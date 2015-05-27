@@ -1,0 +1,41 @@
+package helper_classes;
+
+import java.io.File;
+import java.io.IOException;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartUtilities;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.xy.XYSeries;
+import org.jfree.data.xy.XYSeriesCollection;
+
+public class plotTS {
+    public static void tsplot(Number[][] ts, int index, int type) {
+        // Create a simple XY chart
+        XYSeries series = new XYSeries("XYGraph");
+        for (int i = 0; i < ts.length; i++){
+        	series.add(ts[i][0].intValue(), ts[i][1].intValue());
+        }
+        
+        // Add the series to your data set
+        XYSeriesCollection dataset = new XYSeriesCollection();
+        dataset.addSeries(series);
+        // Generate the graph
+        JFreeChart chart = ChartFactory.createXYLineChart(
+            "XY Chart",
+            "x-axis",
+            "y-axis",
+            dataset,
+            PlotOrientation.VERTICAL,  // Plot Orientation
+            true,                      // Show Legend
+            true,                      // Use tooltips
+            false                      // Configure chart to generate URLs?
+            );
+        try {
+            ChartUtilities.saveChartAsJPEG(new File("/Users/mira67/Google Drive/IceBerg_Project/Condense_Engine/sandbox/chart1.jpg"), chart, 500, 300);
+        } catch (IOException e) {
+            System.err.println("Problem occurred creating chart.");
+} }
+}
+

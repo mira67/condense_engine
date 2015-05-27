@@ -46,8 +46,8 @@ public class Condense extends GeoObject {
 	static int startDay = 1;
 
 	static int finalYear = 2013;
-	static int finalMonth = 6;
-	static int finalDay = 30;
+	static int finalMonth = 2;
+	static int finalDay = 29;
 
 	static int initialStartYear = 0;
 	static int initialStartMonth = 0;
@@ -74,7 +74,7 @@ public class Condense extends GeoObject {
     static boolean warningMessages = false;		// Receive warning messages?
     static boolean debugMessages = true;		// Receive debug messages?
     static boolean addYearToInputDirectory = true; // The input files may be stored in subdirectories by year
-    static boolean databaseRAM = false;			// Store the database in RAM or a file system
+    static boolean databaseRAM = true;			// Store the database in RAM or a file system
     
     // SSMI data selection
     static String polarization = "h"; 			// Horizontal (h) or vertical (v)
@@ -501,6 +501,9 @@ public class Condense extends GeoObject {
 	 *
 	 * pick key samples to store
 	 */
+	/**
+	 * 
+	 */
 	protected void specialsampleCondenstation() {
 		
 		accumulateStats();
@@ -513,16 +516,20 @@ public class Condense extends GeoObject {
 		// reform image based data into group of time series for downsampling
 		for (int r = 0; r < rows; r++){
 			for (int c = 0; c < cols; c++){
-				for (int d = 0; d < 2; d++){//d<2 to test algorithm 
+				for (int d = 0; d < days; d++){//d<2 to test algorithm 
 					pixel_ts[d][1] = data[d][r][c].data();//create pixel time series
 					pixel_ts[d][0] = d;//day stamp
 				}//days
 				
 				sampled_ts = Downsampling.largestTriangleThreeBuckets(pixel_ts, thr);//condense,can be simplified
+				//debug
+				Tools.debugMessage("sampled data length = " + sampled_ts.length);
+				
 				for (int downsampled_id = 0; downsampled_id < thr; downsampled_id++){
 					database.store( data[sampled_ts[downsampled_id][0].intValue()][r][c] );//only store sampled data
 				}
-				
+				//int pixel_num = r * c;
+				//plotTS.tsplot(pixel_ts,sampled_ts, pixel_num);
 			}//cols
 		}//rows
 	}//special sampling method
@@ -817,7 +824,7 @@ public class Condense extends GeoObject {
    		myImage.display( "Time (day): " + startTime.dateString() + " - " + endTime.dateString() +
    				"  " + algorithm + " " + threshold, metadata.rows(), metadata.cols() );
 
-   		/* Grayscale image
+   		//Grayscale image
    		// change the color table?
    		colors.grayScale();
    		
@@ -832,7 +839,7 @@ public class Condense extends GeoObject {
 		//    	algorithm + "_" + Double.toString(threshold), imageRows, imageCols );
 	    myImage.savePNG( outputPath + timeString + "+" + dataType + "+" + increment + "_" +
 		    			 algorithm + "_" + Double.toString(threshold), metadata.rows(), metadata.cols() );
-        */
+        
    		
 	    // Diagnostics
 	    int total = rows*cols;
