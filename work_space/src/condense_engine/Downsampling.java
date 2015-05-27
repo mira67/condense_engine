@@ -1,16 +1,18 @@
 package condense_engine;
 
 /**
- * Naive implementation of down sample with simple array input.
- * Copes gracefully with nulls by preserving them.
- * 
- * @author Benjamin Green
+ * Downsampling condense methods library
+ * 1-triangle
+ * 2-extreme minimum and maximum
+ * 3-band limited down sampling
  * @author Qi Liu, modified
  */
 public class Downsampling{
-	/* Function: largestTriangleThreeBuckets   downsampling
+	
+	/* Function: largestTriangleThreeBuckets
 	 * input- data: x-index, y-value; threshold: how many to keep
 	 * output- sampled data with index
+	 * @author Benjamin Green; Modified by Qi
 	 */
 	public static Number[][] largestTriangleThreeBuckets(Number[][] data, Integer threshold) {
 		Number[][] sampled = new Number[threshold][];
@@ -86,8 +88,9 @@ public class Downsampling{
 	 * 		  upSampling ratio (number of raw / number of down sampled)
 	 * output- up sampled data (reconstructed)
 	 */
-	public static Number[][] upSampling(Number[][] down_sampled, Integer ratio) {
-		Number[][] upsampled = new Number[ratio][];
+	public static Number[][] upSampling(Number[][] down_sampled, Number[] reconstructed_index) {
+		Number[][] upsampled = new Number[reconstructed_index.length][];
+		
 		return upsampled;
 	}
 	
@@ -103,13 +106,14 @@ public class Downsampling{
 	}
 	
 	/* Function: ds_spatial_decorrelation
-	 * input- down sampled: x-index, y-value
+	 * input- down sampled: x-days index, y-row, z-column
 	 * 		  spikes
 	 * 		  block_size
 	 * output- data ready to store in database
 	 */
-	public static Number[][] ds_spatial_decorrelation(Number[][] downsampled, Number[][] spikes, Integer block_size) {
+	public static Number[][][] ds_spatial_decorrelation(Number[][][] downsampled, Number[][] spikes, Integer block_size, boolean hasSpikes) {
 		/*to do*/
+		
 		return null;// return data which is ready to stored in database
 	}
 }
