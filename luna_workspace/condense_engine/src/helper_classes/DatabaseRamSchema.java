@@ -73,7 +73,7 @@ public class DatabaseRamSchema extends Database {
 	 * store a vector by values
 	 * 
 	 */
-	public void store(int data, int row, int col, double time) {
+	public void store(int data, int row, int col, int time) {
 		vectors.add( new GriddedVector( data, row, col, time));
 	}
 

@@ -201,7 +201,7 @@ public class DatabaseFileSchema extends Database {
 	 * store a vector by values
 	 * 
 	 */
-	public void store(int data, int row, int col, double time) {
+	public void store(int data, int row, int col, int time) {
 		try {
 			vectorsFile.writeInt(data);
 			vectorsFile.writeInt(row);

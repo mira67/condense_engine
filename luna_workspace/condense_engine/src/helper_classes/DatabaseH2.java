@@ -16,7 +16,11 @@ public class DatabaseH2 extends Database {
 	
 	// For Hibernate usage. Does nothing.
 	private DatabaseH2() {}
-
+	private PreparedStatement sqlStmt = null;
+	private Statement sqlCreate = null;
+	private ResultSet sqlRs = null;
+	private int index = 0;
+	
 	public DatabaseH2(String name) {
 		this();
 		dbName = name;
@@ -36,7 +40,25 @@ public class DatabaseH2 extends Database {
 		// Open the database.
 		try {
 	        Class.forName("org.h2.Driver");
-	        conn = DriverManager.getConnection("jdbc:h2:~/"+dbName, "sa", "");
+	        conn = DriverManager.getConnection("jdbc:h2:~/"+dbName, "sa", "");//jdbc:h2:mem:db1
+	        conn.setAutoCommit(false);
+	        //drop table is existed for repeat debugging purpose
+	        sqlCreate = conn.createStatement();
+	        boolean status = sqlCreate.execute("DROP TABLE IF EXISTS RAWVECTOR");
+	        Tools.debugMessage("DatabaseH2 Table Status " + status);
+	        
+	        //test sql statement - create a table
+	        sqlCreate = conn.createStatement();
+	     	//Execute SQL query
+	     	status = sqlCreate.execute("CREATE TABLE IF NOT EXISTS RAWVECTOR(ID int primary key, row int, col int,day int, bt int)");//CONSTRAINT pixelID PRIMARY KEY (row,col,bt));
+	     	Tools.debugMessage("DatabaseH2 Create Table Status " + status);
+	     	//test sql statement - row record
+	        sqlStmt = conn.prepareStatement(
+					"INSERT INTO RAWVECTOR " +
+					"(ID, row, col, day, bt) " + 
+					"values " + 
+					"(?,?,?,?,?)");
+	        
 		} catch(Exception e) {
 			Tools.errorMessage("DatabaseH2", "connect", "Could not connect with database " + dbName, e);
 		}
@@ -111,8 +133,24 @@ public class DatabaseH2 extends Database {
 	 * store a vector by values
 	 * 
 	 */
-	public void store(int data, int row, int col, double time) {
+	public void store(int data, int row, int col, int time) {
 		//TODO vectors.add( new GriddedVector( data, row, col, time));
+		//temporal storage method for database/spark testing
+		try {
+	        sqlStmt.setInt(1,index++);
+			sqlStmt.setInt(2, row);
+	        //Tools.debugMessage("Primary Key Time = " + time);
+	        sqlStmt.setInt(3, col);
+	        sqlStmt.setInt(4, time);
+	        sqlStmt.setInt(5, data);
+	        int rowsAffected = sqlStmt.executeUpdate();
+	        Tools.debugMessage("Affected rows = " + rowsAffected);
+	        conn.commit();
+	        
+		} catch(Exception e) {
+			Tools.errorMessage("DatabaseH2", "store", "Could not store with database " + dbName, e);
+		}
+		
 	}
 
 	/*

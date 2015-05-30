@@ -1,0 +1,13 @@
+package database_test;
+
+import java.sql.*;
+public class database_hook {
+    public static void main(String[] a)
+            throws Exception {
+        Class.forName("org.h2.Driver");
+        Connection conn = DriverManager.
+            getConnection("jdbc:h2:~/test", "qi", "test");
+        // add application code here
+        conn.close();
+    }
+}

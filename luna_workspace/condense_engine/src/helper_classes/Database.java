@@ -40,7 +40,7 @@ public abstract class Database extends GeoObject {
 	public abstract void store(ArrayList<GriddedLocation> locs);
 	public abstract void store(GriddedLocation loc);
 
-	public abstract void store(int data, int row, int col, double time); // Raw vector storage
+	public abstract void store(int data, int row, int col, int time); // Raw vector storage
 	public abstract void store(GriddedVector v);
 	public abstract void store(GriddedVector[][] v);
 

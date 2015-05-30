@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="lib/orsonpdf-1.6-eval.jar"/>
 	<classpathentry kind="lib" path="lib/servlet.jar"/>
 	<classpathentry kind="lib" path="lib/swtgraphics2d.jar"/>
+	<classpathentry kind="lib" path="/Users/mira67/Documents/h2/bin/h2-1.4.187.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
