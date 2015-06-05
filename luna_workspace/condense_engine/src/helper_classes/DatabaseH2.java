@@ -78,7 +78,7 @@ public class DatabaseH2 extends Database {
     public void connectReadOnly() {
 		try {
 	        Class.forName("org.h2.Driver");
-	        conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+ "?user=sa&password=1234"+";IFEXISTS=TRUE", "sa", "1234");//
+	        conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+ "?user=sa&password=1234"+";IFEXISTS=TRUE", null, null);//
 		} catch(Exception e) {
 			Tools.errorMessage("DatabaseH2", "connectReadOnly", "Could not connect with database " + dbName, e);
 		}
