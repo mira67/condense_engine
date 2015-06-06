@@ -11,15 +11,13 @@ public class SSMIVector extends GriddedVector {
 	// Default constructor. Location only, no data.
 	public SSMIVector(int r, int c) {
 		super(r,c);
-
 		// The pixel is classified as unknown by default.
 		data = 0;
 	}
 
 	// Constructor using a supplied value and location.
 	public SSMIVector( int i, int r, int c ) {		
-		super(r,c);
-		
+		//super(r,c);//comment out temporally to fix the memory leak issue? by Qi
 		this.data( i );
 	}
 	

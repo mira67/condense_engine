@@ -36,7 +36,7 @@ public class Condense extends GeoObject {
 	//-----------------------------------------------------------------------*/
 	
 	static DataType dataType = DataType.SSMI;
-	static Timespan.Increment increment = Timespan.Increment.MONTH;
+	static Timespan.Increment increment = Timespan.Increment.YEAR;
 	static Algorithm algorithm = Algorithm.SPECIALSAMPLE;
 	static DatabaseType databaseType = DatabaseType.H2;
 	
@@ -46,7 +46,7 @@ public class Condense extends GeoObject {
 	static int startDay = 1;
 
 	static int finalYear = 2013;
-	static int finalMonth = 1;
+	static int finalMonth = 12;
 	static int finalDay = 31;
 
 	static int initialStartYear = 0;
@@ -72,13 +72,13 @@ public class Condense extends GeoObject {
 	// Flags
     static boolean readSurface = false;			// Read the surface type data file?
     static boolean warningMessages = false;		// Receive warning messages?
-    static boolean debugMessages = true;		// Receive debug messages?
+    static boolean debugMessages = false;		// Receive debug messages?
     static boolean addYearToInputDirectory = true; // The input files may be stored in subdirectories by year
-    static boolean databaseRAM = true;			// Store the database in RAM or a file system
+    static boolean databaseRAM = false;			// Store the database in RAM or a file system
     
     // SSMI data selection
-    static String polarization = "h"; 			// Horizontal (h) or vertical (v)
-    static int frequency = 37;		 			// Frequency of SSMI data
+    static String polarization = "v"; 			// Horizontal (h) or vertical (v)
+    static int frequency = 19;		 			// Frequency of SSMI data
 
     /*-------------------------------------------------------------------------
 	// INTERNAL GLOBAL DATA, NOT FOR USER TWEAKING
@@ -315,22 +315,22 @@ public class Condense extends GeoObject {
 	    		case NONE:
 	    			break;
 	    		case SEA_ICE:
-//	    			filename = DatasetSeaIce.getSeaIceFileName(dataPath, date.year(), date.month(),
-//	    										 date.dayOfMonth(), addYearToInputDirectory);
-//	    			
-//	    			if (filename.length() > 0) {
-//	    				try {
-//	    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename );
-//
-//	    					// Success
-//	    					fileCount++;
-//	    				}
-//	    				catch( Exception e ) {return false;}
-//	    			} else {
-//	    				Tools.warningMessage("Could not find data file for date " +
-//	    						date.yearString() + "/" + date.monthString() +
-//	    						"/" + date.dayOfMonthString());
-//	    			}
+	    			filename = DatasetSeaIce.getSeaIceFileName(dataPath, date.year(), date.month(),
+	    										 date.dayOfMonth(), addYearToInputDirectory);
+	    			
+	    			if (filename.length() > 0) {
+	    				try {
+	    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename );
+
+	    					// Success
+	    					fileCount++;
+	    				}
+	    				catch( Exception e ) {return false;}
+	    			} else {
+	    				Tools.warningMessage("Could not find data file for date " +
+	    						date.yearString() + "/" + date.monthString() +
+	    						"/" + date.dayOfMonthString());
+	    			}
 	    			
 	    			break;
 	    			
@@ -362,13 +362,14 @@ public class Condense extends GeoObject {
 					"." + date.dayOfMonthString() + "  File name: " + filename);
 			
 			// Add the timestamp to the database.
-    		database.store(time);
+    		//database.store(time);
     		
 			// Next day.
 			date.incrementOneDay();
 		}
 
 		Tools.debugMessage("End of loop. Next date: " + date.dateString() + "\n-----");
+		System.out.println("End of loop. Next date: " + date.dateString() + "\n-----");
 		
 		// Update the starting date for the next time span.
 		startYear = date.year();
@@ -400,7 +401,7 @@ public class Condense extends GeoObject {
 		
 		rows = dataset.rows();
 		cols = dataset.cols();
-    	database.store( metadata );    			
+    	//database.store( metadata );    			
     	haveMetadata = true;
     	
 		return;
@@ -509,7 +510,8 @@ public class Condense extends GeoObject {
 		accumulateStats();
 		
 		//threshold, percentage of data to preserve
-		int thr = 15;//out of days (in this trial: days = 181)
+		int thr = (int)Math.floor(days*0.1);//out of days (in this trial: days = 120)
+		System.out.println("thr " + thr + " days" + days);
 		Number [][] pixel_ts = new Number[days][2];
 		Number[][] sampled_ts = new Number[thr][];
 		
@@ -517,13 +519,16 @@ public class Condense extends GeoObject {
 		for (int r = 0; r < rows; r++){
 			for (int c = 0; c < cols; c++){
 				for (int d = 0; d < days; d++){//d<2 to test algorithm 
-					pixel_ts[d][1] = data[d][r][c].data();//create pixel time series
-					pixel_ts[d][0] = d;//day stamp
+					if (data[d][r][c] != null) { 
+						pixel_ts[d][1] = data[d][r][c].data();//create pixel time series
+						pixel_ts[d][0] = d;//day stamp
+					}
 				}//days
 				
 				sampled_ts = Downsampling.largestTriangleThreeBuckets(pixel_ts, thr);//condense,can be simplified
 				//debug
 				Tools.debugMessage("sampled data length = " + sampled_ts.length);
+				System.out.println("sampled data length = " + sampled_ts.length);
 				
 				for (int downsampled_id = 0; downsampled_id < thr; downsampled_id++){
 					database.store( data[sampled_ts[downsampled_id][0].intValue()][r][c].data, r,c,sampled_ts[downsampled_id][0].intValue());//only store sampled data
