@@ -1,5 +1,6 @@
 package helper_classes;
 
+import java.sql.Date;
 import java.util.ArrayList;
 ///TODO
 ///import java.util.Iterator;
@@ -251,6 +252,18 @@ public class DatabasePerst extends Database {
 		Tools.statusMessage("Timestamp entries = " + metadata.timestamps);
 		Tools.statusMessage("Location entries  = " + metadata.locations);
 		Tools.statusMessage("Vector entries    = " + metadata.vectors);
+	}
+
+	@Override
+	public void store(int data, int locID, Date date) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void store(int id, int R, int C) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

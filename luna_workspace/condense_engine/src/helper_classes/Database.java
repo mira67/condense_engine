@@ -1,5 +1,6 @@
 package helper_classes;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -21,6 +22,8 @@ public abstract class Database extends GeoObject {
 	}
 
 	protected String dbName = "";
+	protected String tbName = "";
+	protected int chFreq = 0;
 	protected Metadata metadata;
 	protected Status status = Status.DISCONNECTED;
 	
@@ -43,6 +46,8 @@ public abstract class Database extends GeoObject {
 	public abstract void store(int data, int row, int col, int time); // Raw vector storage
 	public abstract void store(GriddedVector v);
 	public abstract void store(GriddedVector[][] v);
+	public abstract void store(int data, int locID, Date date);
+	public abstract void store(int id, int R, int C);
 
 	// RETRIEVAL METHODS
 

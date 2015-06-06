@@ -3,6 +3,7 @@ package helper_classes;
 /* Main program to experiment with algorithms for condensed data sets.
  */
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -36,7 +37,7 @@ public class Condense extends GeoObject {
 	//-----------------------------------------------------------------------*/
 	
 	static DataType dataType = DataType.SSMI;
-	static Timespan.Increment increment = Timespan.Increment.YEAR;
+	static Timespan.Increment increment = Timespan.Increment.MONTH;
 	static Algorithm algorithm = Algorithm.SPECIALSAMPLE;
 	static DatabaseType databaseType = DatabaseType.H2;
 	
@@ -46,7 +47,7 @@ public class Condense extends GeoObject {
 	static int startDay = 1;
 
 	static int finalYear = 2013;
-	static int finalMonth = 12;
+	static int finalMonth = 1;
 	static int finalDay = 31;
 
 	static int initialStartYear = 0;
@@ -119,8 +120,10 @@ public class Condense extends GeoObject {
     
     // Gridded image pixel locations.
     Location locations[][];
+    
+    // Condensed date list
+    Date cDateList[];
 	
-
     /*-------------------------------------------------------------------------
 	// MAIN PROGRAM
 	//-----------------------------------------------------------------------*/
@@ -135,19 +138,19 @@ public class Condense extends GeoObject {
 		
 		// Read the configuration file. Assumes the file path (with name) is
 		// input on the command line, arg[0].
-//		try {
-//			configFilename = args[0];
-//			
-//			if (!readConfigFile( configFilename )) {
-//				Tools.errorMessage("Condense", "main", "Could not read the cofiguration file: " + configFilename,
-//						new Exception());
-//			}
-//		} catch(Exception e) {		
-//			System.out.println(e);
-//			Tools.message("Error when reading configuration file. Did you specify a full path and name?");
-//			Tools.message("Example: \"java Condense C:/users/mydir/configfile.txt\"");
-//			Tools.errorMessage("Condense", "main", "", new Exception());
-//		}
+		try {
+			configFilename = args[0];
+			
+			if (!readConfigFile( configFilename )) {
+				Tools.errorMessage("Condense", "main", "Could not read the cofiguration file: " + configFilename,
+						new Exception());
+			}
+		} catch(Exception e) {		
+			System.out.println(e);
+			Tools.message("Error when reading configuration file. Did you specify a full path and name?");
+			Tools.message("Example: \"java Condense C:/users/mydir/configfile.txt\"");
+			Tools.errorMessage("Condense", "main", "", new Exception());
+		}
 		
     	new Condense();
     	
@@ -173,7 +176,7 @@ public class Condense extends GeoObject {
 					database = new DatabaseFileSchema( dataType.toString(), outputPath );			
 					break;
 				case H2:
-					database = new DatabaseH2( dataType.toString() );			
+					database = new DatabaseH2( dataType.toString(), polarization, frequency);			
 					break;
 				case PERST:
 					database = new DatabasePerst( dataType.toString() );			
@@ -196,10 +199,24 @@ public class Condense extends GeoObject {
 		}
 		
 		database.connect();
+		//write location map table
+		int pixelId = 0;
+		Tools.statusMessage("Creating pixel location map...");
+		if ((frequency == 85) || (frequency == 91)){
+			rows = 632;
+			cols = 664;
+		}
+		for (int r = 0; r < rows; r++){
+			for (int c = 0; c < cols; c++){
+				database.store(pixelId, r, c);
+				pixelId++;
+			}
+		}
+		Tools.statusMessage("Done with MAP, starting condense...");
 		
 		// Read surface types and coast lines.
 		if (readSurface) readSurface();
-		
+
 		// Read the data files. The loop continues until all data files have been read.
 		while( readData() ) {
 			
@@ -284,15 +301,20 @@ public class Condense extends GeoObject {
 			switch (dataType) {
 		    
     			case SEA_ICE:
-    				//filename = DatasetSeaIce.getSeaIceFileName(dataPath, startYear,
-    					//	startMonth, startDay, addYearToInputDirectory);
-    				//dataset = new DatasetSeaIce(filename);
+    				filename = DatasetSeaIce.getSeaIceFileName(dataPath, startYear,
+    						startMonth, startDay, addYearToInputDirectory);
+    				dataset = new DatasetSeaIce(filename);
     				getMetadata( filename );
     				break;
 			    
-    			case SSMI:    				
+    			case SSMI:   
     				dataset = new DatasetSSMI(filename);
     				getMetadata( filename );
+    				//need fix Metadata for different channel (cases)
+    				if ((frequency == 85) || (frequency == 91)){
+    					rows = 632;
+    					cols = 664;
+    				}
     				break;
     				
     			case NONE:
@@ -300,6 +322,7 @@ public class Condense extends GeoObject {
 
 			}
 			data = new GriddedVector[maximumDays][rows][cols];
+			
 		}
 			
 		// The date of the file we are reading.
@@ -307,9 +330,15 @@ public class Condense extends GeoObject {
 		
 		// Loop through the number of days, reading the data file for each day.
 		// If a date doesn't exist (maybe it's monthly data?) ignore it.
+		cDateList = new Date[days];
+		
 		for (int d = 0; d < days; d++) {
 
 			Timestamp time = new Timestamp( date.year(), date.month(), date.dayOfMonth() );
+			//
+			String cDate = date.yearString() + "-" + date.monthString() + "-" + date.dayOfMonthString();
+			cDateList[d] = Date.valueOf(cDate);
+			//System.out.println(cDate);
 			
 			switch (dataType) {
 	    		case NONE:
@@ -344,12 +373,13 @@ public class Condense extends GeoObject {
 	    					data[d] = (GriddedVector[][]) DatasetSSMI.readData( filename,
 	    							date.year(), date.month(), date.dayOfMonth(), time,
 	    							rows, cols);
-
-	    					
 	    					// Success
 	    					fileCount++;
 	    				}
-	    				catch( Exception e ) {return false;}
+	    				
+	    				catch( Exception e ) {
+	    					return false;
+	    				}
 	    			}
 	    			break;
 			}
@@ -362,7 +392,7 @@ public class Condense extends GeoObject {
 					"." + date.dayOfMonthString() + "  File name: " + filename);
 			
 			// Add the timestamp to the database.
-    		//database.store(time);
+    		database.store(time);
     		
 			// Next day.
 			date.incrementOneDay();
@@ -514,6 +544,7 @@ public class Condense extends GeoObject {
 		System.out.println("thr " + thr + " days" + days);
 		Number [][] pixel_ts = new Number[days][2];
 		Number[][] sampled_ts = new Number[thr][];
+		int locID = 0;
 		
 		// reform image based data into group of time series for downsampling
 		for (int r = 0; r < rows; r++){
@@ -531,10 +562,9 @@ public class Condense extends GeoObject {
 				System.out.println("sampled data length = " + sampled_ts.length);
 				
 				for (int downsampled_id = 0; downsampled_id < thr; downsampled_id++){
-					database.store( data[sampled_ts[downsampled_id][0].intValue()][r][c].data, r,c,sampled_ts[downsampled_id][0].intValue());//only store sampled data
+					database.store( data[sampled_ts[downsampled_id][0].intValue()][r][c].data,locID,cDateList[sampled_ts[downsampled_id][0].intValue()]);//only store sampled data
 				}
-				//int pixel_num = r * c;
-				//plotTS.tsplot(pixel_ts,sampled_ts, pixel_num);
+				locID++;
 			}//cols
 		}//rows
 	}//special sampling method

@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="File name:" key="selection"/>
+		<item value="store" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="File name:"/>
-			<item value="File name"/>
-			<item value="test"/>
-			<item value="readdata"/>
 			<item value="store"/>
-			<item value="image"/>
-			<item value="generateTestImages"/>
-			<item value="creating image"/>
+			<item value="databaseRAM"/>
+			<item value="disconnect()"/>
+			<item value="database.disconnect()"/>
+			<item value="database"/>
+			<item value="File name"/>
+			<item value="condense"/>
+			<item value="DataFile"/>
 		</list>
 		<list key="replacehistory">
 		</list>
