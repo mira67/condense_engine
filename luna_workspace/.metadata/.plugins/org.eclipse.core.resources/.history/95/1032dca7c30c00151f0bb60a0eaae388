@@ -541,10 +541,6 @@ public class Condense extends GeoObject {
 		
 		//threshold, percentage of data to preserve
 		int thr = (int)Math.floor(days*0.1);//out of days (in this trial: days = 120)
-		if (thr <= 2){
-			thr = 3;
-		}
-		
 		System.out.println("thr " + thr + " days" + days);
 		Number [][] pixel_ts = new Number[days][2];
 		Number[][] sampled_ts = new Number[thr][];
@@ -563,6 +559,7 @@ public class Condense extends GeoObject {
 				sampled_ts = Downsampling.largestTriangleThreeBuckets(pixel_ts, thr);//condense,can be simplified
 				//debug
 				Tools.debugMessage("sampled data length = " + sampled_ts.length);
+				System.out.println("sampled data length = " + sampled_ts.length);
 				
 				for (int downsampled_id = 0; downsampled_id < thr; downsampled_id++){
 					database.store( data[sampled_ts[downsampled_id][0].intValue()][r][c].data,locID,cDateList[sampled_ts[downsampled_id][0].intValue()]);//only store sampled data

@@ -43,9 +43,7 @@ public class DatabaseH2 extends Database {
 		// Open the database.
 		try {
 	        Class.forName("org.h2.Driver");
-	        conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/~/"+dbName+"?user=sa&password=1234", null, null);//jdbc:h2:mem:db1
-	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/mem:~/"+dbName+ "?user=sa&password=4321"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
-
+	        conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+"?user=sa&password=1234", null, null);//jdbc:h2:mem:db1
 	        conn.setAutoCommit(false);
 	        
 	        //create map iD->row, col table
@@ -102,9 +100,8 @@ public class DatabaseH2 extends Database {
     public void connectReadOnly() {
 		try {
 	        Class.forName("org.h2.Driver");
-	        conn = DriverManager.getConnection("jdbc:h2:tcp://23.236.58.171/~/"+dbName+ "?user=sa&password=1234"+";IFEXISTS=TRUE", null, null);//
-	        //in-memory db test
-	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/mem:~/"+dbName+ "?user=sa&password=4321"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
+	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+ "?user=sa&password=1234"+";IFEXISTS=TRUE", null, null);//
+	        conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/mem:~/"+dbName+ "?user=sa&password=1234"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
 		} catch(Exception e) {
 			Tools.errorMessage("DatabaseH2", "connectReadOnly", "Could not connect with database " + dbName, e);
 		}

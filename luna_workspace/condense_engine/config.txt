@@ -30,7 +30,7 @@ final year = 2014
 final month = 12
 final day = 31
 data type = ssmi
-time increment = month
+time increment = year
 algorithm = SPECIALSAMPLE
 threshold = 0.5
 debug = false
@@ -42,7 +42,7 @@ image end = 0
 *cols = 332
 
 polarization = h
-frequency = 91
+frequency = 19
 *database type = perst
 database type = H2
 filter bad data = false
