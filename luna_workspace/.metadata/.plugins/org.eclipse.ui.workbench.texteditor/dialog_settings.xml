@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="store" key="selection"/>
+		<item value="have" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="have"/>
+			<item value="special"/>
+			<item value="public void store(int data, int locID, Date date) {"/>
 			<item value="store"/>
 			<item value="databaseRAM"/>
 			<item value="disconnect()"/>
 			<item value="database.disconnect()"/>
 			<item value="database"/>
-			<item value="File name"/>
-			<item value="condense"/>
-			<item value="DataFile"/>
 		</list>
 		<list key="replacehistory">
 		</list>
