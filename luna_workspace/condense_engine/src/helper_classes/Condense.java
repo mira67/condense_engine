@@ -238,7 +238,7 @@ public class Condense extends GeoObject {
 
 		// We should now have a database full of condensed pixels.
 		// Let's generate some images of them...
-		generateTestImages();
+		//generateTestImages();
 	}
 	
 	
@@ -554,10 +554,18 @@ public class Condense extends GeoObject {
 		for (int r = 0; r < rows; r++){
 			for (int c = 0; c < cols; c++){
 				for (int d = 0; d < days; d++){//d<2 to test algorithm 
-					if (data[d][r][c] != null) { 
-						pixel_ts[d][1] = data[d][r][c].data();//create pixel time series
-						pixel_ts[d][0] = d;//day stamp
+					if (data[d] != null){
+						if (data[d][r][c] != null) { 
+							pixel_ts[d][1] = data[d][r][c].data();//create pixel time series
+							pixel_ts[d][0] = d;//day stamp
+						}
+						else{
+							pixel_ts[d][1] = data[d-1][r][c].data();
+							data[d][r][c] = data[d-1][r][c];//quick fix for missing days data, if day-0 is missing?
+							pixel_ts[d][0] = d;//day stamp
+						}
 					}
+				
 				}//days
 				
 				sampled_ts = Downsampling.largestTriangleThreeBuckets(pixel_ts, thr);//condense,can be simplified
