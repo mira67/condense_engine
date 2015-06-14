@@ -142,10 +142,10 @@ public class DatasetSSMI extends Dataset {
 
 			// Filter out missing data points. BTs are encoded by a factor of
 			// 10.
-			data = Tools.discardBadData(data, 1000, 4000);
+			//data = Tools.discardBadData(data, 1000, 4000);
 
 			// TODO for testing
-			data = Tools.scaleIntArray2D(data, 0, 255);
+			data = Tools.scaleIntArray2D(data, 0, 350);
 
 			// Create a place to store the data.
 			ssmiVectors = new SSMIVector[rows][cols];

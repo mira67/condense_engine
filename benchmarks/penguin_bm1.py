@@ -7,6 +7,12 @@ How to use the script?
 ./bin/spark-submit /Users/mira67/Downloads/penguin_bm1.py --driver-class-path /Users/mira67/Documents/h2/bin/h2*.jar
 """
 
+"""
+Usage-create realistic testing cases
+auto: auto-random cases testing mode
+manual: use input testing mode
+"""
+
 import sys
 import os
 from pyspark import SparkContext
@@ -17,7 +23,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 #todo - input arguments as DB meta data
-tbName = "CH19H"
+tbName = "CH19V"
 temporal_size = [1990, 2014]#1yr, 2yr, 4yr, 8yr, 16yr,25yr
 temporal_range = [1, 2, 4, 8, 16, 25]
 row_sz = 316
@@ -43,6 +49,12 @@ def memory_usage_psutil():
     return mem
 
 if __name__ == "__main__":
+
+    db = raw_input('Which database? --> ')
+    ch = raw_input('Which channels? i.e. 19v, 19h --> ')
+    autoquery = raw_input('Auto temporal/spatial tests, True or False? --> ')
+    print "Database: %s, Channels: %s, AutoqueryTest: %s" % (db, str(ch),str(autoquery))
+
     """
     Usage: 
     """

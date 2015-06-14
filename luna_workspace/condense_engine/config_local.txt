@@ -23,14 +23,14 @@
 data path =/Users/mira67/Documents/IceData/nsidc_0001/south/
 add year = true
 output path =/Users/mira67/Documents/IceData/nsidc_0001/
-start year = 1990
+start year = 1993
 start month = 1
 start day = 1
-final year = 1994
+final year = 2014
 final month = 12
 final day = 31
 data type = ssmi
-time increment = year
+time increment = month
 algorithm = SPECIALSAMPLE
 threshold = 0.5
 debug = false

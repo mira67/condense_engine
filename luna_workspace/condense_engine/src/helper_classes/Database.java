@@ -98,4 +98,13 @@ public abstract class Database extends GeoObject {
 
 		return vectors;
 	}
+	public String checkTable(String tbNames) {
+		// TODO Auto-generated method stub
+		return "";
+	}
+	
+	public void createMap(String tbN) {
+		// TODO Auto-generated method stub
+		
+	}
 }

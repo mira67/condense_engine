@@ -1,0 +1,48 @@
+*   database type = <RAM|FILE|H2|PERST|EXTREMEDB|ORIGODB|AEROSPIKE|BLANKDB>
+*       How should the database be stored? RAM keeps everything in memory
+*       as Java objects; FILE stores everything in binary files. Other possible
+*       DBMSs, which may not be implemented yet: H2, Perst, ExtremeDB, Aerospike,
+*       OrigoDB, and a BlankDB.
+
+* Output images:
+*
+*   image start = n
+*   image end = n
+*     Create an image using the stored pixels between (and
+*     including) these two time indexes. For instance, if the first
+*     day of data in the database is June 1, and the last day is June
+*     30, using imagestart = 0 and imageend = 2 will generate an
+*     image using the stored pixels for June 1, 2 and 3 (timestamps
+*     are indexed from zero).
+*
+* Windows paths...
+*data path = C:\Users\glgr9602\Desktop\Condensate\Data\SeaIce\Daily\
+*output Path = C:\Users\glgr9602\Desktop\Condensate\output\
+
+* Linux paths...
+data path =/Users/mira67/Documents/IceData/nsidc_0001/south/
+add year = true
+output path =/Users/mira67/Documents/IceData/nsidc_0001/
+start year = 1990
+start month = 1
+start day = 1
+final year = 1990
+final month = 1
+final day = 31
+data type = ssmi
+time increment = month
+algorithm = SPECIALSAMPLE
+threshold = 0.5
+debug = false
+warnings = false
+readsurface = false
+image start = 0
+image end = 0
+*rows = 316
+*cols = 332
+
+polarization = h
+frequency = 19
+*database type = perst
+database type = H2
+filter bad data = false

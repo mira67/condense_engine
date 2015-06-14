@@ -13,6 +13,7 @@ import java.sql.*;
 public class DatabaseH2 extends Database {
 	
 	Connection conn;
+	DatabaseMetaData md;
 	
 	// For Hibernate usage. Does nothing.
 	private DatabaseH2() {}
@@ -43,32 +44,15 @@ public class DatabaseH2 extends Database {
 		// Open the database.
 		try {
 	        Class.forName("org.h2.Driver");
-	        //conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/~/"+dbName+"?user=sa&password=1234", null, null);//jdbc:h2:mem:db1
-	        conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "?user=sa&password=4321"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
+	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/mem:~/"+dbName+";DB_CLOSE_DELAY=-1", "sa", null);//jdbc:h2:mem:db1
+	        conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
+	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+ "?user=sa&password=1234", null, null);//DB_CLOSE_DELAY=-1
 
-	        conn.setAutoCommit(false);
-	        
-	        //create map iD->row, col table
-	        String mapName = "";
-	        if ((chFreq == 85) || (chFreq == 91)){
-	        	mapName = "LOCMAP_L";
-	        }else{
-	        	mapName = "LOCMAP_S";
-	        }
-	        sqlCreate = conn.createStatement();
-	        Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS " + mapName);
-	        sqlCreate = conn.createStatement();
-	     	//Execute SQL query
-	     	status = sqlCreate.execute("CREATE TABLE IF NOT EXISTS "+ mapName + "(id INT primary key, row SMALLINT, col SMALLINT)");
-	        sqlStmt_map = conn.prepareStatement(
-					"INSERT INTO "+mapName +
-					"(id,row, col) " + 
-					"values " + 
-					"(?,?,?)");
+	        conn.setAutoCommit(true);
 	     	
-	        //drop table is existed for repeat debugging purpose
+	        //drop table is existed for repeat debugging purpose -  Todo-get to another function for easy management
 	        sqlCreate = conn.createStatement();
-	        status = sqlCreate.execute("DROP TABLE IF EXISTS " + tbName);
+	        Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS " + tbName);
 	        Tools.debugMessage("DatabaseH2 Table Status " + status);
 	        
 	        //test sql statement - create a table
@@ -102,9 +86,9 @@ public class DatabaseH2 extends Database {
     public void connectReadOnly() {
 		try {
 	        Class.forName("org.h2.Driver");
-	        //conn = DriverManager.getConnection("jdbc:h2:tcp://23.236.58.171/~/"+dbName+ "?user=sa&password=1234"+";IFEXISTS=TRUE", null, null);//
+	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/mem:~/"+dbName+";IFEXISTS=TRUE", "sa", null);//
 	        //in-memory db test
-	        conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "?user=sa&password=4321"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
+	        conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
 		} catch(Exception e) {
 			Tools.errorMessage("DatabaseH2", "connectReadOnly", "Could not connect with database " + dbName, e);
 		}
@@ -131,6 +115,61 @@ public class DatabaseH2 extends Database {
     	
 		status = Status.DISCONNECTED;
     }
+    //Check if table already existed, if not create new->return new, otherwise return old
+    //currently only for location table
+    public String checkTable(String tbNames){
+    	
+    	try {
+			md = conn.getMetaData();
+			ResultSet rs = md.getTables(null, null, tbNames, null);
+	    	while (rs.next()) {
+	    		Tools.statusMessage("LOCATION MAP Table Found: " + rs.getString("TABLE_NAME"));
+	    		if (rs.getString("TABLE_NAME") == tbNames){
+	    			rs.close();
+	    			return "Old";
+	    		}
+	        }
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+      try {
+		sqlCreate = conn.createStatement();
+	   	//Execute SQL query
+	   	Boolean status = sqlCreate.execute("CREATE TABLE IF NOT EXISTS "+ tbNames + "(id INT primary key, row SMALLINT, col SMALLINT)");
+	    sqlStmt_map = conn.prepareStatement(
+					"INSERT INTO "+ tbNames +
+					"(id,row, col) " + 
+					"values " + 
+					"(?,?,?)");
+	  } catch (SQLException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	  }
+    return "New";
+   }
+    
+    //If table not existied, create new table and pre-defined SQL for table entries recording
+    public void createMap(String tbNames){
+		//write location map table
+		int pixelId = 0;
+		Tools.statusMessage("Creating pixel location map...");
+		int rows = 316, cols = 332;
+		if ((chFreq == 85) || (chFreq == 91)){
+			rows = 632;
+			cols = 664;
+		}
+		for (int r = 0; r < rows; r++){
+			for (int c = 0; c < cols; c++){
+				store(pixelId, r, c);
+				pixelId++;
+			}
+		}
+		
+		Tools.statusMessage("Done with MAP, starting condense...");
+    }
+
     
     protected void writeCheck(String methodName) {
     	if (status != Status.CONNECTED) {
@@ -146,8 +185,6 @@ public class DatabaseH2 extends Database {
 	public void store( Metadata m ) {
 		writeCheck("Metadata");
 		metadata = m;
-		
-		
 	}
 	
 	public void store(Timestamp t) {}

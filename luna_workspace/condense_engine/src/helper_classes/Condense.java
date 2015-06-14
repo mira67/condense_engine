@@ -199,20 +199,13 @@ public class Condense extends GeoObject {
 		}
 		
 		database.connect();
-		//write location map table
-		int pixelId = 0;
-		Tools.statusMessage("Creating pixel location map...");
-		if ((frequency == 85) || (frequency == 91)){
-			rows = 632;
-			cols = 664;
+		//check map table
+		String tbN = "LOCMAP_S";
+		String rs = database.checkTable(tbN);
+		if (rs == "New"){
+			//write to location
+			database.createMap(tbN);
 		}
-		for (int r = 0; r < rows; r++){
-			for (int c = 0; c < cols; c++){
-				database.store(pixelId, r, c);
-				pixelId++;
-			}
-		}
-		Tools.statusMessage("Done with MAP, starting condense...");
 		
 		// Read surface types and coast lines.
 		if (readSurface) readSurface();
