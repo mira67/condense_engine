@@ -10,4 +10,5 @@
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="helper_classes.Condense"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="&quot;/Users/mira67/Google Drive/IceBerg_Project/Condense_Engine/luna_workspace/condense_engine/config.txt&quot;"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="condense_engine"/>
+<stringAttribute key="org.eclipse.jdt.launching.VM_ARGUMENTS" value="-XX:+HeapDumpOnOutOfMemoryError"/>
 </launchConfiguration>

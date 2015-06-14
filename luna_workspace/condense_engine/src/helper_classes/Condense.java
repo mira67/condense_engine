@@ -274,7 +274,7 @@ public class Condense extends GeoObject {
 		if (startDate.days() > finalDate.days()) return false;
 		
 		Timespan timespan = new Timespan(startDate, increment);
-		int maximumDays = timespan.fullDays() + 1;
+		int maximumDays = timespan.fullDays() + 2;//366
 		
 		// If the computed start or end date of the time span is outside of the requested
 		// dates, use the requested date instead.
@@ -371,6 +371,7 @@ public class Condense extends GeoObject {
 	    				}
 	    				
 	    				catch( Exception e ) {
+	    					System.out.println("quit process files, false: " + e);
 	    					return false;
 	    				}
 	    			}
@@ -385,7 +386,7 @@ public class Condense extends GeoObject {
 					"." + date.dayOfMonthString() + "  File name: " + filename);
 			
 			// Add the timestamp to the database.
-    		database.store(time);
+    		//database.store(time);
     		
 			// Next day.
 			date.incrementOneDay();

@@ -51,14 +51,14 @@ public class DatabaseH2 extends Database {
 	        conn.setAutoCommit(true);
 	     	
 	        //drop table is existed for repeat debugging purpose -  Todo-get to another function for easy management
-	        sqlCreate = conn.createStatement();
-	        Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS " + tbName);
-	        Tools.debugMessage("DatabaseH2 Table Status " + status);
+	        //sqlCreate = conn.createStatement();
+	        //Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS " + tbName);
+	        //Tools.debugMessage("DatabaseH2 Table Status " + status);
 	        
 	        //test sql statement - create a table
 	        sqlCreate = conn.createStatement();
 	     	//Execute SQL query
-	     	status = sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + tbName + "(date DATE, locID INT, bt SMALLINT, CONSTRAINT IF NOT EXISTS pixelID PRIMARY KEY (date, locID))");
+	     	Boolean status = sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + tbName + "(date DATE, locID INT, bt SMALLINT, CONSTRAINT IF NOT EXISTS pixelID PRIMARY KEY (date, locID))");
 	     	Tools.debugMessage("DatabaseH2 Create Table Status " + status);
 	     	//test sql statement - row record
 	        sqlStmt_tb = conn.prepareStatement(
