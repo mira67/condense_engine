@@ -58,10 +58,7 @@ if __name__ == "__main__":
     """
     Usage: 
     """
-    print "Create benchmark output file for recoring..."
-    file_out = open("/Users/mira67/Downloads/benchmark_output.txt", "w")
-    print "start query evaluation, load tables from DB and register tables in Spark..."
-    
+     
     with Timer() as tm:
         sc = SparkContext(appName="Benchmark1")
         sqlContext = SQLContext(sc)

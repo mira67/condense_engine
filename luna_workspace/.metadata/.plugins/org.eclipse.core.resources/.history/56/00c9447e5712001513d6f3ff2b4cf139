@@ -44,21 +44,21 @@ public class DatabaseH2 extends Database {
 		// Open the database.
 		try {
 	        Class.forName("org.h2.Driver");
-	        conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+"Raw"+";DB_CLOSE_DELAY=-1", "sa", null);//jdbc:h2:mem:db1
-	        //conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
+	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/mem:~/"+dbName+";DB_CLOSE_DELAY=-1", "sa", null);//jdbc:h2:mem:db1
+	        conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
 	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+ "?user=sa&password=1234", null, null);//DB_CLOSE_DELAY=-1
 
 	        conn.setAutoCommit(true);
 	     	
 	        //drop table is existed for repeat debugging purpose -  Todo-get to another function for easy management
-	        sqlCreate = conn.createStatement();
-	        Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS " + tbName);
-	        Tools.debugMessage("DatabaseH2 Table Status " + status);
+	        //sqlCreate = conn.createStatement();
+	        //Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS " + tbName);
+	        //Tools.debugMessage("DatabaseH2 Table Status " + status);
 	        
 	        //test sql statement - create a table
 	        sqlCreate = conn.createStatement();
 	     	//Execute SQL query
-	     	status = sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + tbName + "(date DATE, locID INT, bt SMALLINT, CONSTRAINT IF NOT EXISTS pixelID PRIMARY KEY (date, locID))");
+	     	Boolean status = sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + tbName + "(date DATE, locID INT, bt SMALLINT, CONSTRAINT IF NOT EXISTS pixelID PRIMARY KEY (date, locID))");
 	     	Tools.debugMessage("DatabaseH2 Create Table Status " + status);
 	     	//test sql statement - row record
 	        sqlStmt_tb = conn.prepareStatement(
@@ -86,9 +86,9 @@ public class DatabaseH2 extends Database {
     public void connectReadOnly() {
 		try {
 	        Class.forName("org.h2.Driver");
-	        conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+"Raw"+";IFEXISTS=TRUE", "sa", null);//
+	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/mem:~/"+dbName+";IFEXISTS=TRUE", "sa", null);//
 	        //in-memory db test
-	        //conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
+	        conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
 		} catch(Exception e) {
 			Tools.errorMessage("DatabaseH2", "connectReadOnly", "Could not connect with database " + dbName, e);
 		}

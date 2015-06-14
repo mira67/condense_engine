@@ -511,23 +511,14 @@ public class Condense extends GeoObject {
 	 * Don't do any condensation. Add all pixels to the database.
 	 */
 	protected void noCondensation() {
-		//
-		int locID = 0;
 		
-		// reform image based data into group of time series for downsampling
-		for (int r = 0; r < rows; r++){
-			for (int c = 0; c < cols; c++){
-				for (int d = 0; d < days; d++){//d<2 to test algorithm 
-					if (data[d] != null){
-						if (data[d][r][c] == null) { 
-							data[d][r][c] = data[d-1][r][c];//quick fix for missing days data, if day-0 is missing?
-						}
-					}
-					database.store(data[d][r][c].data(),locID,cDateList[d]);
-				}//days	
-				locID++;
-			}//cols
-		}//rows
+		for (int d = 0; d < days; d++) {
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
+					database.store( data[d][r][c] );
+				}
+			}
+		}
 	}
 
 	

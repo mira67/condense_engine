@@ -44,7 +44,7 @@ public class DatabaseH2 extends Database {
 		// Open the database.
 		try {
 	        Class.forName("org.h2.Driver");
-	        conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+"Raw"+";DB_CLOSE_DELAY=-1", "sa", null);//jdbc:h2:mem:db1
+	        conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+";DB_CLOSE_DELAY=-1", "sa", null);//jdbc:h2:mem:db1
 	        //conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
 	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+ "?user=sa&password=1234", null, null);//DB_CLOSE_DELAY=-1
 
@@ -86,7 +86,7 @@ public class DatabaseH2 extends Database {
     public void connectReadOnly() {
 		try {
 	        Class.forName("org.h2.Driver");
-	        conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+"Raw"+";IFEXISTS=TRUE", "sa", null);//
+	        conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/mem:~/"+dbName+";IFEXISTS=TRUE", "sa", null);//
 	        //in-memory db test
 	        //conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
 		} catch(Exception e) {
