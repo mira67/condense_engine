@@ -93,6 +93,8 @@ class configQuery(object):
                 AND t1.BT>%s \
                 AND t1.BT<%s" %(self.queryRes['temp_start'],self.queryRes['temp_end'],\
                 self.queryRes['pixel_range'][0],self.queryRes['pixel_range'][1])
+
+                sqlStm2 = ""
             else:#discontinuous time range
                 sqlStm1 = "t1.BT>%s AND t1.BT<%s" %(self.queryRes['pixel_range'][0],self.queryRes['pixel_range'][1])
                 sqlStm2 = " AND YEAR(t1.DATE) = '%s'" % (self.queryRes['yrs'][0])
@@ -100,7 +102,7 @@ class configQuery(object):
                 if yrlen > 1:
                     for yr in range(0,yrlen):
                         if yr > 0:
-                            sqlStm2 += " OR YEAR(t1.DATE) = '%s'" %(self.queryRes['yrs'][yr])
+                            sqlStm2 += " OR EXTRACT(YEAR FROM t1.DATE) = '%s'" %(self.queryRes['yrs'][yr])#EXTRACT(YEAR FROM DATE) 
 
             if self.queryRes['months'] == 'all':
                 sqlStm3 = ""
@@ -129,7 +131,7 @@ class configQuery(object):
         else:
             print 'Unrecognized mode\n'
 
-        print sqlStm
+        #print sqlStm
         return sqlStm
 
 #cfgdb = configQuery()
