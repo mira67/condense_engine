@@ -18,6 +18,7 @@ import sys
 import os
 from pyspark import SparkContext
 from pyspark.sql import *
+from pyspark.sql.types import StringType
 from math import floor
 from time_profile import Timer
 import matplotlib.pyplot as plt
@@ -80,10 +81,15 @@ class PenguinBM(object):
              
             #queries test here, depends on queries to load table in memory
             df1 =sqlContext.load(source="jdbc",url=self.url, dbtable = self.tbName[0]) #dbtable is variable
-            df1.registerTempTable(self.tbName[0]);
+            df1.registerTempTable(self.tbName[0])
 
             df2 =sqlContext.load(source="jdbc",url=self.url, dbtable = self.tbName[1]) #dbtable is variable
-            df2.registerTempTable(self.tbName[1]);
+            df2.registerTempTable(self.tbName[1])
+
+            #register helper functions for SQL
+            sqlContext.registerFunction("MONTH", lambda x: x[5:7], StringType())#grab Month
+            sqlContext.registerFunction("YEAR", lambda x: x[0:4], StringType())
+            sqlContext.registerFunction("DAY", lambda x: x[8:10], StringType())
 
         mem_use = self.memory_usage_psutil()
         print "memory_use_load %s" %mem_use
@@ -93,6 +99,8 @@ class PenguinBM(object):
         with Timer() as tm:
             #query
             rdf = sqlContext.sql(self.sqlStm)
+#need register as table first
+            rdf.printSchema()
             #hist of BT values
             #Todo
         mem_use = self.memory_usage_psutil()
