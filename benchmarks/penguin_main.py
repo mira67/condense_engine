@@ -10,7 +10,8 @@ Function:
 5. Aggregate history query results into report --- Todo
 
 How to use the script?
-./bin/spark-submit /Users/mira67/Downloads/penguin_bm1.py --driver-class-path /Users/mira67/Documents/h2/bin/h2*.jar
+./bin/spark-submit /Users/mira67/Downloads/penguin_main.py --driver-class-path /Users/mira67/Documents/h2/bin/h2*.jar
+use with Spark 1.4.0
 
 """
 #Libraries
@@ -26,6 +27,7 @@ import numpy as np
 import database_cfg as dbcfg
 import query_cfg as qcfg
 import psutil
+import query_plot as qplt
 
 #Main Class
 class PenguinBM(object):
@@ -34,9 +36,10 @@ class PenguinBM(object):
         self.dbType = "ssmi"
         self.dbName = "CH37H"
         self.tbName =["CH37H" ,"LOCMAP_S"]
+        self.mtb = ["ssmi","map"]
         self.sqlStmPre = ""
         self.sqlStm = ""
-        self.url = "jdbc:h2:tcp://localhost/~/ssmi9095ct"
+        self.url = "jdbc:h2:tcp://localhost/~/ssmiSmall"
 
     def memory_usage_psutil(self):
         # return the memory usage in MB
@@ -60,7 +63,7 @@ class PenguinBM(object):
         querycfg.whichQuery()
         self.sqlStmPre = querycfg.queryStm()
         #construct full sql statement
-        self.sqlStm = "SELECT * FROM %s t1, %s t2 " %(self.tbName[0], self.tbName[1])
+        self.sqlStm = "SELECT * FROM %s t1, %s t2 " %(self.mtb[0], self.mtb[1])
         self.sqlStm += self.sqlStmPre
         print 'Generated SQL statement based on user input--> %s\n' % self.sqlStm
 
@@ -80,16 +83,21 @@ class PenguinBM(object):
             sqlContext = SQLContext(sc)
              
             #queries test here, depends on queries to load table in memory
-            df1 =sqlContext.load(source="jdbc",url=self.url, dbtable = self.tbName[0]) #dbtable is variable
+            df1 =sqlContext.read.jdbc(url=self.url, table = self.tbName[0],lowerBound = 0, upperBound = 350, numPartitions=200)#dbtable is variable
             df1.registerTempTable(self.tbName[0])
 
-            df2 =sqlContext.load(source="jdbc",url=self.url, dbtable = self.tbName[1]) #dbtable is variable
+            df2 =sqlContext.read.jdbc(url=self.url, table = self.tbName[1],lowerBound = 0, upperBound = 350, numPartitions=200)#dbtable is variable
             df2.registerTempTable(self.tbName[1])
 
             #register helper functions for SQL
             sqlContext.registerFunction("MONTH", lambda x: x[5:7], StringType())#grab Month
             sqlContext.registerFunction("YEAR", lambda x: x[0:4], StringType())
             sqlContext.registerFunction("DAY", lambda x: x[8:10], StringType())
+
+            rdf1 = sqlContext.sql("SELECT * FROM "+self.tbName[0])
+            rdf2 = sqlContext.sql("SELECT * FROM " + self.tbName[1])
+            sqlContext.registerDataFrameAsTable(rdf1, self.mtb[0])
+            sqlContext.registerDataFrameAsTable(rdf2, self.mtb[1])
 
         mem_use = self.memory_usage_psutil()
         print "memory_use_load %s" %mem_use
@@ -100,14 +108,23 @@ class PenguinBM(object):
             #query
             rdf = sqlContext.sql(self.sqlStm)
 #need register as table first
+            print "Data schema from query:"
             rdf.printSchema()
             #hist of BT values
             #Todo
         mem_use = self.memory_usage_psutil()
         print "memory_use_load %s" %mem_use
-        print "=> elasped query 1: %s ms" % (tm.secs * 1000)
+        print "=> elasped: %s ms" % (tm.secs * 1000)
 
         file_out.write("Query Time %s Memory %s\n" % (str(tm.secs * 1000),str(mem_use))) 
+                
+        #example enabled
+        day1 = sqlContext.sql("SELECT * FROM ssmi t1, map t2 WHERE t1.DATE BETWEEN '1990-01-01' AND '1990-01-01' AND t1.LOCID = t2.ID ORDER BY t1.LOCID")
+        #call plot
+        demoplt = qplt.queryPlot()
+        demoplt.qMapDemo(day1)
+
+        
         #stop sparkcontext
         sc.stop()
 

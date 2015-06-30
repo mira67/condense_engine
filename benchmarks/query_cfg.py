@@ -9,7 +9,7 @@ import os
 class configQuery(object):
 
     def __init__(self):
-        self.queryMode = {'1': 'temporal', '2': 'spatial', '3': 'combo'}
+        self.queryMode = {'1': 'temporal', '2': 'spatial', '3': 'spatio-temp'}
         self.queryRes = {}
 
     def whichQuery(self):
@@ -84,6 +84,7 @@ class configQuery(object):
         md = self.queryRes['mode']
         sqlStm = ""
         header = "WHERE "
+        sqlStm4 = " AND t1.LOCID = t2.ID"
 
         if md == 'temporal':
             #how to query month and random a list of years? #need a function for dis query
@@ -110,7 +111,7 @@ class configQuery(object):
                 sqlStm3 = " AND MONTH(t1.DATE) = '%s'" % (self.queryRes['months'])
 
             #construct sql statement
-            sqlStm = header + sqlStm1 + sqlStm2 + sqlStm3
+            sqlStm = header + sqlStm1 + sqlStm2 + sqlStm3 +sqlStm4
                 
 
         elif md == 'spatial':
@@ -120,7 +121,7 @@ class configQuery(object):
             AND t1.BT>%s \
             AND t1.BT<%s" %(self.queryRes['row_range'][1],self.queryRes['row_range'][0],self.queryRes['col_range'][1],self.queryRes['col_range'][0],self.queryRes['pixel_range'][0],self.queryRes['pixel_range'][1])
 
-        elif md == 'combo':
+        elif md == 'spatio-temp':
             sqlStm = "WHERE t1.LOCID = t2.ID \
             AND t1.DATE BETWEEN '%s' AND '%s' \
             AND t2.ROW < %s AND t2.ROW > %s \
