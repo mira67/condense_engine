@@ -3,23 +3,23 @@
 <meta charset="utf-8">
 <script type="text/javascript">
 
-var nesne;
+var data;
 if( navigator.appName.search('Microsoft') > -1 ){
-    nesne = new ActiveXObject('MSXML2.XMLHTTP');
+    data = new ActiveXObject('MSXML2.XMLHTTP');
 } else {
-    nesne = new XMLHttpRequest();
+    data = new XMLHttpRequest();
 }
 
 function openAndRead( ){
-    nesne.open('get', 'data/foo.csv', true);
-    nesne.onreadystatechange = cevap;
-    nesne.send(null);
+    data.open('get', 'data/foo.csv', true);
+    data.onreadystatechange = replace;
+    data.send(null);
 }
 
-function cevap() {
-    if( nesne.readyState == 4 ){
-    var el = document.getElementById('bilgi');
-    el.innerHTML = nesne.responseText;
+function replace( ) {
+    if( data.readyState == 4 ){
+    var el = document.getElementById('output');
+    el.innerHTML = data.responseText;
     }
 }
 
@@ -28,5 +28,6 @@ function cevap() {
 
 <body>
 <input type="button" value="read file"  onclick="openAndRead()">
-<div id="bilgi"></div>
+<p>write data here:</p>
+<div id="output"></div>
 </body>
