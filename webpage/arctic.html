@@ -1,105 +1,127 @@
 <!DOCTYPE html>
 <html>
-  <head>
-		<meta name="robots" content="noindex" />
-		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-		<title>Snow and Ice Data</title>
+	<head>
+	<meta name="robots" content="noindex" />
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<title>Snow and Ice Data</title>
 
-		<script type="text/javascript" src="d3.hexbin.v0.min.js"></script>
-		<script type="text/javascript" src="d3.v3.js"></script>
-		<script type="text/javascript" src="jquery.js"></script>		
-			
-		<style type="text/css">
-		a:visited, a:link{
-				color: #909090;
-				text-decoration: none;
-			}
-			.header {
-				clear: both;
-				margin-left: auto;
-				margin-right: auto;
-				width: 1200px;
-				height: 50px;
-				text-align: center;
-				font-size: 36px;
-				font-weight: 300;
-				text-shadow: 0 1px 0 #fff;
-			}
-			.subtitle {
-				color: rgb(153, 153, 153); 
-				font-size: 12px;
-			}
-			.hex{
-				clear: both;
-				margin-left: auto;
-				margin-right: auto;
-				width: 1200px;
-				height: 800px;
-			}
-			.block {
-				clear: both;
-				margin-left: auto;
-				margin-right: auto;
-				width: 1200px;
-				height: 650px;
-				margin-top: 20px;
-				color: #777;
-			}
-			.box {
-				margin-left: 25px;
-				margin-top: 25px;
-			}
-			.figureLeft {
-				float: left;
-				width: 250px;
-				height: 600px;
-				text-align: center;
-				font-size: medium;
-				font-family: "Helvetica Neue", Helvetica;
-			}
-			.figureCenter {
-				float: left;
-				position: relative;
-				text-align: center;
-				width: 600px;
-				height: 600px;
-			}
-			.figureRight {
-				float: left;
-				width: 250px;
-				height: 600px;
-			}
-			.leftArrow { position: absolute; bottom: 0; left: 0; font-size: xx-large; margin: 5px; }
-			.rightArrow { position: absolute; bottom: 0; right: 0; font-size: xx-large; margin: 5px; }
-			.fileName { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: medium; margin: 10px; }
-			.month { clear: both; }
-			.month p { margin: 1px 5px 1px 3px; text-align: left; }
-			.foo {
-				float: left;
-				width: 7px;
-				height: 7px;
-				margin: 3px 3px 2px 3px;
-				border-width: 1px;
-				border-style: solid;
-				border-color: rgba(0, 0, 0, 0.1);
-				background-color: #f9f9f9;
-			}
-                        .pink { background: SkyBlue; }
-                        .green { background: SkyBlue; }
-                        .blue { background: SkyBlue; }
-
-			.white { background: #fff; }
+	<script type="text/javascript" src="d3.hexbin.v0.min.js"></script>
+	<script type="text/javascript" src="d3.v3.js"></script>
+	<script type="text/javascript" src="jquery.js"></script>		
 		
-			.footer { height: 10px; text-align: center; font-size: small; }
-			
-			.advanced {
-				position: fixed;
-				bottom: 0;
-				right: 0;
-				padding: 10px;
-				color: #a0a0a0;
-			}			
-		</style>
+	<style type="text/css">
+	a:visited, a:link{
+			color: #909090;
+			text-decoration: none;
+		}
+		.header {
+			clear: both;
+			margin-left: auto;
+			margin-right: auto;
+			width: 1200px;
+			height: 50px;
+			text-align: center;
+			font-size: 36px;
+			font-weight: 300;
+			text-shadow: 0 1px 0 #fff;
+		}
+		.subtitle {
+			color: rgb(153, 153, 153); 
+			font-size: 12px;
+		}
+		.hex{
+			clear: both;
+			margin-left: auto;
+			margin-right: auto;
+			width: 1200px;
+			height: 800px;
+		}
+		.block {
+			clear: both;
+			margin-left: auto;
+			margin-right: auto;
+			width: 1200px;
+			height: 650px;
+			margin-top: 20px;
+			color: #777;
+		}
+		.box {
+			margin-left: 25px;
+			margin-top: 25px;
+		}
+		.figureLeft {
+			float: left;
+			width: 250px;
+			height: 600px;
+			text-align: center;
+			font-size: medium;
+			font-family: "Helvetica Neue", Helvetica;
+		}
+		.figureCenter {
+			float: left;
+			position: relative;
+			text-align: center;
+			width: 600px;
+			height: 600px;
+		}
+		.figureRight {
+			float: left;
+			width: 250px;
+			height: 600px;
+		}
+		.leftArrow { position: absolute; bottom: 0; left: 0; font-size: xx-large; margin: 5px; }
+		.rightArrow { position: absolute; bottom: 0; right: 0; font-size: xx-large; margin: 5px; }
+		.fileName { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: medium; margin: 10px; }
+		.month { clear: both; }
+		.month p { margin: 1px 5px 1px 3px; text-align: left; }
+		.foo {
+			float: left;
+			width: 7px;
+			height: 7px;
+			margin: 3px 3px 2px 3px;
+			border-width: 1px;
+			border-style: solid;
+			border-color: rgba(0, 0, 0, 0.1);
+			background-color: #f9f9f9;
+		}
+		.pink { background: SkyBlue; }
+		.green { background: SkyBlue; }
+		.blue { background: SkyBlue; }
+		.white { background: #fff; }
+		.pysparkButton { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: large; margin: 10px; }
+		#pysparkResults { }
+	
+		.footer { height: 10px; text-align: center; font-size: small; }
+		
+		.advanced {
+			position: fixed;
+			bottom: 0;
+			right: 0;
+			padding: 10px;
+			color: #a0a0a0;
+		}			
+	</style>
+
+	<!-- this script will listen for button push and then execute cgi script and return data to user -->
+	<script type="text/javascript">
+		function onTest( dest, params ){
+			var xmlhttp;
+			if( window.XMLHttpRequest ){ // code for IE7+, Firefox, Chrome, Opera, Safari
+			    xmlhttp=new XMLHttpRequest();
+			} else { // code for IE6, IE5
+			    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+
+			xmlhttp.onreadystatechange=function(){
+			    if (xmlhttp.readyState==4 && xmlhttp.status==200){
+				document.getElementById( "pysparkResults" ).innerHTML = xmlhttp.responseText;
+			    }
+			}
+			xmlhttp.open("POST",dest,true);
+			xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+			xmlhttp.send( params ); 
+		}
+	</script>
 	</head>
 	<body>	
 	<div id="wrapper">
@@ -218,7 +240,10 @@
 			</div><!--end left-->
 			
 			<div class="box figureCenter white">
-				python histogram spark
+				python results generated each time button is pressed
+				<br><br><br><br>
+        			<div id="pysparkResults"><p id="pyspark">python</p></div>
+			        <div class="pysparkButton"><a href="javascript:onTest('/cgi-bin/test.py', '')">run pyspark</a></div>
 			</div><!--end center-->
 			
 			<div class="box figureRight white">
