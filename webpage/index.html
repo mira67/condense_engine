@@ -1,46 +1,374 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta name="robots" content="noindex" />
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<title>Snow and Ice Data</title>
+	<script type="text/javascript" src="jquery.js"></script>		
+		
+	<style type="text/css">
+		a:visited, a:link{
+			color: #909090;
+			text-decoration: none;
+		}
+		.header {
+			clear: both;
+			margin-left: auto;
+			margin-top: 30px;
+			margin-bottom: 20px;
+			margin-right: auto;
+			width: 1200px;
+			height: 50px;
+			text-align: center;
+			font-size: 36px;
+			font-weight: 300;
+			text-shadow: 0 1px 0 #fff;
+		}
+		.subtitle {
+			color: rgb(153, 153, 153); 
+			font-size: 12px;
+		}
+		.menu{
+			clear: both;
+			margin-left: auto;
+			margin-right: auto;
+			width: 1200px;
+			height: 10px;
+			margin-bottom: -5px;
+		}
+		.menu #sparkInterface { color: #aaa; }
+		.hex{
+			clear: both;
+			margin-left: auto;
+			margin-right: auto;
+			width: 1200px;
+			height: 800px;
+		}
+		.block {
+			clear: both;
+			margin-left: auto;
+			margin-right: auto;
+			width: 1200px;
+			height: 650px;
+			margin-top: 20px;
+			color: #777;
+		}
+		.box {
+			margin-left: 25px;
+			margin-top: 25px;
+		}
+		.figureLeftExplorer {
+			float: left;
+			width: 250px;
+			height: 600px;
+			text-align: center;
+			font-size: medium;
+			font-family: "Helvetica Neue", Helvetica;
+		}
+		.figureRightExplorer {
+			float: left;
+			position: relative;
+			text-align: center;
+			width: 875px;
+			height: 600px;
+		}
+		.figureLeftSpark {
+			float: left;
+			position: relative;
+			text-align: center;
+			width: 875px;
+			height: 600px;
+		}
+		.figureRightSpark {
+			float: left;
+			width: 250px;
+			height: 600px;
+			text-align: center;
+			font-size: medium;
+			font-family: "Helvetica Neue", "Helvetica";
+		}
+		.text-button, #yearField, #monthField, #dayField { font-size: 13px; }
+		.myButton {
+			background-color:#ffffff;
+			-moz-border-radius:7px;
+			-webkit-border-radius:7px;
+			border-radius:7px;
+			border:1px solid #dcdcdc;
+			display:inline-block;
+			cursor:pointer;
+			color:#666666;
+			font-family:Arial;
+			font-size:13px;
+			font-weight:bold;
+			padding:2px 20px;
+			margin: 0px 10px 0px 10px;
+			text-decoration:none;
+		}
+		.myButton:hover {
+			background-color:#f6f6f6;
+		}
+		.myButton:active {
+			position:relative;
+			top:1px;
+		}
+		.leftArrow { position: absolute; bottom: 0; left: 0; font-size: xx-large; margin: 5px; }
+		.rightArrow { position: absolute; bottom: 0; right: 0; font-size: xx-large; margin: 5px; }
+		.fileName { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: medium; margin: 10px; }
+		.pink { background: #6cf; }
+		.green { background: #cff; }
+		.blue { background: #cff; }
+		.white { background: #fff; }
+		.pysparkButton { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: large; margin: 10px; }
+		#pysparkResults { }
+	
+		.footer { height: 10px; text-align: center; font-size: small; }
+		
+		.advanced {
+			position: fixed;
+			bottom: 0;
+			right: 0;
+			padding: 10px;
+			color: #a0a0a0;
+		}			
+		path {
+		  stroke: #fff;
+		}
 
-<script type="text/javascript">
-<!--
-    function onTest( dest, params )
-    {
-	var xmlhttp;
+		path:first-child {
+		  fill: yellow !important;
+		}
 
-	if (window.XMLHttpRequest)
-	{// code for IE7+, Firefox, Chrome, Opera, Safari
-	    xmlhttp=new XMLHttpRequest();
-	}
-	else
-	{// code for IE6, IE5
-	    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-	}
+		circle {
+		  fill: #000;
+		  pointer-events: none;
+		}
 
-	xmlhttp.onreadystatechange=function()
-	{
-	    if (xmlhttp.readyState==4 && xmlhttp.status==200)
-	    {
-		document.getElementById( "bb" ).innerHTML = xmlhttp.responseText;
-	    }
-	}
+		.q0-9 { fill: rgb(197,27,125); }
+		.q1-9 { fill: rgb(222,119,174); }
+		.q2-9 { fill: rgb(241,182,218); }
+		.q3-9 { fill: rgb(253,224,239); }
+		.q4-9 { fill: rgb(247,247,247); }
+		.q5-9 { fill: rgb(230,245,208); }
+		.q6-9 { fill: rgb(184,225,134); }
+		.q7-9 { fill: rgb(127,188,65); }
+		.q8-9 { fill: rgb(77,146,33); }
 
-	xmlhttp.open("POST",dest,true);
-	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-	xmlhttp.send( params ); 
-    }
+	</style>
+	
+	<!-- decrement increment the image on canvas -->
+	<script type="text/javascript">
+		directory = "data/south/";
+		var example = '03-10-2010';
+		var parts = example.split('-');
+		date = new Date();
+		date.setFullYear(parts[2], parts[0]-1, parts[1]); // year, month (0-based), day
+		date.setTime(date.getTime() + 86400000);
+		currentFileName = "data/south/2010/tb_f17_20100310_v4_s19h.bin";
+		function decrement(){
+			// sub one to the day
+			date.setTime(date.getTime() - 86400000);
+			var dateString = date.getFullYear().toString()+('0'+(date.getMonth()+1)).slice(-2)+('0'+date.getDate()).slice(-2);
+			var yearString = date.getFullYear().toString();
+			updateImage(dateString, yearString);
+		}
+		function increment(){
+			// add one to the day
+			date.setTime(date.getTime() + 86400000);
+			var dateString = date.getFullYear().toString()+('0'+(date.getMonth()+1)).slice(-2)+('0'+date.getDate()).slice(-2);
+			var yearString = date.getFullYear().toString();
+			updateImage(dateString, yearString);
+		}
+		function updateImage(dateString, yearString){
+			console.log("currentFileName: ", currentFileName);
+			currentFileName = directory + yearString + "/tb_f17_" + dateString + "_v4_s19v.bin";
+			console.log("updatedFileName: ", currentFileName);
+			document.getElementById( "fileLabelName" ).innerHTML = currentFileName;
+			
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', currentFileName, true);
+			xhr.responseType = 'arraybuffer';
+
+			xhr.onload = function(e){
+				console.log("response: ", this.response);
+				var responseArray = new Uint16Array(this.response);
+				console.log("response array: ", responseArray);
+				var imageWidth = 316;
+				var imageHeight = 332;
+				var c = document.getElementById("myCanvas");
+				var ctx = c.getContext("2d");
+				var imgData = ctx.createImageData(imageWidth, imageHeight);
+				for( var i = 0, j = 0; i < imgData.data.length; i+=4, j++ ){
+					if( responseArray[j] == 0 ){
+						imgData.data[i+0] = 0;
+						imgData.data[i+1] = 0;
+						imgData.data[i+2] = 0;
+						imgData.data[i+3] = 0;
+					} else {
+						imgData.data[i+0] = (responseArray[j]/10-50)/300*255;
+						imgData.data[i+1] = (responseArray[j]/10-50)/300*255;
+						imgData.data[i+2] = (responseArray[j]/10-50)/300*255;
+						imgData.data[i+3] = 255;
+					}
+				}
+				ctx.putImageData(imgData,(600-imageWidth)/2,(500-imageWidth)/2);
+			};
+			xhr.send();
+
+		}
+		updateImage("20100310", "2010");
+	</script>
+
+	<!-- this script will listen for button push and then execute cgi script and return data to user -->
+	<script type="text/javascript">
+		function onTest( dest, params ){
+			var xmlhttp;
+			if( window.XMLHttpRequest ){ // code for IE7+, Firefox, Chrome, Opera, Safari
+			    xmlhttp=new XMLHttpRequest();
+			} else { // code for IE6, IE5
+			    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+			}
+
+			xmlhttp.onreadystatechange=function(){
+			    if (xmlhttp.readyState==4 && xmlhttp.status==200){
+				document.getElementById( "pysparkResults" ).innerHTML = xmlhttp.responseText;
+			    }
+			}
+			xmlhttp.open("POST",dest,true);
+			xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+			xmlhttp.send( params ); 
+		}
+	</script>
+
+	<!-- increment value of button -->
+	<script type="text/javascript">
+		var yearValue = 2001;
+		var monthValue = 6;
+		var dayValue = 12;
+		window.onload = function(){
+			document.getElementById("yearField").innerHTML = yearValue;
+			document.getElementById("monthField").innerHTML = monthValue;
+			document.getElementById("dayField").innerHTML = dayValue;
+		}
+		function incrementYear(){yearValue++;if(yearValue>=2014){yearValue=2014;}document.getElementById("yearField").innerHTML=yearValue;}
+		function decrementYear(){yearValue--;if(yearValue<=1987){yearValue=1987;}document.getElementById("yearField").innerHTML=yearValue;}
+		function incrementMonth(){monthValue++;if(monthValue>=12){monthValue=12;}document.getElementById("monthField").innerHTML=monthValue;}
+		function decrementMonth(){monthValue--;if(monthValue<=1){monthValue=1;}document.getElementById("monthField").innerHTML=monthValue;}
+		function incrementDay(){dayValue++;if(dayValue>=31){dayValue=31;}document.getElementById("dayField").innerHTML=dayValue;}
+		function decrementDay(){dayValue--;if(dayValue<=1){dayValue=1;}document.getElementById("dayField").innerHTML=dayValue;}
+	</script>
+
+	</head>
+	<body>	
+	<div id="wrapper">
+		<div class="header">Snow and Ice Data
+			<div class="subtitle">
+				<a href="http://nsidc.org/data/docs/daac/nsidc0001_ssmi_tbs.gd.html">DMSP SSM/I-SSMIS daily polar gridded brightness temperatures</a>
+			</div><!--end subtitle-->
+		</div><!--end header-->
+<!-- menu -->	
+		<div class="menu">
+			<span id="dataExplorer">data-explorer </span>/<span id="sparkInterface"> spark-interface</span>
+		</div>
+<!--<div id="chart" class="hex"></div> --><!-- needed for the hexagonal display -->
+<!-- top box -->
+		<div class="block pink">
+			<div class="box figureLeftExplorer white">
+				<br><br><br><br><span>region</span><br>                
+				<span id="north" class="text-button" id="northSouth">[ north ↑ ] </span>
+				<span id="south" class="text-button" id="northSouth">[ south ↓ ]</span>
+				
+				<br><br><br><span>frequency</span><br>
+				<span id="91" class="text-button" id="frequencyChoice">[ 91.7 ] </span>
+				<span id="85" class="text-button" id="frequencyChoice">[ 85.5 ] </span>
+				<span id="37" class="text-button" id="frequencyChoice">[ 37.0 ] </span>
+				<span id="22" class="text-button" id="frequencyChoice">[ 22.2 ] </span>
+				<span id="19" class="text-button" id="frequencyChoice">[ 19.3 ]</span>
+				
+				<br><br><br><span>polarization</span><br>
+				<span id="vertical" class="text-button" onclick="myFunction()">[ vertical ↕ ] </span>
+				<span id="horizontal" class="text-button" onclick="myFunction()">[ horizontal ↔ ]</span>
+				
+				<br><br><br><span>year</span><br>
+				<a onClick="decrementYear();return false;" href="#" class="myButton"> ← </a><span id="yearField"></span><a onClick="incrementYear();return false;" href="#" class="myButton"> → </a>
+				
+				<br><br><br><span>month</span><br>
+				<a onClick="decrementMonth();return false;" href="#" class="myButton"> ← </a><span id="monthField"></span><a onClick="incrementMonth();return false;" href="#" class="myButton"> → </a>
+				
+				<br><br><br><span>day</span><br>
+				<a onClick="decrementDay();return false;" href="#" class="myButton"> ← </a><span id="dayField"></span><a onClick="incrementDay();return false;" href="#" class="myButton"> → </a>
+			</div><!--end left-->
+			
+			<div class="box figureRightExplorer white">
+				<br>
+				<canvas id="myCanvas" width="600" height="500" style="border:1px solid #d3d3d3;">Canvas</canvas>
+				<div class="leftArrow" onclick="decrement()">←</div>
+				<div class="fileName" id="fileLabelName"><center></center></div>
+				<div class="rightArrow" onclick="increment()">→</div>
+			</div><!--end center-->
+		</div>
+		
+		<div class="block green">
+			<div class="box figureLeftSpark white">
+				python results generated each time button is pressed...
+        			<div id="pysparkResults"><p id="pyspark">python</p></div>
 
 
--->
-</script>
-</head>
+			        <div class="pysparkButton"><a href="javascript:onTest('/cgi-bin/test.py', '')">run pyspark</a></div>
+			</div><!--end center-->
+			
+			<div class="box figureRightSpark white">
+				<br><br><br><br>
+				database
+				<br>
+				[ h2 ] [ perst ] [ aerospike ]
+				<br><br>
+				mode
+				<br>
+				[ mem ] [ ssd ] [ psd ]
+				<br><br>
+				dataset
+				<br>
+				[ seaice ] [ ssmi ]
+				<br><br>
+				method
+				<br>
+				[ sparse ] [ no ]
+				<br><br>
+				evaluation method
+				<br>
+				[ temporal ] [ spatial ] [ combo ]
+				<br><br>
+				row range
+				<br>
+				← [ r1 ] [ r2 ] →
+				<br><br>
+				col range
+				<br>
+				← [ c1 ] [ c2 ] →
+				<br><br>
+				pixel range
+				<br>
+				← [ p1 ] [ p2 ] →
 
-<body>
 
-<p id="bb"> print </p>
-<a href="javascript:onTest('/cgi-bin/pi.py', '')">Click it</a>
+			</div><!--end right-->
+		</div><!--end boxMiddle-->
+		
+		<div class="block footer">
+			<p id="copyright">Copyright &#169
+				<script type="text/javascript">
+				<!--
+				var currentTime = new Date()
+				var year = currentTime.getFullYear()
+				document.write(year)
+				//-->
+				</script>, by The Snow and Ice Data Center</p>
+		</div><!--end footer-->
+		
+		<div class="advanced"><a onmouseover="this.innerHTML='advanced'" onmouseout="this.innerHTML='π'" href="http://104.154.87.138">π</a></div>
+	</div><!--end wrapper-->
+		
+	<script type="text/javascript" src="script.js"></script>
 
-</body>
-
+	</body>
 </html>
