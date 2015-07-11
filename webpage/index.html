@@ -37,13 +37,10 @@
 			margin-bottom: -5px;
 		}
 		.menu #sparkInterface { color: #aaa; }
-		.hex{
-			clear: both;
-			margin-left: auto;
-			margin-right: auto;
-			width: 1200px;
-			height: 800px;
-		}
+		#outputImageTemperature { float: left; width: 300px; height: 30px; text-align: left; margin-left: 10px; }
+		#outputImageCoordinates { float: left; width: 200px; height: 30px; text-align: left; }
+		#outputImageMin { float: left; width: 150px; height: 30px; text-align: left; }
+		#outputImageMax { float: left; width: 120px; height: 30px; text-align: left; }
 		.block {
 			clear: both;
 			margin-left: auto;
@@ -111,10 +108,11 @@
 			position:relative;
 			top:1px;
 		}
-		.leftArrow { position: absolute; bottom: 0; left: 0; font-size: xx-large; margin: 5px; }
-		.rightArrow { position: absolute; bottom: 0; right: 0; font-size: xx-large; margin: 5px; }
+		.leftArrow { position: absolute; bottom: 0; left: 0; font-size: xx-large; margin: 10px; }
+		.rightArrow { position: absolute; bottom: 0; right: 0; font-size: xx-large; margin: 10px; }
 		.fileName { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: medium; margin: 10px; }
-		.pink { background: #6cf; }
+		//.pink { background: #6cf; }
+		.pink { background: #eee; }
 		.green { background: #cff; }
 		.blue { background: #cff; }
 		.white { background: #fff; }
@@ -154,71 +152,7 @@
 		.q8-9 { fill: rgb(77,146,33); }
 
 	</style>
-	
-	<!-- decrement increment the image on canvas -->
-	<script type="text/javascript">
-		directory = "data/south/";
-		var example = '03-10-2010';
-		var parts = example.split('-');
-		date = new Date();
-		date.setFullYear(parts[2], parts[0]-1, parts[1]); // year, month (0-based), day
-		date.setTime(date.getTime() + 86400000);
-		currentFileName = "data/south/2010/tb_f17_20100310_v4_s19h.bin";
-		function decrement(){
-			// sub one to the day
-			date.setTime(date.getTime() - 86400000);
-			var dateString = date.getFullYear().toString()+('0'+(date.getMonth()+1)).slice(-2)+('0'+date.getDate()).slice(-2);
-			var yearString = date.getFullYear().toString();
-			updateImage(dateString, yearString);
-		}
-		function increment(){
-			// add one to the day
-			date.setTime(date.getTime() + 86400000);
-			var dateString = date.getFullYear().toString()+('0'+(date.getMonth()+1)).slice(-2)+('0'+date.getDate()).slice(-2);
-			var yearString = date.getFullYear().toString();
-			updateImage(dateString, yearString);
-		}
-		function updateImage(dateString, yearString){
-			console.log("currentFileName: ", currentFileName);
-			currentFileName = directory + yearString + "/tb_f17_" + dateString + "_v4_s19v.bin";
-			console.log("updatedFileName: ", currentFileName);
-			document.getElementById( "fileLabelName" ).innerHTML = currentFileName;
-			
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', currentFileName, true);
-			xhr.responseType = 'arraybuffer';
-
-			xhr.onload = function(e){
-				console.log("response: ", this.response);
-				var responseArray = new Uint16Array(this.response);
-				console.log("response array: ", responseArray);
-				var imageWidth = 316;
-				var imageHeight = 332;
-				var c = document.getElementById("myCanvas");
-				var ctx = c.getContext("2d");
-				var imgData = ctx.createImageData(imageWidth, imageHeight);
-				for( var i = 0, j = 0; i < imgData.data.length; i+=4, j++ ){
-					if( responseArray[j] == 0 ){
-						imgData.data[i+0] = 0;
-						imgData.data[i+1] = 0;
-						imgData.data[i+2] = 0;
-						imgData.data[i+3] = 0;
-					} else {
-						imgData.data[i+0] = (responseArray[j]/10-50)/300*255;
-						imgData.data[i+1] = (responseArray[j]/10-50)/300*255;
-						imgData.data[i+2] = (responseArray[j]/10-50)/300*255;
-						imgData.data[i+3] = 255;
-					}
-				}
-				ctx.putImageData(imgData,(600-imageWidth)/2,(500-imageWidth)/2);
-			};
-			xhr.send();
-
-		}
-		updateImage("20100310", "2010");
-	</script>
-
-	<!-- this script will listen for button push and then execute cgi script and return data to user -->
+		<!-- this script will listen for button push and then execute cgi script and return data to user -->
 	<script type="text/javascript">
 		function onTest( dest, params ){
 			var xmlhttp;
@@ -239,24 +173,6 @@
 		}
 	</script>
 
-	<!-- increment value of button -->
-	<script type="text/javascript">
-		var yearValue = 2001;
-		var monthValue = 6;
-		var dayValue = 12;
-		window.onload = function(){
-			document.getElementById("yearField").innerHTML = yearValue;
-			document.getElementById("monthField").innerHTML = monthValue;
-			document.getElementById("dayField").innerHTML = dayValue;
-		}
-		function incrementYear(){yearValue++;if(yearValue>=2014){yearValue=2014;}document.getElementById("yearField").innerHTML=yearValue;}
-		function decrementYear(){yearValue--;if(yearValue<=1987){yearValue=1987;}document.getElementById("yearField").innerHTML=yearValue;}
-		function incrementMonth(){monthValue++;if(monthValue>=12){monthValue=12;}document.getElementById("monthField").innerHTML=monthValue;}
-		function decrementMonth(){monthValue--;if(monthValue<=1){monthValue=1;}document.getElementById("monthField").innerHTML=monthValue;}
-		function incrementDay(){dayValue++;if(dayValue>=31){dayValue=31;}document.getElementById("dayField").innerHTML=dayValue;}
-		function decrementDay(){dayValue--;if(dayValue<=1){dayValue=1;}document.getElementById("dayField").innerHTML=dayValue;}
-	</script>
-
 	</head>
 	<body>	
 	<div id="wrapper">
@@ -269,40 +185,51 @@
 		<div class="menu">
 			<span id="dataExplorer">data-explorer </span>/<span id="sparkInterface"> spark-interface</span>
 		</div>
-<!--<div id="chart" class="hex"></div> --><!-- needed for the hexagonal display -->
 <!-- top box -->
 		<div class="block pink">
 			<div class="box figureLeftExplorer white">
 				<br><br><br><br><span>region</span><br>                
-				<span id="north" class="text-button" id="northSouth">[ north ↑ ] </span>
-				<span id="south" class="text-button" id="northSouth">[ south ↓ ]</span>
+				<span id="north" class="text-button" id="northSouth" onclick="changeRegion('n')">[ north ↑ ] </span>
+				<span id="south" class="text-button" id="northSouth" onclick="changeRegion('s')">[ south ↓ ]</span>
 				
 				<br><br><br><span>frequency</span><br>
-				<span id="91" class="text-button" id="frequencyChoice">[ 91.7 ] </span>
-				<span id="85" class="text-button" id="frequencyChoice">[ 85.5 ] </span>
-				<span id="37" class="text-button" id="frequencyChoice">[ 37.0 ] </span>
-				<span id="22" class="text-button" id="frequencyChoice">[ 22.2 ] </span>
-				<span id="19" class="text-button" id="frequencyChoice">[ 19.3 ]</span>
+				<span id="91" class="text-button" id="frequencyChoice" onclick="changeFreq(91)">[ 91.7 ] </span>
+				<span id="85" class="text-button" id="frequencyChoice" onclick="changeFreq(85)">[ 85.5 ] </span>
+				<span id="37" class="text-button" id="frequencyChoice" onclick="changeFreq(37)">[ 37.0 ] </span>
+				<span id="22" class="text-button" id="frequencyChoice" onclick="changeFreq(22)">[ 22.2 ] </span>
+				<span id="19" class="text-button" id="frequencyChoice" onclick="changeFreq(19)">[ 19.3 ]</span>
 				
 				<br><br><br><span>polarization</span><br>
-				<span id="vertical" class="text-button" onclick="myFunction()">[ vertical ↕ ] </span>
-				<span id="horizontal" class="text-button" onclick="myFunction()">[ horizontal ↔ ]</span>
+				<span id="vertical" class="text-button" onclick="changePolarization('v')">[ vertical ↕ ] </span>
+				<span id="horizontal" class="text-button" onclick="changePolarization('h')">[ horizontal ↔ ]</span>
 				
 				<br><br><br><span>year</span><br>
-				<a onClick="decrementYear();return false;" href="#" class="myButton"> ← </a><span id="yearField"></span><a onClick="incrementYear();return false;" href="#" class="myButton"> → </a>
+				<span onClick="decrementYear()"> ← </span>
+				<span id="yearField"></span>
+				<span onClick="incrementYear()"> → </span>
 				
 				<br><br><br><span>month</span><br>
-				<a onClick="decrementMonth();return false;" href="#" class="myButton"> ← </a><span id="monthField"></span><a onClick="incrementMonth();return false;" href="#" class="myButton"> → </a>
+				<span onClick="decrementMonth()"> ← </span>
+				<span id="monthField"></span>
+				<span onClick="incrementMonth()"> → </span>
 				
 				<br><br><br><span>day</span><br>
-				<a onClick="decrementDay();return false;" href="#" class="myButton"> ← </a><span id="dayField"></span><a onClick="incrementDay();return false;" href="#" class="myButton"> → </a>
+				<span onClick="decrementDay()"> ← </span>
+				<span id="dayField"></span>
+				<span onClick="incrementDay()"> → </span>
 			</div><!--end left-->
 			
 			<div class="box figureRightExplorer white">
+				<div id="outputInfo">
+					<div id="outputImageTemperature">brightness temperature:</div>
+					<div id="outputImageCoordinates">location:</div>
+					<div id="outputImageMin">min: </div>
+					<div id="outputImageMax">max: </div>
+				</div>
 				<br>
-				<canvas id="myCanvas" width="600" height="500" style="border:1px solid #d3d3d3;">Canvas</canvas>
-				<div class="leftArrow" onclick="decrement()">←</div>
+				<canvas id="myCanvas" width="600" height="500">Canvas</canvas>
 				<div class="fileName" id="fileLabelName"><center></center></div>
+				<div class="leftArrow" onclick="decrement()">←</div>
 				<div class="rightArrow" onclick="increment()">→</div>
 			</div><!--end center-->
 		</div>
@@ -318,38 +245,22 @@
 			
 			<div class="box figureRightSpark white">
 				<br><br><br><br>
-				database
-				<br>
-				[ h2 ] [ perst ] [ aerospike ]
-				<br><br>
-				mode
-				<br>
-				[ mem ] [ ssd ] [ psd ]
-				<br><br>
 				dataset
 				<br>
 				[ seaice ] [ ssmi ]
 				<br><br>
-				method
-				<br>
-				[ sparse ] [ no ]
-				<br><br>
 				evaluation method
-				<br>
-				[ temporal ] [ spatial ] [ combo ]
 				<br><br>
-				row range
-				<br>
-				← [ r1 ] [ r2 ] →
+				[ temporal ]<br>
+				start: year | month | day<br>
+				end: year | month | day<br>
 				<br><br>
-				col range
+				[ spatial ]
+				row: start | end
+				column: start | end
 				<br>
-				← [ c1 ] [ c2 ] →
+				[ combo ]
 				<br><br>
-				pixel range
-				<br>
-				← [ p1 ] [ p2 ] →
-
 
 			</div><!--end right-->
 		</div><!--end boxMiddle-->
@@ -368,7 +279,174 @@
 		<div class="advanced"><a onmouseover="this.innerHTML='advanced'" onmouseout="this.innerHTML='π'" href="http://104.154.87.138">π</a></div>
 	</div><!--end wrapper-->
 		
-	<script type="text/javascript" src="script.js"></script>
+	<!-- decrement increment the image on canvas -->
+	<script type="text/javascript">
+		directory = "data/south/";
+		region = "s";
+		frequency = "91";
+		polarization = "h";
+		year = 2009; month = 10; day = 1;
+		minimumTemperature = 50; maximumTemperature = 350;
+		monthArray = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+		date = new Date();
+		date.setFullYear(year, month, day); // year, month (0-based), day
+		//date.setTime(date.getTime() + (86400*100));
+		currentFileName = "data/south/2010/tb_f17_20090310_v4_s91h.bin";
+		function decrement(){ // sub one from day
+			date.setTime(date.getTime() - 86400000); updateImage();
+		}
+		function increment(){ // add one to the day
+			date.setTime(date.getTime() + 86400000); updateImage();
+		}
+		function changeFreq(num){ frequency = num; updateImage(); }
+		function changeRegion(reg) { region = reg; updateImage(); }
+		function changePolarization(pol) { polarization = pol; updateImage(); }
+		function updateDateFields(){
+			document.getElementById("yearField").innerHTML = year;
+			document.getElementById("monthField").innerHTML = monthArray[month];
+			document.getElementById("dayField").innerHTML = day;
+		}
+		function updateImage(){
+			console.log("currentFileName: ", currentFileName);
+			dateString = date.getFullYear().toString()+('0'+(date.getMonth()+1)).slice(-2)+('0'+date.getDate()).slice(-2);
+			year = date.getFullYear();
+			month = date.getMonth();
+			day = date.getDate();
+			updateDateFields();
+			currentFileName = directory + year + "/tb_f17_" + dateString + "_v4_" + region + frequency + polarization + ".bin";
+			console.log("updatedFileName: ", currentFileName);
+			document.getElementById( "fileLabelName" ).innerHTML = currentFileName;
+			
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', currentFileName, true);
+			xhr.responseType = 'arraybuffer';
+
+			xhr.onload = function(e){
+				console.log("response: ", this.response);
+				var responseArray = new Uint16Array(this.response);
+				console.log("response array: ", responseArray);
+				
+				var c = document.getElementById("myCanvas");
+				var ctx = c.getContext("2d");
+        			ctx.clearRect(0, 0, c.width, c.height);
+				
+				// get size of image
+				if( responseArray.length == 419648 ){ // south 664x632
+					var imageHeight = 664; var imageWidth = 632;
+				} else if( responseArray.length == 104912 ){ // south 332x316
+					var imageHeight = 332; var imageWidth = 316;
+				} else if( responseArray.length == 544768 ){ // north 896x608
+					var imageHeght = 896; var imageWidth = 608;
+				} else if( responseArray.length == 136192 ){ // north 448x304
+					var imageHeight = 448; var imageWidth = 304;
+				} else { // error of some sort
+					document.getElementById( "fileLabelName" ).innerHTML = "No Files Available For These Parameters!";
+					return;
+				}
+				
+				var imgData = ctx.createImageData(imageWidth, imageHeight);
+				for( var i = 0, j = 0; i < imgData.data.length; i+=4, j++ ){
+					if( responseArray[j] == 0 ){ // missing data
+						imgData.data[i+0] = 0;
+						imgData.data[i+1] = 0;
+						imgData.data[i+2] = 0;
+						imgData.data[i+3] = 0;
+					} else {
+						imgData.data[i+0] = (responseArray[j]/10-50)/300*255;
+						imgData.data[i+1] = (responseArray[j]/10-50)/300*255;
+						imgData.data[i+2] = (responseArray[j]/10-50)/300*255;
+						imgData.data[i+3] = 255;
+					}
+				}
+				// update max min
+				minimumTemperature = Math.min.apply(null, responseArray);
+				maximumTemperature = Math.max.apply(null, responseArray);
+				document.getElementById("outputImageMin").innerHTML = "min: " + minimumTemperature/10;
+				document.getElementById("outputImageMax").innerHTML = "max: " + maximumTemperature/10;
+				ctx.putImageData(imgData,(600-imageWidth)/2,(500-imageWidth)/2);
+			};
+			xhr.send();
+		}
+		updateImage();
+
+		// find pos and append to the plot
+		function findPos( obj ){
+			var current_left = 0, current_top = 0;
+			if (obj.offsetParent){
+				do{
+					current_left += obj.offsetLeft;
+					current_top += obj.offsetTop;
+				} while( obj = obj.offsetParent );
+				return {x: current_left, y: current_top};
+			}
+			return undefined;
+		}
+		function rgbToHex(r, g, b){
+			if (r > 255 || g > 255 || b > 255)
+				throw "Invalid color component";
+			return ((r << 16) | (g << 8) | b).toString(16);
+		}
+		// output pixel info to screen
+		$('#myCanvas').mousemove(function(e){
+			var position = findPos(this);
+			var x = e.pageX - position.x;
+			var y = e.pageY - position.y;
+			var coordinate = "location: x = " + x + ", y = " + y;
+			var canvas = this.getContext('2d');
+			var p = canvas.getImageData(x, y, 1, 1).data;
+			//var hex = "#" + ("000000" + rgbToHex(p[0], p[1], p[2])).slice(-6);
+			var temperature = Math.round( p[0]/255*300+50 );
+			if( temperature == 50 ){
+				document.getElementById("outputImageTemperature").innerHTML = "brightness temperature: ";
+			} else {
+				document.getElementById("outputImageTemperature").innerHTML = "brightness temperature: " + temperature + " K";
+			}
+			document.getElementById("outputImageCoordinates").innerHTML = coordinate.toString();
+			//alert("HEX: " + hex);
+		});
+		$('#myCanvas').mouseout(function(e){
+			document.getElementById( "outputImageTemperature" ).innerHTML = "brightness temperature: ";
+			document.getElementById( "outputImageCoordinates" ).innerHTML = "location:";
+		});
+	</script>
+
+	<!-- increment value of button -->
+	<script type="text/javascript">
+		window.onload = function(){
+			document.getElementById("yearField").innerHTML = year;
+			document.getElementById("monthField").innerHTML = month;
+			document.getElementById("dayField").innerHTML = day;
+		}
+		function incrementYear(){
+			if( (year) < 2015 ){
+				date.setFullYear(year+1, month, day); // year, month (0-based), day
+			}
+			updateImage();
+		}
+		function decrementYear(){
+			if( (year) > 1987 ){
+				date.setFullYear(year-1, month, day); // year, month (0-based), day
+			}
+			updateImage();
+		}
+		function incrementMonth(){
+			date.setFullYear(year, (month+1), day); // year, month (0-based), day
+			updateImage();
+		}
+		function decrementMonth(){
+			date.setFullYear(year, (month-1), day); // year, month (0-based), day
+			updateImage();
+		}
+		function incrementDay(){
+			date.setFullYear(year, month, day+1); // year, month (0-based), day
+			updateImage();
+		}
+		function decrementDay(){
+			date.setFullYear(year, month, day-1); // year, month (0-based), day
+			updateImage();
+		}
+		
+	</script>
 
 	</body>
 </html>
