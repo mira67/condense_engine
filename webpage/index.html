@@ -7,10 +7,18 @@
 	<script type="text/javascript" src="jquery.js"></script>		
 		
 	<style type="text/css">
-		a:visited, a:link{
-			color: #909090;
-			text-decoration: none;
-		}
+		/* clear all attributes */
+		html, body, div, span, applet, object, iframe,h1, h2, h3, h4, h5, h6, p, blockquote, pre,a, abbr, acronym, address, big, cite, code,del, dfn, em, img, ins, kbd, q, s, samp,small, strike, strong, sub, sup, tt, var,b, u, i, center,dl, dt, dd, ol, ul, li,fieldset, form, label, legend,table, caption, tbody, tfoot, thead, tr, th, td,article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary,time, mark, audio, video {margin: 0;padding: 0;border: 0;font-size: 100%;font: inherit;vertical-align: baseline;}
+		/* HTML5 display-role reset for older browsers */
+		article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {display: block;}
+		body {line-height: 1;}
+		ol, ul {list-style: none;}
+		blockquote, q {quotes: none;}
+		blockquote:before, blockquote:after,
+		q:before, q:after {content: '';content: none;}
+		table {border-collapse: collapse;border-spacing: 0;}
+		/* end css reset */
+		a:visited, a:link { color: #909090;text-decoration: none; }
 		.header {
 			clear: both;
 			margin-left: auto;
@@ -36,11 +44,11 @@
 			height: 10px;
 			margin-bottom: -5px;
 		}
-		.menu #sparkInterface { color: #aaa; }
-		#outputImageTemperature { float: left; width: 300px; height: 30px; text-align: left; margin-left: 10px; }
-		#outputImageCoordinates { float: left; width: 200px; height: 30px; text-align: left; }
-		#outputImageMin { float: left; width: 150px; height: 30px; text-align: left; }
-		#outputImageMax { float: left; width: 120px; height: 30px; text-align: left; }
+		#outputImageTemperature { float: left; width: 100%; text-align: left; }
+		#outputImageCoordinates { float: left; width: 100%; text-align: left; }
+		#outputImageMin { float: left; width: 100%; text-align: left; }
+		#outputImageMax { float: left; width: 100%; text-align: left; }
+		#fileLabelName { float: left; width: 100%; text-align: left; }
 		.block {
 			clear: both;
 			margin-left: auto;
@@ -49,6 +57,7 @@
 			height: 650px;
 			margin-top: 20px;
 			color: #777;
+			font-family: "Helvetica Neue", Helvetica;
 		}
 		.box {
 			margin-left: 25px;
@@ -60,8 +69,8 @@
 			height: 600px;
 			text-align: center;
 			font-size: medium;
-			font-family: "Helvetica Neue", Helvetica;
 		}
+		#imageInformation { width: 100%; margin: 10px; }
 		.figureRightExplorer {
 			float: left;
 			position: relative;
@@ -82,9 +91,12 @@
 			height: 600px;
 			text-align: center;
 			font-size: medium;
-			font-family: "Helvetica Neue", "Helvetica";
 		}
-		.text-button, #yearField, #monthField, #dayField { font-size: 13px; }
+		#regionField, #frequencyField, #polarizationField, #yearField, #monthField, #dayField {
+			width: 100%;
+			font-size: 13px;
+		}
+		#yearEntry, #monthEntry, #dayEntry { width: 20px; height: 12px; }
 		.myButton {
 			background-color:#ffffff;
 			-moz-border-radius:7px;
@@ -94,11 +106,9 @@
 			display:inline-block;
 			cursor:pointer;
 			color:#666666;
-			font-family:Arial;
 			font-size:13px;
-			font-weight:bold;
 			padding:2px 20px;
-			margin: 0px 10px 0px 10px;
+			margin: 2px 3px 2px 3px;
 			text-decoration:none;
 		}
 		.myButton:hover {
@@ -110,17 +120,14 @@
 		}
 		.leftArrow { position: absolute; bottom: 0; left: 0; font-size: xx-large; margin: 10px; }
 		.rightArrow { position: absolute; bottom: 0; right: 0; font-size: xx-large; margin: 10px; }
-		.fileName { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: medium; margin: 10px; }
-		//.pink { background: #6cf; }
+		/*.pink { background: #6cf; } */
 		.pink { background: #eee; }
 		.green { background: #cff; }
 		.blue { background: #cff; }
 		.white { background: #fff; }
 		.pysparkButton { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: large; margin: 10px; }
 		#pysparkResults { }
-	
 		.footer { height: 10px; text-align: center; font-size: small; }
-		
 		.advanced {
 			position: fixed;
 			bottom: 0;
@@ -128,31 +135,9 @@
 			padding: 10px;
 			color: #a0a0a0;
 		}			
-		path {
-		  stroke: #fff;
-		}
-
-		path:first-child {
-		  fill: yellow !important;
-		}
-
-		circle {
-		  fill: #000;
-		  pointer-events: none;
-		}
-
-		.q0-9 { fill: rgb(197,27,125); }
-		.q1-9 { fill: rgb(222,119,174); }
-		.q2-9 { fill: rgb(241,182,218); }
-		.q3-9 { fill: rgb(253,224,239); }
-		.q4-9 { fill: rgb(247,247,247); }
-		.q5-9 { fill: rgb(230,245,208); }
-		.q6-9 { fill: rgb(184,225,134); }
-		.q7-9 { fill: rgb(127,188,65); }
-		.q8-9 { fill: rgb(77,146,33); }
 
 	</style>
-		<!-- this script will listen for button push and then execute cgi script and return data to user -->
+	<!-- this script will listen for button push and then execute cgi script and return data to user -->
 	<script type="text/javascript">
 		function onTest( dest, params ){
 			var xmlhttp;
@@ -161,7 +146,6 @@
 			} else { // code for IE6, IE5
 			    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
 			}
-
 			xmlhttp.onreadystatechange=function(){
 			    if (xmlhttp.readyState==4 && xmlhttp.status==200){
 				document.getElementById( "pysparkResults" ).innerHTML = xmlhttp.responseText;
@@ -183,57 +167,62 @@
 		</div><!--end header-->
 <!-- menu -->	
 		<div class="menu">
-			<span id="dataExplorer">data-explorer </span>/<span id="sparkInterface"> spark-interface</span>
+			<span id="dataExplorer">data-explorer</span>
 		</div>
 <!-- top box -->
 		<div class="block pink">
 			<div class="box figureLeftExplorer white">
-				<br><br><br><br><span>region</span><br>                
-				<span id="north" class="text-button" id="northSouth" onclick="changeRegion('n')">[ north ↑ ] </span>
-				<span id="south" class="text-button" id="northSouth" onclick="changeRegion('s')">[ south ↓ ]</span>
+				<br><br><span id="regionField">region</span><br>                
+				<button id="north" class="myButton" id="northSouth" onclick="changeRegion('n')">north ↑</button>
+				<button id="south" class="myButton" id="northSouth" onclick="changeRegion('s')">south ↓</button>
 				
-				<br><br><br><span>frequency</span><br>
-				<span id="91" class="text-button" id="frequencyChoice" onclick="changeFreq(91)">[ 91.7 ] </span>
-				<span id="85" class="text-button" id="frequencyChoice" onclick="changeFreq(85)">[ 85.5 ] </span>
-				<span id="37" class="text-button" id="frequencyChoice" onclick="changeFreq(37)">[ 37.0 ] </span>
-				<span id="22" class="text-button" id="frequencyChoice" onclick="changeFreq(22)">[ 22.2 ] </span>
-				<span id="19" class="text-button" id="frequencyChoice" onclick="changeFreq(19)">[ 19.3 ]</span>
+				<br><br><br><span id="frequencyField">frequency</span><br>
+				<button id="91" class="myButton" id="frequencyChoice" onclick="changeFreq(91)">91.7</button>
+				<button id="85" class="myButton" id="frequencyChoice" onclick="changeFreq(85)">85.5</button>
+				<button id="37" class="myButton" id="frequencyChoice" onclick="changeFreq(37)">37.0</button>
+				<button id="22" class="myButton" id="frequencyChoice" onclick="changeFreq(22)">22.2</button>
+				<button id="19" class="myButton" id="frequencyChoice" onclick="changeFreq(19)">19.3</button>
 				
-				<br><br><br><span>polarization</span><br>
-				<span id="vertical" class="text-button" onclick="changePolarization('v')">[ vertical ↕ ] </span>
-				<span id="horizontal" class="text-button" onclick="changePolarization('h')">[ horizontal ↔ ]</span>
+				<br><br><br><span id="polarizationField">polarization</span><br>
+				<button class="myButton" onclick="changePolarization('v')">vertical ↕</button>
+				<button id="horizontal" class="myButton" onclick="changePolarization('h')">horizontal ↔</button>
 				
-				<br><br><br><span>year</span><br>
-				<span onClick="decrementYear()"> ← </span>
-				<span id="yearField"></span>
-				<span onClick="incrementYear()"> → </span>
+				<br><br><br><span id="yearField">year</span><br>
+				<button class="myButton" onClick="decrementYear()">← prev</button>
+				<span id="yearEntry"></span>
+				<button class="myButton" onClick="incrementYear()">next →</button>
 				
-				<br><br><br><span>month</span><br>
-				<span onClick="decrementMonth()"> ← </span>
-				<span id="monthField"></span>
-				<span onClick="incrementMonth()"> → </span>
+				<br><br><br><span id="monthField">month</span><br>
+				<button class="myButton" onClick="decrementMonth()">← prev</button>
+				<span id="monthEntry"></span>
+				<button class="myButton" onClick="incrementMonth()">next →</button>
 				
-				<br><br><br><span>day</span><br>
-				<span onClick="decrementDay()"> ← </span>
-				<span id="dayField"></span>
-				<span onClick="incrementDay()"> → </span>
+				<br><br><br><span id="dayField">day</span><br>
+				<button class="myButton" onClick="decrementDay()">← prev</button>
+				<span id="dayEntry"></span>
+				<button class="myButton" onClick="incrementDay()">next →</button>
+				<br><br><br><br><br>
+				<div id="imageInformation">
+					<span id="outputImageTemperature">brightness temperature:</span><br>
+					<span id="outputImageCoordinates">location:</span><br>
+					<!--<span id="outputImageMin">min: </span><br>
+					<span id="outputImageMax">max: </span><br> -->
+					<span id="fileLabelName"></span>
+				</div>			
 			</div><!--end left-->
 			
 			<div class="box figureRightExplorer white">
-				<div id="outputInfo">
-					<div id="outputImageTemperature">brightness temperature:</div>
-					<div id="outputImageCoordinates">location:</div>
-					<div id="outputImageMin">min: </div>
-					<div id="outputImageMax">max: </div>
-				</div>
-				<br>
-				<canvas id="myCanvas" width="600" height="500">Canvas</canvas>
-				<div class="fileName" id="fileLabelName"><center></center></div>
-				<div class="leftArrow" onclick="decrement()">←</div>
+				
+				<canvas id="myCanvas" width="875" height="600" style="border: 1px solid black;">Canvas</canvas>
+				<!--<div class="leftArrow" onclick="decrement()">←</div>
 				<div class="rightArrow" onclick="increment()">→</div>
+				<button onclick="threshold()">Threshold the image</button>-->
 			</div><!--end center-->
 		</div>
-		
+		<br>
+		<div class="menu">
+			<span id="sparkInterface">spark-interface</span>
+		</div>
 		<div class="block green">
 			<div class="box figureLeftSpark white">
 				python results generated each time button is pressed...
@@ -255,11 +244,23 @@
 				start: year | month | day<br>
 				end: year | month | day<br>
 				<br><br>
-				[ spatial ]
-				row: start | end
-				column: start | end
+				[ spatial ]<br>
+				<form>
+					columns<br>
+					start<input type="text" name="c1"><br>
+					end<input type="text" name="c2">
+					<br><br>
+					rows<br>
+					start<input type="text" name="r1"><br>
+					end<input type="text" name="r2">
+				</form>
 				<br>
-				[ combo ]
+				query
+				<br><br>
+				histogram
+				<br><br>
+				pixel-mapping
+				<br><br>
 				<br><br>
 
 			</div><!--end right-->
@@ -281,17 +282,17 @@
 		
 	<!-- decrement increment the image on canvas -->
 	<script type="text/javascript">
-		directory = "data/south/";
+		directory = "data/";
 		region = "s";
 		frequency = "91";
 		polarization = "h";
-		year = 2009; month = 10; day = 1;
+		year = 2011; month = 10; day = 1;
 		minimumTemperature = 50; maximumTemperature = 350;
 		monthArray = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
 		date = new Date();
 		date.setFullYear(year, month, day); // year, month (0-based), day
 		//date.setTime(date.getTime() + (86400*100));
-		currentFileName = "data/south/2010/tb_f17_20090310_v4_s91h.bin";
+		currentFileName = "data/south/2009/tb_f17_20111001_v4_s91h.bin";
 		function decrement(){ // sub one from day
 			date.setTime(date.getTime() - 86400000); updateImage();
 		}
@@ -302,9 +303,9 @@
 		function changeRegion(reg) { region = reg; updateImage(); }
 		function changePolarization(pol) { polarization = pol; updateImage(); }
 		function updateDateFields(){
-			document.getElementById("yearField").innerHTML = year;
-			document.getElementById("monthField").innerHTML = monthArray[month];
-			document.getElementById("dayField").innerHTML = day;
+			document.getElementById("yearEntry").innerHTML = year;
+			document.getElementById("monthEntry").innerHTML = monthArray[month];
+			document.getElementById("dayEntry").innerHTML = day;
 		}
 		function updateImage(){
 			console.log("currentFileName: ", currentFileName);
@@ -313,9 +314,11 @@
 			month = date.getMonth();
 			day = date.getDate();
 			updateDateFields();
-			currentFileName = directory + year + "/tb_f17_" + dateString + "_v4_" + region + frequency + polarization + ".bin";
+			var area = "south";
+			region == "n"? area = "north": area = "south";
+			currentFileName = directory + area + "/" + year + "/tb_f17_" + dateString + "_v4_" + region + frequency + polarization + ".bin";
 			console.log("updatedFileName: ", currentFileName);
-			document.getElementById( "fileLabelName" ).innerHTML = currentFileName;
+			document.getElementById("fileLabelName").innerHTML = "tb_f17_"+dateString+"_v4_"+region+frequency+polarization+".bin";
 			
 			var xhr = new XMLHttpRequest();
 			xhr.open('GET', currentFileName, true);
@@ -328,7 +331,9 @@
 				
 				var c = document.getElementById("myCanvas");
 				var ctx = c.getContext("2d");
-        			ctx.clearRect(0, 0, c.width, c.height);
+        			var width = c.width;
+				var height = c.height;
+				ctx.clearRect(0, 0, c.width, c.height);
 				
 				// get size of image
 				if( responseArray.length == 419648 ){ // south 664x632
@@ -359,11 +364,12 @@
 					}
 				}
 				// update max min
-				minimumTemperature = Math.min.apply(null, responseArray);
-				maximumTemperature = Math.max.apply(null, responseArray);
-				document.getElementById("outputImageMin").innerHTML = "min: " + minimumTemperature/10;
-				document.getElementById("outputImageMax").innerHTML = "max: " + maximumTemperature/10;
-				ctx.putImageData(imgData,(600-imageWidth)/2,(500-imageWidth)/2);
+				//minimumTemperature = Math.min.apply(null, responseArray); # some array problem
+				//maximumTemperature = Math.max.apply(null, responseArray);
+				//document.getElementById("outputImageMin").innerHTML = "min: " + minimumTemperature/10;
+				//document.getElementById("outputImageMax").innerHTML = "max: " + maximumTemperature/10;
+				ctx.putImageData(imgData,(width-imageWidth)/2,(height-imageWidth)/2);
+				//ctx.putImageData(imgData,0,0);
 			};
 			xhr.send();
 		}
@@ -413,18 +419,16 @@
 	<!-- increment value of button -->
 	<script type="text/javascript">
 		window.onload = function(){
-			document.getElementById("yearField").innerHTML = year;
-			document.getElementById("monthField").innerHTML = month;
-			document.getElementById("dayField").innerHTML = day;
+			//updateDateFields(){
 		}
 		function incrementYear(){
-			if( (year) < 2015 ){
+			if( (year) < 2014 ){
 				date.setFullYear(year+1, month, day); // year, month (0-based), day
 			}
 			updateImage();
 		}
 		function decrementYear(){
-			if( (year) > 1987 ){
+			if( (year) > 2008 ){
 				date.setFullYear(year-1, month, day); // year, month (0-based), day
 			}
 			updateImage();
@@ -434,6 +438,7 @@
 			updateImage();
 		}
 		function decrementMonth(){
+			console.log('here again');
 			date.setFullYear(year, (month-1), day); // year, month (0-based), day
 			updateImage();
 		}
@@ -446,6 +451,50 @@
 			updateImage();
 		}
 		
+	</script>
+
+	<!-- Get files from folder. Usage: "_getAllFilesFromFolder(__dirname + "folder");" -->
+	<script>
+	
+	</script>
+
+	<!-- for convolution filter -->
+	<script>
+		Filters = {};
+		Filters.getPixels = function(img) {
+		  var c = this.getCanvas(img.width, img.height);
+		  var ctx = c.getContext('2d');
+		  ctx.drawImage(img);
+		  return ctx.getImageData(0,0,c.width,c.height);
+		};
+
+		Filters.getCanvas = function(w,h) {
+		  var c = document.createElement('canvas');
+		  c.width = w;
+		  c.height = h;
+		  return c;
+		};
+
+		Filters.filterImage = function(filter, image, var_args) {
+		  var args = [this.getPixels(image)];
+		  for (var i=2; i<arguments.length; i++) {
+		    args.push(arguments[i]);
+		  }
+		  return filter.apply(null, args);
+		};
+		
+		Filters.threshold = function(pixels, threshold) {
+		  var d = pixels.data;
+		  for (var i=0; i<d.length; i+=4) {
+		    var r = d[i];
+		    var g = d[i+1];
+		    var b = d[i+2];
+		    var v = (0.2126*r + 0.7152*g + 0.0722*b >= threshold) ? 255 : 0;
+		    d[i] = d[i+1] = d[i+2] = v
+		  }
+		  return pixels;
+		};
+
 	</script>
 
 	</body>
