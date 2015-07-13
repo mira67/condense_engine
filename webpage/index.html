@@ -1,11 +1,25 @@
-<!DOCTYPE html>
-<html>
-	<head>
+<!doctype html>
+<html lang="en">
+<head>
 	<meta name="robots" content="noindex" />
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 	<title>Snow and Ice Data</title>
 	<script type="text/javascript" src="jquery.js"></script>		
-		
+	
+	<title>jQuery UI Datepicker - Default functionality</title>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/bootstrap.daterangepicker/latest/daterangepicker-bs3.css" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js"></script>         
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/bootstrap.daterangepicker/latest/daterangepicker.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.js"></script><!--Submit Query-->
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
 	<style type="text/css">
 		/* clear all attributes */
 		html, body, div, span, applet, object, iframe,h1, h2, h3, h4, h5, h6, p, blockquote, pre,a, abbr, acronym, address, big, cite, code,del, dfn, em, img, ins, kbd, q, s, samp,small, strike, strong, sub, sup, tt, var,b, u, i, center,dl, dt, dd, ol, ul, li,fieldset, form, label, legend,table, caption, tbody, tfoot, thead, tr, th, td,article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary,time, mark, audio, video {margin: 0;padding: 0;border: 0;font-size: 100%;font: inherit;vertical-align: baseline;}
@@ -135,69 +149,49 @@
 			padding: 10px;
 			color: #a0a0a0;
 		}			
-
 	</style>
-	<!-- this script will listen for button push and then execute cgi script and return data to user -->
-	<script type="text/javascript">
-		function onTest( dest, params ){
-			var xmlhttp;
-			if( window.XMLHttpRequest ){ // code for IE7+, Firefox, Chrome, Opera, Safari
-			    xmlhttp=new XMLHttpRequest();
-			} else { // code for IE6, IE5
-			    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
-			}
-			xmlhttp.onreadystatechange=function(){
-			    if (xmlhttp.readyState==4 && xmlhttp.status==200){
-				document.getElementById( "pysparkResults" ).innerHTML = xmlhttp.responseText;
-			    }
-			}
-			xmlhttp.open("POST",dest,true);
-			xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-			xmlhttp.send( params ); 
-		}
-	</script>
 
-	</head>
-	<body>	
+</head>
+<body>
 	<div id="wrapper">
 		<div class="header">Snow and Ice Data
-			<div class="subtitle">
-				<a href="http://nsidc.org/data/docs/daac/nsidc0001_ssmi_tbs.gd.html">DMSP SSM/I-SSMIS daily polar gridded brightness temperatures</a>
-			</div><!--end subtitle-->
+		<div class="subtitle">
+			<a href="http://nsidc.org/data/docs/daac/nsidc0001_ssmi_tbs.gd.html">DMSP SSM/I-SSMIS daily polar gridded brightness temperatures</a>
+		</div><!--end subtitle-->
 		</div><!--end header-->
-<!-- menu -->	
+		<!-- menu -->	
 		<div class="menu">
 			<span id="dataExplorer">data-explorer</span>
 		</div>
-<!-- top box -->
+		<!-- top box -->
 		<div class="block pink">
 			<div class="box figureLeftExplorer white">
-				<br><br><span id="regionField">region</span><br>                
+				<br><br><span id="regionField"><font color="DeepSkyBlue">region</font></span><br>                
 				<button id="north" class="myButton" id="northSouth" onclick="changeRegion('n')">north ↑</button>
 				<button id="south" class="myButton" id="northSouth" onclick="changeRegion('s')">south ↓</button>
 				
-				<br><br><br><span id="frequencyField">frequency</span><br>
+				<br><br><br><span id="frequencyField"><font color="DeepSkyBlue">frequency</font></span><br>
 				<button id="91" class="myButton" id="frequencyChoice" onclick="changeFreq(91)">91.7</button>
 				<button id="85" class="myButton" id="frequencyChoice" onclick="changeFreq(85)">85.5</button>
 				<button id="37" class="myButton" id="frequencyChoice" onclick="changeFreq(37)">37.0</button>
 				<button id="22" class="myButton" id="frequencyChoice" onclick="changeFreq(22)">22.2</button>
 				<button id="19" class="myButton" id="frequencyChoice" onclick="changeFreq(19)">19.3</button>
 				
-				<br><br><br><span id="polarizationField">polarization</span><br>
+				<br><br><br><span id="polarizationField"><font color="DeepSkyBlue">polarization</font></span><br>
 				<button class="myButton" onclick="changePolarization('v')">vertical ↕</button>
 				<button id="horizontal" class="myButton" onclick="changePolarization('h')">horizontal ↔</button>
 				
-				<br><br><br><span id="yearField">year</span><br>
+				<br><br><br><span id="yearField"><font color="DeepSkyBlue">year</font></span><br>
 				<button class="myButton" onClick="decrementYear()">← prev</button>
 				<span id="yearEntry"></span>
 				<button class="myButton" onClick="incrementYear()">next →</button>
 				
-				<br><br><br><span id="monthField">month</span><br>
+				<br><br><br><span id="monthField"><font color="DeepSkyBlue">month</font></span><br>
 				<button class="myButton" onClick="decrementMonth()">← prev</button>
 				<span id="monthEntry"></span>
 				<button class="myButton" onClick="incrementMonth()">next →</button>
 				
-				<br><br><br><span id="dayField">day</span><br>
+				<br><br><br><span id="dayField"><font color="DeepSkyBlue">day</font></span><br>
 				<button class="myButton" onClick="decrementDay()">← prev</button>
 				<span id="dayEntry"></span>
 				<button class="myButton" onClick="incrementDay()">next →</button>
@@ -213,7 +207,8 @@
 			
 			<div class="box figureRightExplorer white">
 				
-				<canvas id="myCanvas" width="875" height="600" style="border: 1px solid black;">Canvas</canvas>
+				<!--<canvas id="myCanvas" width="875" height="600" style="border: 1px solid black;">Canvas</canvas>-->
+				<canvas id="myCanvas" width="875" height="600">Canvas</canvas>
 				<!--<div class="leftArrow" onclick="decrement()">←</div>
 				<div class="rightArrow" onclick="increment()">→</div>
 				<button onclick="threshold()">Threshold the image</button>-->
@@ -225,44 +220,28 @@
 		</div>
 		<div class="block green">
 			<div class="box figureLeftSpark white">
-				python results generated each time button is pressed...
-        			<div id="pysparkResults"><p id="pyspark">python</p></div>
+				<!--Histogram-->
+				<div id="hist" class="graph">
+					<canvas id="myChart" width="400" height="400">Chart</canvas>
+				</div>
 
-
-			        <div class="pysparkButton"><a href="javascript:onTest('/cgi-bin/test.py', '')">run pyspark</a></div>
+			        <!-- <div class="pysparkButton"><a href="javascript:onTest('/cgi-bin/test.py', '')">run pyspark</a></div> -->
 			</div><!--end center-->
-			
+
 			<div class="box figureRightSpark white">
 				<br><br><br><br>
-				dataset
-				<br>
-				[ seaice ] [ ssmi ]
-				<br><br>
-				evaluation method
-				<br><br>
-				[ temporal ]<br>
-				start: year | month | day<br>
-				end: year | month | day<br>
-				<br><br>
-				[ spatial ]<br>
-				<form>
-					columns<br>
-					start<input type="text" name="c1"><br>
-					end<input type="text" name="c2">
-					<br><br>
-					rows<br>
-					start<input type="text" name="r1"><br>
-					end<input type="text" name="r2">
-				</form>
-				<br>
-				query
-				<br><br>
-				histogram
-				<br><br>
-				pixel-mapping
-				<br><br>
-				<br><br>
-
+				<br><br><input id="temporal" type="text" name="daterange" value="1990-01-01 - 1990-01-31" />
+				<br><br><label for="rowselect">Row range:</label>
+				<br><br><input type="text" id="rowselect" readonly style="border:0; color:#f6931f; font-weight:bold;">
+				<br><br><div id="row-range"></div>
+				<br><br><label for="colselect">Column range:</label>
+				<br><br><input type="text" id="colselect" readonly style="border:0; color:#f6931f; font-weight:bold;">
+				<br><br><div id="col-range"></div>
+				<!--Pixel Range Selector-->
+				<br><br><label for="pselect">Pixel value range(K):</label>
+				<br><br><input type="text" id="pselect" readonly style="border:0; color:#f6931f; font-weight:bold;">
+				<br><br><div id="p-range"></div>
+				<br><br><input id = "query" type="submit" value="Query">
 			</div><!--end right-->
 		</div><!--end boxMiddle-->
 		
@@ -416,11 +395,11 @@
 		});
 	</script>
 
-	<!-- increment value of button -->
+	<!-- increment value of button for the explorer -->
 	<script type="text/javascript">
-		window.onload = function(){
+		//window.onload = function(){
 			//updateDateFields(){
-		}
+		//}
 		function incrementYear(){
 			if( (year) < 2014 ){
 				date.setFullYear(year+1, month, day); // year, month (0-based), day
@@ -453,49 +432,142 @@
 		
 	</script>
 
-	<!-- Get files from folder. Usage: "_getAllFilesFromFolder(__dirname + "folder");" -->
-	<script>
-	
-	</script>
 
-	<!-- for convolution filter -->
-	<script>
-		Filters = {};
-		Filters.getPixels = function(img) {
-		  var c = this.getCanvas(img.width, img.height);
-		  var ctx = c.getContext('2d');
-		  ctx.drawImage(img);
-		  return ctx.getImageData(0,0,c.width,c.height);
+<!-- pyspark scripts #################################################################################################### -->
+<script type="text/javascript">
+	$(function() {
+		$('input[name="daterange"]').daterangepicker({
+		format: 'YYYY-MM-DD',
+		minDate: '1990-01-01',
+		maxDate: '1994-12-31'
+		});
+	});
+</script>
+
+<script>
+	$(function() {
+		$( "#row-range" ).slider({
+			range: true,
+			min: 0,
+			max: 315,
+			values: [ 150, 200 ],
+			slide: function( event, ui ) {
+				$( "#rowselect" ).val(+ ui.values[ 0 ] + "," + ui.values[ 1 ] );
+			}
+		});
+		$( "#rowselect" ).val(+ $( "#row-range" ).slider( "values", 0 ) + "," + $( "#row-range" ).slider( "values", 1 ) );
+	});
+</script>
+
+<script>
+	$(function() {
+		$( "#col-range" ).slider({
+			range: true,
+			min: 0,
+			max: 332,
+			values: [ 150, 200 ],
+			slide: function( event, ui ) {
+				$( "#colselect" ).val(+ ui.values[ 0 ] + "," + ui.values[ 1 ] );
+			}
+		});
+		$( "#colselect" ).val(+ $( "#col-range" ).slider( "values", 0 ) + "," + $( "#col-range" ).slider( "values", 1 ) );
+	});
+</script>
+
+<script>
+	$(function() {
+		$( "#p-range" ).slider({
+			range: true,
+			min: 0,
+			max: 350,
+			values: [ 300, 350 ],
+			slide: function( event, ui ) {
+				$( "#pselect" ).val(+ ui.values[ 0 ] + "," + ui.values[ 1 ] );
+			}
+		});
+	$( "#pselect" ).val(+ $( "#p-range" ).slider( "values", 0 ) + "," + $( "#p-range" ).slider( "values", 1 ) );
+	});
+</script>
+
+<script>
+  	$("#query").click(function(e){
+		e.preventDefault();
+		$.ajax({type: "POST",
+			url: "/user_query",
+			data: { id: $("#query").val(), temporal: $("#temporal").val(), rowselect: $("#rowselect").val(),colselect:$("#colselect").val(),pselect:$("#pselect").val()},
+			dataType: 'json',
+			success:function(result){
+				drawHist(result);//pass in returned data
+			}
+		});
+		});
+
+		//function to draw histogram
+		function drawHist(inputdata) {
+		// Get the context of the canvas element we want to select
+		var canvas = document.getElementById('myChart'); 
+		var ctx= canvas.getContext("2d");
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		var options  = {
+			//Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
+			scaleBeginAtZero : true,
+			//Boolean - Whether grid lines are shown across the chart
+			scaleShowGridLines : true,
+			//String - Colour of the grid lines
+			scaleGridLineColor : "rgba(0,0,0,.05)",
+			//Number - Width of the grid lines
+			scaleGridLineWidth : 1,
+			//Boolean - Whether to show horizontal lines (except X axis)
+			scaleShowHorizontalLines: true,
+			//Boolean - Whether to show vertical lines (except Y axis)
+			scaleShowVerticalLines: true,
+			//Boolean - If there is a stroke on each bar
+			barShowStroke : true,
+			//Number - Pixel width of the bar stroke
+			barStrokeWidth : 3,
+			//Number - Spacing between each of the X value sets
+			barValueSpacing : 1,
+			//Number - Spacing between data sets within X values
+			barDatasetSpacing : 1
+		};
+		var data_max = Math.max.apply(null,inputdata), data_min = Math.min.apply(null,inputdata);
+		var bins_num = 20, binsp = Math.floor((data_max - data_min)/bins_num);
+		var bins_cnt = [];
+		var label = [];
+		for (var i = 0;i < bins_num; i++){
+			label[i] = data_min + Math.floor((i*binsp + (i+1)*binsp)/2);
 		};
 
-		Filters.getCanvas = function(w,h) {
-		  var c = document.createElement('canvas');
-		  c.width = w;
-		  c.height = h;
-		  return c;
+		for (var i = 0;i < bins_num; i++){
+			bins_cnt[i] = 0;
+			for (var n = 0; n < inputdata.length; n++){
+				d = inputdata[n];
+				if ((d >= data_min + i*binsp) && (d < data_min + (i+1)*binsp)){
+					console.log(d);
+					bins_cnt[i]++;
+				}
+			}
 		};
+		console.log(bins_cnt);
 
-		Filters.filterImage = function(filter, image, var_args) {
-		  var args = [this.getPixels(image)];
-		  for (var i=2; i<arguments.length; i++) {
-		    args.push(arguments[i]);
-		  }
-		  return filter.apply(null, args);
+		var data = {
+			labels: label,//need calculate with input data
+			datasets: [
+				{
+				    label: "My First dataset",
+				    fillColor: "rgba(255,255,0,0.3)",//bar color
+				    strokeColor: "rgba(220,220,220,1)",
+				    pointColor: "rgba(220,220,220,1)",
+				    pointStrokeColor: "#fff",
+				    pointHighlightFill: "#fff",
+				    pointHighlightStroke: "rgba(220,220,220,1)",
+				    data: bins_cnt
+				}
+				]
 		};
-		
-		Filters.threshold = function(pixels, threshold) {
-		  var d = pixels.data;
-		  for (var i=0; i<d.length; i+=4) {
-		    var r = d[i];
-		    var g = d[i+1];
-		    var b = d[i+2];
-		    var v = (0.2126*r + 0.7152*g + 0.0722*b >= threshold) ? 255 : 0;
-		    d[i] = d[i+1] = d[i+2] = v
-		  }
-		  return pixels;
-		};
-
-	</script>
-
-	</body>
+		var myBarChart = new Chart(ctx).Bar(data, options);
+	}
+</script>
+<!-- pyspark scripts #################################################################################################### -->
+</body>
 </html>
