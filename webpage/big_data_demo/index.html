@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta name="robots" content="noindex" />
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<title>Snow and Ice Data</title>
+	<!-- <script type="text/javascript" src="jquery.js"></script> -->
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/bootstrap.daterangepicker/latest/daterangepicker-bs3.css" />
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/2.9.0/moment.min.js"></script>         
+	<script type="text/javascript" src="https://cdn.jsdelivr.net/bootstrap.daterangepicker/latest/daterangepicker.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.js"></script><!--Submit Query-->
+	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+	<style type="text/css">
+		/* clear all attributes */
+		html, body, div, span, applet, object, iframe,h1, h2, h3, h4, h5, h6, p, blockquote, pre,a, abbr, acronym, address, big, cite, code,del, dfn, em, img, ins, kbd, q, s, samp,small, strike, strong, sub, sup, tt, var,b, u, i, center,dl, dt, dd, ol, ul, li,fieldset, form, label, legend,table, caption, tbody, tfoot, thead, tr, th, td,article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary,time, mark, audio, video {margin: 0;padding: 0;border: 0;font-size: 100%;font: inherit;vertical-align: baseline;}
+		/* HTML5 display-role reset for older browsers */
+		article, aside, details, figcaption, figure, footer, header, hgroup, menu, nav, section {display: block;}
+		body {line-height: 1;}
+		ol, ul {list-style: none;}
+		blockquote, q {quotes: none;}
+		blockquote:before, blockquote:after,
+		q:before, q:after {content: '';content: none;}
+		table {border-collapse: collapse;border-spacing: 0;}
+		/* end css reset */
+		a:visited, a:link { color: #909090;text-decoration: none; }
+		.header {
+			clear: both;
+			margin-left: auto;
+			margin-top: 30px;
+			margin-bottom: 20px;
+			margin-right: auto;
+			width: 1200px;
+			height: 50px;
+			text-align: center;
+			font-size: 36px;
+			font-weight: 300;
+			text-shadow: 0 1px 0 #fff;
+		}
+		.subtitle {
+			color: rgb(153, 153, 153); 
+			font-size: 12px;
+		}
+		.menu{
+			clear: both;
+			margin-left: auto;
+			margin-right: auto;
+			width: 1200px;
+			height: 10px;
+			margin-bottom: -5px;
+		}
+		#outputImageTemperature { float: left; width: 100%; text-align: left; }
+		#outputImageCoordinates { float: left; width: 100%; text-align: left; }
+		#outputImageMin { float: left; width: 100%; text-align: left; }
+		#outputImageMax { float: left; width: 100%; text-align: left; }
+		#fileLabelName { float: left; width: 100%; text-align: left; }
+		.block {
+			clear: both;
+			margin-left: auto;
+			margin-right: auto;
+			width: 1200px;
+			height: 650px;
+			margin-top: 20px;
+			color: #777;
+			font-family: "Helvetica Neue", Helvetica;
+		}
+		.box {
+			margin-left: 25px;
+			margin-top: 25px;
+		}
+		.figureLeftExplorer {
+			float: left;
+			width: 250px;
+			height: 600px;
+			text-align: center;
+			font-size: medium;
+		}
+		#imageInformation { width: 100%; margin: 10px; font-size: 13px; }
+		.figureRightExplorer {
+			float: left;
+			position: relative;
+			text-align: center;
+			width: 875px;
+			height: 600px;
+		}
+		.figureLeftSpark {
+			float: left;
+			position: relative;
+			text-align: center;
+			width: 875px;
+			height: 600px;
+		}
+		.figureRightSpark {
+			float: left;
+			width: 250px;
+			height: 600px;
+			text-align: center;
+			font-size: medium;
+		}
+		#regionField, #frequencyField, #polarizationField, #yearField, #monthField, #dayField {
+			width: 100%;
+			font-size: 13px;
+		}
+		#yearEntry, #monthEntry, #dayEntry { width: 20px; height: 12px; }
+		.myButton {
+			background-color:#ffffff;
+			-moz-border-radius:7px;
+			-webkit-border-radius:7px;
+			border-radius:7px;
+			border:1px solid #dcdcdc;
+			display:inline-block;
+			cursor:pointer;
+			color:#666666;
+			font-size:13px;
+			padding:2px 20px;
+			margin: 2px 3px 2px 3px;
+			text-decoration:none;
+		}
+		.myButton:hover {
+			background-color:#f6f6f6;
+		}
+		.myButton:active {
+			position:relative;
+			top:1px;
+		}
+		.leftArrow { position: absolute; bottom: 0; left: 0; font-size: xx-large; margin: 10px; }
+		.rightArrow { position: absolute; bottom: 0; right: 0; font-size: xx-large; margin: 10px; }
+		/*.pink { background: #6cf; } */
+		.green { background: PaleGreen; }
+		.blue { background: PaleTurquoise; }
+		.blue { background: #cff; }
+		.white { background: #fff; }
+		.pysparkButton { position: absolute; bottom: 0; width: 100%; text-align: center; font-size: large; margin: 10px; }
+		#pysparkResults { }
+		.footer { height: 10px; text-align: center; font-size: small; }
+		.advanced {
+			position: fixed;
+			bottom: 0;
+			right: 0;
+			padding: 10px;
+			color: #a0a0a0;
+		}
+		#temporal { width: 100%; text-align: center; }			
+		.firstImage { position: absolute; top: 0px; left: 0px; z-index: 3; }
+		.secondCanvas { position: absolute; top: 0px; left: 0px; z-index: 2; }
+	</style>
+
+</head>
+<body>
+	<div id="wrapper">
+		<div class="header">Snow and Ice Data
+		<div class="subtitle">
+			<a href="http://nsidc.org/data/docs/daac/nsidc0001_ssmi_tbs.gd.html">DMSP SSM/I-SSMIS daily polar gridded brightness temperatures</a>
+		</div><!--end subtitle-->
+		</div><!--end header-->
+		<!-- menu -->	
+		<div class="menu">
+			<span id="dataExplorer">data-explorer</span>
+		</div>
+		<!-- top box -->
+		<div class="block green">
+			<div class="box figureLeftExplorer white">
+				<br><br><span id="regionField"><font color="DeepSkyBlue">region</font></span><br>                
+				<button id="north" class="myButton" id="northSouth" onclick="changeRegion('n')"><strike>north ↑</strike></button>
+				<button id="south" class="myButton" id="northSouth" onclick="changeRegion('s')">south ↓</button>
+				
+				<br><br><br><span id="frequencyField"><font color="DeepSkyBlue">frequency</font></span><br>
+				<button id="91" class="myButton" id="frequencyChoice" onclick="changeFreq(91)">91.7</button>
+				<button id="85" class="myButton" id="frequencyChoice" onclick="changeFreq(85)"><strike>85.5</strike></button>
+				<button id="37" class="myButton" id="frequencyChoice" onclick="changeFreq(37)">37.0</button>
+				<button id="22" class="myButton" id="frequencyChoice" onclick="changeFreq(22)"><strike>22.2</strike></button>
+				<button id="19" class="myButton" id="frequencyChoice" onclick="changeFreq(19)">19.3</button>
+				
+				<br><br><br><span id="polarizationField"><font color="DeepSkyBlue">polarization</font></span><br>
+				<button class="myButton" onclick="changePolarization('v')">vertical ↕</button>
+				<button id="horizontal" class="myButton" onclick="changePolarization('h')">horizontal ↔</button>
+				
+				<br><br><br><span id="yearField"><font color="DeepSkyBlue">year</font></span><br>
+				<button class="myButton" onClick="decrementYear()">← prev</button>
+				<span id="yearEntry"></span>
+				<button class="myButton" onClick="incrementYear()">next →</button>
+				
+				<br><br><br><span id="monthField"><font color="DeepSkyBlue">month</font></span><br>
+				<button class="myButton" onClick="decrementMonth()">← prev</button>
+				<span id="monthEntry"></span>
+				<button class="myButton" onClick="incrementMonth()">next →</button>
+				
+				<br><br><br><span id="dayField"><font color="DeepSkyBlue">day</font></span><br>
+				<button class="myButton" onClick="decrementDay()">← prev</button>
+				<span id="dayEntry"></span>
+				<button class="myButton" onClick="incrementDay()">next →</button>
+				<br><br><br><br><br>
+				<div id="imageInformation">
+					<span id="outputImageTemperature">brightness temperature:</span><br><br>
+					<span id="outputImageCoordinates">location:</span><br><br>
+					<!--<span id="outputImageMin">min: </span><br><br>
+					<span id="outputImageMax">max: </span><br> -->
+					<span id="fileLabelName"></span>
+				</div>			
+			</div><!--end left-->
+			
+			<div class="box figureRightExplorer white">
+				
+				<!--<canvas id="myCanvas" width="875" height="600" style="border: 1px solid black;">Canvas</canvas>-->
+				<canvas id="myCanvas" width="875" height="600">Canvas</canvas>
+				<!--<div class="leftArrow" onclick="decrement()">←</div>
+				<div class="rightArrow" onclick="increment()">→</div>
+				<button onclick="threshold()">Threshold the image</button>-->
+			</div><!--end center-->
+		</div>
+		<br>
+		<div class="menu">
+			<span id="sparkInterface">spark-interface</span>
+		</div>
+		<div class="block blue">
+			<div class="box figureLeftSpark white">
+				<img class="firstImage" id="instruction" src="/static/images/instructions.jpg" alt="instructions" style="width:875px;height:600px;">
+				<!--Histogram-->
+				<br><br><br>
+				<div id="hist" class="graph">
+					<canvas class="secondCanvas" id="myChart" width="875" height="600">Chart</canvas>
+				</div>
+
+			        <!-- <div class="pysparkButton"><a href="javascript:onTest('/cgi-bin/test.py', '')">run pyspark</a></div> -->
+			</div><!--end center-->
+
+			<div class="box figureRightSpark white">
+				<br><br><br><br>
+				<br><span>[ click below to input dates ]</span><br>
+				<br><input id="temporal" type="text" name="daterange" value="1990-01-01 - 1990-01-31" />
+				<br><br><label for="rowselect">row range:</label>
+				<br><br><input type="text" id="rowselect" readonly style="border:0; color:#f6931f; font-weight:bold;">
+				<br><br><div id="row-range"></div>
+				<br><br><label for="colselect">column range:</label>
+				<br><br><input type="text" id="colselect" readonly style="border:0; color:#f6931f; font-weight:bold;">
+				<br><br><div id="col-range"></div>
+				<!--Pixel Range Selector-->
+				<br><br><label for="pselect">pixel value range (K):</label>
+				<br><br><input type="text" id="pselect" readonly style="border:0; color:#f6931f; font-weight:bold;">
+				<br><br><div id="p-range"></div>
+				<br><br><input id = "query" type="submit" value="Query" onclick="hideImage()">
+			</div><!--end right-->
+		</div><!--end boxMiddle-->
+		
+		<div class="block footer">
+			<p id="copyright">Copyright &#169
+				<script type="text/javascript">
+				<!--
+				var currentTime = new Date()
+				var year = currentTime.getFullYear()
+				document.write(year)
+				//-->
+				</script>, by The Snow and Ice Data Center</p>
+		</div><!--end footer-->
+		
+		<div class="advanced"><a onmouseover="this.innerHTML='advanced'" onmouseout="this.innerHTML='π'" href="http://104.154.87.138">π</a></div>
+	</div><!--end wrapper-->
+		
+	<script type="text/javascript">
+		function hideImage(){
+			document.getElementById('instruction').style.display = 'none';
+		}
+	</script>
+
+
+	<!-- decrement increment the image on canvas -->
+	<script type="text/javascript">//works now, Qi
+		directory = "/static/data/";
+		region = "s";
+		frequency = "91";
+		polarization = "h";
+		year = 2009; month = 11; day = 1;
+		minimumTemperature = 50; maximumTemperature = 350;
+		monthArray = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+		date = new Date();
+		date.setFullYear(year, month, day); // year, month (0-based), day
+		//date.setTime(date.getTime() + (86400*100));
+		currentFileName = "/static/data/south/1999/19991001s85h.bin";
+		function decrement(){ // sub one from day
+			date.setTime(date.getTime() - 86400000); updateImage();
+		}
+		function increment(){ // add one to the day
+			date.setTime(date.getTime() + 86400000); updateImage();
+		}
+		function changeFreq(num){ frequency = num; updateImage(); }
+		function changeRegion(reg) { region = reg; updateImage(); }
+		function changePolarization(pol) { polarization = pol; updateImage(); }
+		function updateDateFields(){
+			document.getElementById("yearEntry").innerHTML = year;
+			document.getElementById("monthEntry").innerHTML = monthArray[month];
+			document.getElementById("dayEntry").innerHTML = day;
+		}
+		function updateImage(){
+			console.log("currentFileName: ", currentFileName);
+			dateString = date.getFullYear().toString()+('0'+(date.getMonth()+1)).slice(-2)+('0'+date.getDate()).slice(-2);
+			year = date.getFullYear();
+			month = date.getMonth();
+			day = date.getDate();
+			updateDateFields();
+			var area = "south";
+			region == "n"? area = "north": area = "south";
+			currentFileName = directory + area + "/" + year + "/" + dateString + region + frequency + polarization + ".bin";
+			console.log("updatedFileName: ", currentFileName);
+			document.getElementById("fileLabelName").innerHTML = dateString+region+frequency+polarization+".bin";
+			
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', currentFileName, true);
+			xhr.responseType = 'arraybuffer';
+
+			xhr.onload = function(e){
+				console.log("response: ", this.response);
+				var responseArray = new Uint16Array(this.response);
+				console.log("response array: ", responseArray);
+				
+				var c = document.getElementById("myCanvas");
+				var ctx = c.getContext("2d");
+        			var width = c.width;
+				var height = c.height;
+				ctx.clearRect(0, 0, c.width, c.height);
+				
+				// get size of image
+				if( responseArray.length == 419648 ){ // south 664x632
+					var imageHeight = 664; var imageWidth = 632;
+				} else if( responseArray.length == 104912 ){ // south 332x316
+					var imageHeight = 332; var imageWidth = 316;
+				} else if( responseArray.length == 544768 ){ // north 896x608
+					var imageHeght = 896; var imageWidth = 608;
+				} else if( responseArray.length == 136192 ){ // north 448x304
+					var imageHeight = 448; var imageWidth = 304;
+				} else { // error of some sort
+					document.getElementById( "fileLabelName" ).innerHTML = "No Files Available For These Parameters!";
+					return;
+				}
+				
+				var imgData = ctx.createImageData(imageWidth, imageHeight);
+				for( var i = 0, j = 0; i < imgData.data.length; i+=4, j++ ){
+					if( responseArray[j] == 0 ){ // missing data
+						imgData.data[i+0] = 0;
+						imgData.data[i+1] = 0;
+						imgData.data[i+2] = 0;
+						imgData.data[i+3] = 0;
+					} else {
+						imgData.data[i+0] = (responseArray[j]/10-50)/300*255;
+						imgData.data[i+1] = (responseArray[j]/10-50)/300*255;
+						imgData.data[i+2] = (responseArray[j]/10-50)/300*255;
+						imgData.data[i+3] = 255;
+					}
+				}
+				// update max min
+				//minimumTemperature = Math.min.apply(null, responseArray); # some array problem
+				//maximumTemperature = Math.max.apply(null, responseArray);
+				//document.getElementById("outputImageMin").innerHTML = "min: " + minimumTemperature/10;
+				//document.getElementById("outputImageMax").innerHTML = "max: " + maximumTemperature/10;
+				ctx.putImageData(imgData,(width-imageWidth)/2,(height-imageWidth)/2);
+				//ctx.putImageData(imgData,0,0);
+			};
+			xhr.send();
+		}
+		updateImage();
+
+		// find pos and append to the plot
+		function findPos( obj ){
+			var current_left = 0, current_top = 0;
+			if (obj.offsetParent){
+				do{
+					current_left += obj.offsetLeft;
+					current_top += obj.offsetTop;
+				} while( obj = obj.offsetParent );
+				return {x: current_left, y: current_top};
+			}
+			return undefined;
+		}
+		function rgbToHex(r, g, b){
+			if (r > 255 || g > 255 || b > 255)
+				throw "Invalid color component";
+			return ((r << 16) | (g << 8) | b).toString(16);
+		}
+		// output pixel info to screen
+		$('#myCanvas').mousemove(function(e){
+			var position = findPos(this);
+			var x = e.pageX - position.x;
+			var y = e.pageY - position.y;
+			var coordinate = "location: x = " + x + ", y = " + y;
+			var canvas = this.getContext('2d');
+			var p = canvas.getImageData(x, y, 1, 1).data;
+			//var hex = "#" + ("000000" + rgbToHex(p[0], p[1], p[2])).slice(-6);
+			var temperature = Math.round( p[0]/255*300+50 );
+			if( temperature == 50 ){
+				document.getElementById("outputImageTemperature").innerHTML = "brightness temperature: ";
+			} else {
+				document.getElementById("outputImageTemperature").innerHTML = "brightness temperature: " + temperature + " K";
+			}
+			document.getElementById("outputImageCoordinates").innerHTML = coordinate.toString();
+			//alert("HEX: " + hex);
+		});
+		$('#myCanvas').mouseout(function(e){
+			document.getElementById( "outputImageTemperature" ).innerHTML = "brightness temperature: ";
+			document.getElementById( "outputImageCoordinates" ).innerHTML = "location:";
+		});
+	</script>
+
+	<!-- increment value of button for the explorer -->
+	<script type="text/javascript">
+		//window.onload = function(){
+			//updateDateFields(){
+		//}
+		function incrementYear(){
+			if( (year) < 2014 ){
+				date.setFullYear(year+1, month, day); // year, month (0-based), day
+			}
+			updateImage();
+		}
+		function decrementYear(){
+			if( (year) > 1987 ){
+				date.setFullYear(year-1, month, day); // year, month (0-based), day 
+			}
+			updateImage();
+		}
+		function incrementMonth(){
+			date.setFullYear(year, (month+1), day); // year, month (0-based), day
+			updateImage();
+		}
+		function decrementMonth(){
+			console.log('here again');
+			date.setFullYear(year, (month-1), day); // year, month (0-based), day
+			updateImage();
+		}
+		function incrementDay(){
+			date.setFullYear(year, month, day+1); // year, month (0-based), day
+			updateImage();
+		}
+		function decrementDay(){
+			date.setFullYear(year, month, day-1); // year, month (0-based), day
+			updateImage();
+		}
+		
+	</script>
+
+
+	<!-- pyspark scripts #################################################################################################### -->
+	<script type="text/javascript">
+		$(function() {
+			$('input[name="daterange"]').daterangepicker({
+			format: 'YYYY-MM-DD',
+			minDate: '1990-01-01',
+			maxDate: '1994-12-31'
+			});
+		});
+	</script>
+
+	<script>
+		$(function() {
+			$( "#row-range" ).slider({
+				range: true,
+				min: 0,
+				max: 315,
+				values: [ 150, 200 ],
+				slide: function( event, ui ) {
+					$( "#rowselect" ).val(+ ui.values[ 0 ] + "," + ui.values[ 1 ] );
+				}
+			});
+			$( "#rowselect" ).val(+ $( "#row-range" ).slider( "values", 0 ) + "," + $( "#row-range" ).slider( "values", 1 ) );
+		});
+	</script>
+
+	<script>
+		$(function() {
+			$( "#col-range" ).slider({
+				range: true,
+				min: 0,
+				max: 332,
+				values: [ 150, 200 ],
+				slide: function( event, ui ) {
+					$( "#colselect" ).val(+ ui.values[ 0 ] + "," + ui.values[ 1 ] );
+				}
+			});
+			$( "#colselect" ).val(+ $( "#col-range" ).slider( "values", 0 ) + "," + $( "#col-range" ).slider( "values", 1 ) );
+		});
+	</script>
+
+	<script>
+		$(function() {
+			$( "#p-range" ).slider({
+				range: true,
+				min: 0,
+				max: 350,
+				values: [ 300, 350 ],
+				slide: function( event, ui ) {
+					$( "#pselect" ).val(+ ui.values[ 0 ] + "," + ui.values[ 1 ] );
+				}
+			});
+		$( "#pselect" ).val(+ $( "#p-range" ).slider( "values", 0 ) + "," + $( "#p-range" ).slider( "values", 1 ) );
+		});
+	</script>
+
+	<script>
+		$("#query").click(function(e){
+			e.preventDefault();
+			$.ajax({type: "POST",
+				url: "/user_query",
+				data: { id: $("#query").val(), temporal: $("#temporal").val(), rowselect: $("#rowselect").val(),colselect:$("#colselect").val(),pselect:$("#pselect").val()},
+				dataType: 'json',
+				success:function(result){
+					drawHist(result);//pass in returned data
+				}
+			});
+			});
+
+			//function to draw histogram
+			function drawHist(inputdata) {
+			// Get the context of the canvas element we want to select
+			var canvas = document.getElementById('myChart'); 
+			var ctx= canvas.getContext("2d");
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			var options  = {
+				//Boolean - Whether the scale should start at zero, or an order of magnitude down from the lowest value
+				scaleBeginAtZero : true,
+				//Boolean - Whether grid lines are shown across the chart
+				scaleShowGridLines : true,
+				//String - Colour of the grid lines
+				scaleGridLineColor : "rgba(0,0,0,.05)",
+				//Number - Width of the grid lines
+				scaleGridLineWidth : 1,
+				//Boolean - Whether to show horizontal lines (except X axis)
+				scaleShowHorizontalLines: true,
+				//Boolean - Whether to show vertical lines (except Y axis)
+				scaleShowVerticalLines: true,
+				//Boolean - If there is a stroke on each bar
+				barShowStroke : true,
+				//Number - Pixel width of the bar stroke
+				barStrokeWidth : 3,
+				//Number - Spacing between each of the X value sets
+				barValueSpacing : 1,
+				//Number - Spacing between data sets within X values
+				barDatasetSpacing : 1
+			};
+			var data_max = Math.max.apply(null,inputdata), data_min = Math.min.apply(null,inputdata);
+			var bins_num = 20, binsp = Math.floor((data_max - data_min)/bins_num);
+			var bins_cnt = [];
+			var label = [];
+			for (var i = 0;i < bins_num; i++){
+				label[i] = data_min + Math.floor((i*binsp + (i+1)*binsp)/2);
+			};
+
+			for (var i = 0;i < bins_num; i++){
+				bins_cnt[i] = 0;
+				for (var n = 0; n < inputdata.length; n++){
+					d = inputdata[n];
+					if ((d >= data_min + i*binsp) && (d < data_min + (i+1)*binsp)){
+						//console.log(d);
+						bins_cnt[i]++;
+					}
+				}
+			};
+			console.log(bins_cnt);
+
+			var data = {
+				labels: label,//need calculate with input data
+				datasets: [
+					{
+					    label: "My First dataset",
+					    fillColor: "rgba(255,255,0,0.3)",//bar color
+					    strokeColor: "rgba(220,220,220,1)",
+					    pointColor: "rgba(220,220,220,1)",
+					    pointStrokeColor: "#fff",
+					    pointHighlightFill: "#fff",
+					    pointHighlightStroke: "rgba(220,220,220,1)",
+					    data: bins_cnt
+					}
+					]
+			};
+			var myBarChart = new Chart(ctx).Bar(data, options);
+		}
+	</script>
+	<!-- pyspark scripts #################################################################################################### -->
+</body>
+</html>
