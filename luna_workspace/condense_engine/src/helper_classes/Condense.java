@@ -136,11 +136,17 @@ public class Condense extends GeoObject {
 		Tools.setDebug( debugMessages );
 		Tools.setWarnings( warningMessages );
 		
-		// Read the configuration file. Assumes the file path (with name) is
-		// input on the command line, arg[0].
-		try {
+		// Read the configuration file. First, check to see if the the config file
+		// has been specified with an environment variable. If not, look for the file
+		// path (with name) as input on the command line, arg[0].
+		String path = System.getenv("configfile");
+		if (path == null) {
 			configFilename = args[0];
-			
+		} else {
+			configFilename = path;
+		}
+		
+		try {		
 			if (!readConfigFile( configFilename )) {
 				Tools.errorMessage("Condense", "main", "Could not read the cofiguration file: " + configFilename,
 						new Exception());
@@ -149,8 +155,13 @@ public class Condense extends GeoObject {
 			System.out.println(e);
 			Tools.message("Error when reading configuration file. Did you specify a full path and name?");
 			Tools.message("Example: \"java Condense C:/users/mydir/configfile.txt\"");
+			Tools.message("or put the path in an enviroment variable called \"configfile\"");
 			Tools.errorMessage("Condense", "main", "", new Exception());
 		}
+		
+		// Check environment variables for default locations to output files and read-in data.
+		if (System.getenv("outputpath")!= null) outputPath = System.getenv("outputpath");
+		if (System.getenv("datapath") !=null) dataPath = System.getenv("datapath");
 		
     	new Condense();
     	
@@ -274,7 +285,7 @@ public class Condense extends GeoObject {
 		if (startDate.days() > finalDate.days()) return false;
 		
 		Timespan timespan = new Timespan(startDate, increment);
-		int maximumDays = timespan.fullDays() + 2;//366
+		int maximumDays = timespan.fullDays() + 1;//366
 		
 		// If the computed start or end date of the time span is outside of the requested
 		// dates, use the requested date instead.
