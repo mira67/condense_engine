@@ -135,8 +135,9 @@ public class Timespan extends GeoObject {
 	public void endTimestamp(Timestamp t) { endTime = t; }
 	public Timestamp endTimestamp() { return endTime; }
 	
+	// Total number of elapsed days.
 	public double days() {return (endTime.days() - startTime.days());}
-	public int fullDays() {return ((int) endTime.days() - (int) startTime.days());}
+	public int fullDays() {return ((int) endTime.days() - (int) startTime.days()) + 1;}
 
 	
 	// Print methods.

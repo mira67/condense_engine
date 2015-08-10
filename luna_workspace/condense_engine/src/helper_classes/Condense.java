@@ -285,7 +285,7 @@ public class Condense extends GeoObject {
 		if (startDate.days() > finalDate.days()) return false;
 		
 		Timespan timespan = new Timespan(startDate, increment);
-		int maximumDays = timespan.fullDays() + 1;//366
+		int maximumDays = timespan.fullDays();
 		
 		// If the computed start or end date of the time span is outside of the requested
 		// dates, use the requested date instead.
@@ -293,8 +293,9 @@ public class Condense extends GeoObject {
 		if (timespan.endTimestamp().days() > finalDate.days()) timespan.endTimestamp( finalDate );
 
 		// Total days we're processing. Add one to include the final date.
-		days = timespan.fullDays() + 1;
+		days = timespan.fullDays();
 
+		Tools.debugMessage("maximum days = " + maximumDays);
 		Tools.debugMessage("days = " + days);
 
 		String filename = "";
@@ -530,11 +531,13 @@ public class Condense extends GeoObject {
 			for (int c = 0; c < cols; c++){
 				for (int d = 0; d < days; d++){//d<2 to test algorithm 
 					if (data[d] != null){
-						if (data[d][r][c] == null) { 
-							data[d][r][c] = data[d-1][r][c];//quick fix for missing days data, if day-0 is missing?
+						if (data[d][r][c] != null) { 
+							database.store(data[d][r][c].data(),locID,cDateList[d]);
+///							if (data[d][r][c] == null && d > 0) { 
+///							data[d][r][c] = data[d-1][r][c]; // quick fix for missing days data, if day-0 is missing?
 						}
 					}
-					database.store(data[d][r][c].data(),locID,cDateList[d]);
+///					database.store(data[d][r][c].data(),locID,cDateList[d]);
 				}//days	
 				locID++;
 			}//cols
