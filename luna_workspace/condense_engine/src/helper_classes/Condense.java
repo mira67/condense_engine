@@ -583,6 +583,7 @@ public class Condense extends GeoObject {
 		}//rows
 	}//special sampling method
 	
+	
 	/* blankCondensation
 	 * 
 	 * A stub method for adding another condensation algorithm.
