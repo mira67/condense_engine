@@ -204,7 +204,7 @@ public class DatabaseRamSchema extends Database {
 		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
 		
 		if (first > last || first < 0) {
-			Tools.warningMessage("DatabaseRamSchema::getVectorsInTimeRange: Warning: " +
+			Tools.warningMessage("DatabaseRamSchema::getVectors: Warning: " +
 					"Requested time range " + first + " to " + last +
 					" may exceed the range of the timestamps in the datbase " +
 					"or be malformed. Be sure to index from zero.");
@@ -248,6 +248,8 @@ public class DatabaseRamSchema extends Database {
 		Tools.statusMessage("Timestamp entries = " + metadata.timestamps);
 		Tools.statusMessage("Location entries  = " + metadata.locations);
 		Tools.statusMessage("Vector entries    = " + metadata.vectors);
+		Tools.statusMessage("Rows              = " + metadata.rows());
+		Tools.statusMessage("Cols              = " + metadata.cols());
 	}
 
 	@Override
