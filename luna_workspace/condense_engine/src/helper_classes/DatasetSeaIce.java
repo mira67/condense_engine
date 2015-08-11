@@ -173,6 +173,7 @@ public class DatasetSeaIce extends Dataset {
 		} catch (Exception error) {
 			Tools.warningMessage("DatasetSeaIce::readData: Could not open data file: "
 					+ filename);
+			ncfile.close();
 			return null;
 		}
 
