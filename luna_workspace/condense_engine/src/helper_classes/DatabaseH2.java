@@ -23,8 +23,9 @@ public class DatabaseH2 extends Database {
 	private ResultSet sqlRs = null;
 	private int index = 0;
    	
-	public DatabaseH2(String name, String polarization, int frequency) {
+	public DatabaseH2(String path, String name, String polarization, int frequency) {
 		this();
+		dbPath = path;
 		dbName = name;
 		tbName = "ch" + frequency + polarization;
 		status = Status.DISCONNECTED;
@@ -44,7 +45,7 @@ public class DatabaseH2 extends Database {
 		// Open the database.
 		try {
 	        Class.forName("org.h2.Driver");
-	        conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+"Test", null, null);//jdbc:h2:mem:db1
+	        conn = DriverManager.getConnection(dbPath+dbName, null, null);//jdbc:h2:mem:db1
 	        //conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
 	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+ "?user=sa&password=1234", null, null);//DB_CLOSE_DELAY=-1
 
@@ -71,7 +72,7 @@ public class DatabaseH2 extends Database {
 			Tools.errorMessage("DatabaseH2", "connect", "Could not connect with database " + dbName, e);
 		}
 		
-		Tools.statusMessage("Connected to database: " + dbName + tbName);
+		Tools.statusMessage("Connected to database: " + dbName + "  Table name: " + tbName);
 		status = Status.CONNECTED;
     }
 
@@ -86,7 +87,7 @@ public class DatabaseH2 extends Database {
     public void connectReadOnly() {
 		try {
 	        Class.forName("org.h2.Driver");
-	        conn = DriverManager.getConnection("jdbc:h2:tcp://10.251.53.27:9292/~/"+dbName+"Small"+";IFEXISTS=TRUE", null, null);//
+	        conn = DriverManager.getConnection(dbPath+dbName+";IFEXISTS=TRUE", null, null);//
 	        //in-memory db test
 	        //conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
 		} catch(Exception e) {
@@ -367,6 +368,8 @@ public class DatabaseH2 extends Database {
 		
 		Tools.statusMessage("Database name = " + dbName + "  Status: "
 				+ status.toString());
+		Tools.statusMessage("Database path = " + dbPath);
+		Tools.statusMessage("Database table = " + tbName);
 		Tools.statusMessage("Timestamp entries = " + metadata.timestamps);
 		Tools.statusMessage("Location entries  = " + metadata.locations);
 		Tools.statusMessage("Vector entries    = " + metadata.vectors);
