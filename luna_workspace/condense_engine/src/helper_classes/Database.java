@@ -22,6 +22,7 @@ public abstract class Database extends GeoObject {
 	}
 
 	protected String dbName = "";
+	protected String dbPath = "";
 	protected String tbName = "";
 	protected int chFreq = 0;
 	protected Metadata metadata;
