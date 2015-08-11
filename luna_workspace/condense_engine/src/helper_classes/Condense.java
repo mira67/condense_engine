@@ -66,6 +66,8 @@ public class Condense extends GeoObject {
 	// Files and paths for i/o
 	static String outputPath = "/Users/mira67/Documents/IceData/nsidc_0001/";
 	static String dataPath = "/Users/mira67/Documents/IceData/nsidc_0001/south/";
+	static String databaseName;
+	static String databasePath = "jdbc:h2:tcp://localhost/~/";
 	static String surfaceFile = "";
 	static String surfaceLats = "";
 	static String surfaceLons = "";
@@ -75,7 +77,7 @@ public class Condense extends GeoObject {
     static boolean warningMessages = false;		// Receive warning messages?
     static boolean debugMessages = false;		// Receive debug messages?
     static boolean addYearToInputDirectory = true; // The input files may be stored in subdirectories by year
-    static boolean databaseRAM = false;			// Store the database in RAM or a file system
+    static boolean generateImages = false;		// Generate test images
     
     // SSMI data selection
     static String polarization = "v"; 			// Horizontal (h) or vertical (v)
@@ -136,7 +138,7 @@ public class Condense extends GeoObject {
 		Tools.setDebug( debugMessages );
 		Tools.setWarnings( warningMessages );
 
-		// Check environment variables for default locations to output files and read-in data.
+		// Check environment variables for default paths.
 		if (System.getenv("outputpath")!= null) outputPath = System.getenv("outputpath");
 		if (System.getenv("datapath") !=null) dataPath = System.getenv("datapath");
 		
@@ -163,6 +165,9 @@ public class Condense extends GeoObject {
 			Tools.errorMessage("Condense", "main", "", new Exception());
 		}
 		
+		// If a database name is not specified, create a default one.
+		if (databaseName.isEmpty()) databaseName = dataType.toString();
+		
     	new Condense();
     	
 		long endTime = System.currentTimeMillis();
@@ -187,7 +192,7 @@ public class Condense extends GeoObject {
 					database = new DatabaseFileSchema( dataType.toString(), outputPath );			
 					break;
 				case H2:
-					database = new DatabaseH2( dataType.toString(), polarization, frequency);			
+					database = new DatabaseH2( databasePath, databaseName, polarization, frequency );			
 					break;
 				case PERST:
 					database = new DatabasePerst( dataType.toString() );			
@@ -229,9 +234,10 @@ public class Condense extends GeoObject {
 			
 		}
 		
-		///Tools.message("\nDatabase status:");
-		///database.status();
-		///Tools.message("");
+		// Database info for debugging purposes.
+		Tools.statusMessage("\n---------------------------");
+		database.status();
+		Tools.statusMessage("---------------------------\n");
 		
 		// All done. Close the database.
 		database.disconnect();
@@ -242,7 +248,7 @@ public class Condense extends GeoObject {
 
 		// We should now have a database full of condensed pixels.
 		// Let's generate some images of them...
-		//generateTestImages();
+		if (generateImages) generateTestImages();
 	}
 	
 	
@@ -333,17 +339,17 @@ public class Condense extends GeoObject {
 		// The date of the file we are reading.
 		Timestamp date = new Timestamp( startDate.year(), startDate.month(), startDate.dayOfMonth());
 		
-		// Loop through the number of days, reading the data file for each day.
-		// If a date doesn't exist (maybe it's monthly data?) ignore it.
 		cDateList = new Date[days];
 		
+		// Loop through the number of days, reading the data file for each day.
+		// If a date doesn't exist (maybe it's monthly data?) ignore it.
 		for (int d = 0; d < days; d++) {
 
 			Timestamp time = new Timestamp( date.year(), date.month(), date.dayOfMonth() );
+			
 			//
 			String cDate = date.yearString() + "-" + date.monthString() + "-" + date.dayOfMonthString();
 			cDateList[d] = Date.valueOf(cDate);
-			//System.out.println(cDate);
 			
 			switch (dataType) {
 	    		case NONE:
@@ -378,6 +384,7 @@ public class Condense extends GeoObject {
 	    					data[d] = (GriddedVector[][]) DatasetSSMI.readData( filename,
 	    							date.year(), date.month(), date.dayOfMonth(), time,
 	    							rows, cols);
+	    					
 	    					// Success
 	    					fileCount++;
 	    				}
@@ -398,14 +405,13 @@ public class Condense extends GeoObject {
 					"." + date.dayOfMonthString() + "  File name: " + filename);
 			
 			// Add the timestamp to the database.
-    		//database.store(time);
+    		database.store(time);
     		
 			// Next day.
 			date.incrementOneDay();
 		}
 
 		Tools.debugMessage("End of loop. Next date: " + date.dateString() + "\n-----");
-		System.out.println("End of loop. Next date: " + date.dateString() + "\n-----");
 		
 		// Update the starting date for the next time span.
 		startYear = date.year();
@@ -437,7 +443,10 @@ public class Condense extends GeoObject {
 		
 		rows = dataset.rows();
 		cols = dataset.cols();
-    	//database.store( metadata );    			
+		
+		// We need to store the metadata in the database.
+    	database.store( metadata );
+    	
     	haveMetadata = true;
     	
 		return;
@@ -523,6 +532,22 @@ public class Condense extends GeoObject {
 	 * Don't do any condensation. Add all pixels to the database.
 	 */
 	protected void noCondensation() {
+		
+		for (int d = 0; d < days; d++) {
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
+					database.store( data[d][r][c] );
+				}
+			}
+		}
+	}
+
+	
+	/* noCondensation
+	 * 
+	 * Don't do any condensation. Add all pixels to the database.
+	 */
+	/*protected void noCondensation() {
 		//
 		int locID = 0;
 		
@@ -543,7 +568,7 @@ public class Condense extends GeoObject {
 			}//cols
 		}//rows
 	}
-
+	*/
 	
 	/* special sampling
 	 *
@@ -821,6 +846,12 @@ public class Condense extends GeoObject {
 
 
 		database.connectReadOnly();
+
+		// Database info for debugging purposes.
+		Tools.statusMessage("\n---------------------------");
+		database.status();
+		Tools.statusMessage("---------------------------\n");
+		
 		metadata = database.getMetadata();
 		
 		// Display an image. Pixels between imageStartIndex and imageEndIndex will
@@ -922,8 +953,9 @@ public class Condense extends GeoObject {
    		Tools.statusMessage("Time indicies: " + database.numberOfTimestamps());	
    		Tools.statusMessage("Total pixels in one image:  " + total);     
    		Tools.statusMessage("Total pixels in all images: " + allPixels);
-        Tools.statusMessage("Database size (pixels):     " + storedPixels );   		
-        Tools.statusMessage("Percent of pixels stored:   " + 100f*(float)storedPixels/(float)allPixels );
+        Tools.statusMessage("Database size (pixels):     " + storedPixels );
+        if (allPixels > 0)
+        	Tools.statusMessage("Percent of pixels stored:   " + 100f*(float)storedPixels/(float)allPixels );
    		Tools.statusMessage("--------------------------------------------------------------");        
    		Tools.statusMessage(" ");
 
@@ -932,6 +964,9 @@ public class Condense extends GeoObject {
 	
 	/*
 	 * createArrayFromVectorList
+	 * 
+	 * Given an array-list of vectors, create an integer array containing only the vectors'
+	 * scalar data values at each row/col location.
 	 */
 	public static int[][] createArrayFromVectorList( int rows, int cols, ArrayList<GriddedVector> list) {
 		int[][] array = new int[rows][cols];
@@ -1081,6 +1116,14 @@ public class Condense extends GeoObject {
 						outputPath = textValue;
 						Tools.statusMessage("Output Path = " + outputPath);
 						break;
+					case "databasename":
+						databaseName = textValue;
+						Tools.statusMessage("Database Name = " + databaseName);
+						break;
+					case "databasepath":
+						databasePath = textValue;
+						Tools.statusMessage("Database Path = " + databasePath);
+						break;
 					case "surfacefile":
 						surfaceFile = textValue;
 						Tools.statusMessage("Surface Data File = " + surfaceFile);
@@ -1108,6 +1151,10 @@ public class Condense extends GeoObject {
 					case "filterbaddata":
 						filterBadData = Boolean.valueOf(value);
 						Tools.statusMessage("Filter bad data = " + filterBadData);
+						break;
+					case "generateimages":
+						generateImages = Boolean.valueOf(value);
+						Tools.statusMessage("Generate Images = " + generateImages);
 						break;
 					case "imagestart":
 						imageStartIndex = Integer.valueOf(value);
