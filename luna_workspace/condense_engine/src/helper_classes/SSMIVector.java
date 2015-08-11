@@ -17,7 +17,7 @@ public class SSMIVector extends GriddedVector {
 
 	// Constructor using a supplied value and location.
 	public SSMIVector( int i, int r, int c ) {		
-		//super(r,c);//comment out temporally to fix the memory leak issue? by Qi
+		super(r,c);
 		this.data( i );
 	}
 	
