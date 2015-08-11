@@ -89,45 +89,48 @@ public class DatasetSeaIce extends Dataset {
 
 		try {
 			ncfile = NetcdfFile.open(filename);
+			
+			// Successful open. Now read the data.
+			try {
+				Variable latVar = ncfile.findVariable("latitude");
+				Variable lonVar = ncfile.findVariable("longitude");
+				latArray = (ArrayDouble.D2) latVar.read();
+				lonArray = (ArrayDouble.D2) lonVar.read();
+
+				int[] shape = latArray.getShape();
+
+				// Be sure to store the rows and columns in the metadata, which
+				// will later be part of the database.
+				metadata.rows(shape[0]);
+				metadata.cols(shape[1]);
+
+				// Create a location array based on the lats/lons where
+				// each vector is located.
+				locs = new GriddedLocation[rows()][cols()];
+
+				for (int r = 0; r < metadata.rows(); r++) {
+					for (int c = 0; c < metadata.cols(); c++) {
+						locs[r][c] = new GriddedLocation(r, c,
+								latArray.getDouble(r), lonArray.getDouble(c));
+					}
+				}
+			} catch (Exception e) {
+				Tools.warningMessage("DatasetSeaIce::readMetadata: error during read. File: "
+						+ filename);
+			}
 		} catch (Exception error) {
 			Tools.warningMessage("DatasetSeaIce::readMetadata: Could not open data file: "
 					+ filename);
-			return metadata;
 		}
 
+		
 		try {
-			Variable latVar = ncfile.findVariable("latitude");
-			Variable lonVar = ncfile.findVariable("longitude");
-			latArray = (ArrayDouble.D2) latVar.read();
-			lonArray = (ArrayDouble.D2) lonVar.read();
-
-			int[] shape = latArray.getShape();
-
-			// Be sure to store the rows and columns in the metadata, which
-			// will later be part of the database.
-			metadata.rows(shape[0]);
-			metadata.cols(shape[1]);
-
-			// Create a location array based on the lats/lons where
-			// each vector is located.
-			locs = new GriddedLocation[rows()][cols()];
-
-			for (int r = 0; r < metadata.rows(); r++) {
-				for (int c = 0; c < metadata.cols(); c++) {
-					locs[r][c] = new GriddedLocation(r, c,
-							latArray.getDouble(r), lonArray.getDouble(c));
-				}
-			}
-
 			ncfile.close();
-
-			return metadata;
-
 		} catch (Exception e) {
-			Tools.warningMessage("DatasetSeaIce::readMetadata: error during read. File: "
+			Tools.warningMessage("DatasetSeaIce::readMetadata: error during file close: "			
 					+ filename);
-			return metadata;
 		}
+		return metadata;
 	}
 
 	/*
@@ -205,7 +208,7 @@ public class DatasetSeaIce extends Dataset {
 			}
 		} catch (Exception error) {
 			Tools.warningMessage("DatasetSeaIce::readData: when reading data, " + error);
-			throw error;
+			///throw error;
 		}
 
 		try {

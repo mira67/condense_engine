@@ -135,6 +135,10 @@ public class Condense extends GeoObject {
 		// Control what messages we see.
 		Tools.setDebug( debugMessages );
 		Tools.setWarnings( warningMessages );
+
+		// Check environment variables for default locations to output files and read-in data.
+		if (System.getenv("outputpath")!= null) outputPath = System.getenv("outputpath");
+		if (System.getenv("datapath") !=null) dataPath = System.getenv("datapath");
 		
 		// Read the configuration file. First, check to see if the the config file
 		// has been specified with an environment variable. If not, look for the file
@@ -158,10 +162,6 @@ public class Condense extends GeoObject {
 			Tools.message("or put the path in an enviroment variable called \"configfile\"");
 			Tools.errorMessage("Condense", "main", "", new Exception());
 		}
-		
-		// Check environment variables for default locations to output files and read-in data.
-		if (System.getenv("outputpath")!= null) outputPath = System.getenv("outputpath");
-		if (System.getenv("datapath") !=null) dataPath = System.getenv("datapath");
 		
     	new Condense();
     	
@@ -557,12 +557,12 @@ public class Condense extends GeoObject {
 		accumulateStats();
 		
 		//threshold, percentage of data to preserve
-		int thr = (int)Math.floor(days*0.1);//out of days (in this trial: days = 120)
+		int thr = (int)Math.floor(days*0.1); //out of days (in this trial: days = 120)
 		if (thr <= 2){
 			thr = 3;
 		}
 		
-		System.out.println("thr " + thr + " days" + days);
+		Tools.statusMessage("thr " + thr + " days" + days);
 		Number [][] pixel_ts = new Number[days][2];
 		Number[][] sampled_ts = new Number[thr][];
 		int locID = 0;
@@ -1040,6 +1040,7 @@ public class Condense extends GeoObject {
 						Tools.statusMessage("Time Increment = " + increment);
 						break;
 					case "algorithm":
+						if (value.equals("none")) algorithm = Algorithm.NO_CONDENSATION;
 						if (value.equals("no_condensation")) algorithm = Algorithm.NO_CONDENSATION;
 						if (value.equals("temporal")) algorithm = Algorithm.TEMPORAL_THRESHOLD;
 						if (value.equals("minmax")) algorithm = Algorithm.MINMAX;
@@ -1116,6 +1117,7 @@ public class Condense extends GeoObject {
 						imageEndIndex = Integer.valueOf(value);
 						Tools.statusMessage("Image end index = " + imageEndIndex);
 						break;
+					case "database":
 					case "databasetype":
 						if (value.equals("ram")) databaseType = DatabaseType.RAM;
 						if (value.equals("file")) databaseType = DatabaseType.FILE;
