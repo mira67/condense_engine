@@ -40,6 +40,7 @@ public class DatasetSSMI extends Dataset {
 		if (addYearToInputDirectory) {
 			path = path + String.valueOf(year) + "/";
 		}
+		
 		// Strings for building the file name.
 		String yearString = String.valueOf(year);
 		String monthString = String.valueOf(month);
@@ -95,8 +96,11 @@ public class DatasetSSMI extends Dataset {
 	 */
 	public Metadata metadata() {
 		if (!haveMetadata) {
-			Tools.errorMessage("DatasetSSMI", "metadata",
-				"Attempt to retrieve metadata when it hasn't been read yet", new Exception());
+			Tools.errorMessage(
+					"DatasetSSMI",
+					"metadata",
+					"Attempt to retrieve metadata when it hasn't been read yet",
+					new Exception());
 		}
 
 		return metadata;
@@ -143,7 +147,7 @@ public class DatasetSSMI extends Dataset {
 
 			// Filter out missing data points. BTs are encoded by a factor of
 			// 10.
-			//data = Tools.discardBadData(data, 1000, 4000);
+			// data = Tools.discardBadData(data, 1000, 4000);
 
 			// TODO for testing
 			data = Tools.scaleIntArray2D(data, 0, 350);
@@ -161,8 +165,9 @@ public class DatasetSSMI extends Dataset {
 			}
 		} catch (Exception error) {
 			System.out.println("reading data error");
-			Tools.warningMessage("DatasetSSMI::readData: when reading data, " + error);
-			
+			Tools.warningMessage("DatasetSSMI::readData: when reading data, "
+					+ error);
+
 			throw error;
 		}
 
@@ -170,7 +175,8 @@ public class DatasetSSMI extends Dataset {
 			file.close();
 		} catch (Exception error) {
 			System.out.println("error in file close");
-			Tools.warningMessage("DatasetSSMI::readData: Error on file close, " + error);
+			Tools.warningMessage("DatasetSSMI::readData: Error on file close, "
+					+ error);
 			throw error;
 		}
 
