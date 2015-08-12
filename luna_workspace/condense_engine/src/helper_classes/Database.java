@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 public abstract class Database extends GeoObject {
-
+	
 	public enum Status {
 		DISCONNECTED("DISCONNECTED"), CONNECTED("CONNECTED"), CONNECTED_READ_ONLY("CONNECTED READ-ONLY"),
 			UNKNOWN("UNKNOWN");

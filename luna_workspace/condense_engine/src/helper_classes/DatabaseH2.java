@@ -101,7 +101,7 @@ public class DatabaseH2 extends Database {
 			Tools.errorMessage("DatabaseH2", "connectReadOnly", "Could not connect with database " + dbName, e);
 		}
 		
-		Tools.statusMessage("Connected to database read-only: " + dbName);
+		Tools.statusMessage("Connected to database, read-only: " + dbName);
 		status = Status.CONNECTED_READ_ONLY;
     }
 
@@ -162,13 +162,13 @@ public class DatabaseH2 extends Database {
 		//write location map table
 		int pixelId = 0;
 		Tools.statusMessage("Creating pixel location map...");
-		int rows = 316, cols = 332;
-		if ((chFreq == 85) || (chFreq == 91)){
-			rows = 632;
-			cols = 664;
+		
+		if (metadata == null) {
+			Tools.errorMessage("DatabaseH2", "createMap", "Metadata has not been set", new Exception());
 		}
-		for (int r = 0; r < rows; r++){
-			for (int c = 0; c < cols; c++){
+	
+		for (int r = 0; r < metadata.rows(); r++){
+			for (int c = 0; c < metadata.cols(); c++){
 				store(pixelId, r, c);
 				pixelId++;
 			}
@@ -192,6 +192,7 @@ public class DatabaseH2 extends Database {
 	public void store( Metadata m ) {
 		writeCheck("Metadata");
 		metadata = m;
+		// TODO: store the metadata in the database
 	}
 	
 	public void store(Timestamp t) {}
