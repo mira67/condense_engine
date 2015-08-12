@@ -30,7 +30,7 @@ public class Condense extends GeoObject {
 
 	public enum Algorithm 	{ NO_CONDENSATION, TEMPORAL_THRESHOLD, MINMAX, SPECIALSAMPLE }
 
-	public enum DatabaseType { RAM, FILE, H2, BLANKDB }
+	public enum DatabaseType { RAM, FILE, H2 }
 
 	/*-------------------------------------------------------------------------
 	// DEFAULTS. USE THE CONFIGURATION FILE TO MODIFY THESE VALUES.
@@ -193,9 +193,6 @@ public class Condense extends GeoObject {
 					break;
 				case H2:
 					database = new DatabaseH2( databasePath, databaseName );			
-					break;
-				case BLANKDB:
-					database = new DatabaseBlank( dataType.toString() );			
 					break;
 			}
 		} catch (Exception e) {
@@ -1097,7 +1094,6 @@ public class Condense extends GeoObject {
 						if (value.equals("ram")) databaseType = DatabaseType.RAM;
 						if (value.equals("file")) databaseType = DatabaseType.FILE;
 						if (value.equals("h2")) databaseType = DatabaseType.H2;
-						if (value.equals("blankdb")) databaseType = DatabaseType.BLANKDB;
 						Tools.statusMessage("Database type: " + databaseType);
 						break;
 					default:
