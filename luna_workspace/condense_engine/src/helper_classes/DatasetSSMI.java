@@ -82,11 +82,57 @@ public class DatasetSSMI extends Dataset {
 	 */
 	public Metadata readMetadata(String filename) {
 
-		// Temporary hard-code
-		metadata.rows(332);
-		metadata.cols(316);
+		// SSMI data comes in a binary file without metadata. It is assumed
+		// the user will know 'a priori' the dimensions of the data.
+		// A description of the files can be found here:
+		// http://nsidc.org/data/docs/daac/nsidc0001_ssmi_tbs.gd.html
+		// Below, we use the file size to determine the dimensions of the
+		// data it contains. (The file name could also be parsed for the
+		// hemisphere and frequency info but this is just easier.)
+		
+		long length = 0;
+		
+		try {
+			DataFile file = new DataFile(filename);
+			length = file.length();
+			file.close();
+			Tools.debugMessage("DatasetSSMI::readMetadata: file length = " + length);
+		} catch(Exception e) {
+			Tools.errorMessage("DatasetSSMI", "readMetadata", "Unable to open file: " + filename, e);
+		}
+		
+		// Southern hemisphere,	85.5 and 91.7 GHz, 839296 Bytes
+		if (length == 839296) {
+			metadata.rows(664);
+			metadata.cols(632);
+			return metadata;
+		}
+		
+		// Southern hemisphere,	everything else, 209824 Bytes
+		if (length == 209824) {
+			metadata.rows(332);
+			metadata.cols(316);
+			return metadata;
+		}
+		
+		// Northern hemisphere,	85.5 and 91.7 GHz, 1089536 Bytes
+		if (length == 1089536) {
+			metadata.rows(896);
+			metadata.cols(608);
+			return metadata;
+		}
 
-		return metadata;
+		// Northern hemisphere,	everything else, 272384 Bytes
+		if (length == 272384) {
+			metadata.rows(448);
+			metadata.cols(304);
+			return metadata;
+		}
+
+		Tools.errorMessage("DatasetSSMI", "readMetadata", "Unable to determine data dimensions: " + filename,
+				new Exception());
+		
+		return metadata;		
 	}
 
 	/*
