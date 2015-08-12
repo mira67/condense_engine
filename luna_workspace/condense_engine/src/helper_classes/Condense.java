@@ -260,7 +260,7 @@ public class Condense extends GeoObject {
 	 * have different formats and file names, this method must tailor itself
 	 * to the type of data being read.
 	 * 
-	 * This method reads data files in 'gulps', at the specified time increment
+	 * This method reads data files in 'gulps' of the specified time increment
 	 * (i.e., week, month, or seasonal, etc.).
 	 * 
 	 * The method exits if the time increment overruns the total time span. For example,
@@ -268,7 +268,7 @@ public class Condense extends GeoObject {
 	 * this method will process up to May 15th and return the days in the month (n=31).
 	 * 
 	 * Returns false if the start day for processing greater than the final day
-	 * (the overall final day as user-specified for processing).
+	 * (i.e., the ultimate final day as the user specified for processing).
 	 * 
 	 * Doesn't care if a file is missing. Assumes the data isn't available and plows ahead.
 	 */
@@ -277,10 +277,15 @@ public class Condense extends GeoObject {
 		Timestamp startDate = new Timestamp( startYear, startMonth, startDay);
 		Timestamp finalDate = new Timestamp( finalYear, finalMonth, finalDay);
 
-		// Are we all done?
+		// Are we already done?
 		if (startDate.days() > finalDate.days()) return false;
 		
+		// Timespan is the total time to process in each incremental 'gulp'.
 		Timespan timespan = new Timespan(startDate, increment);
+		
+		// Convert it to a number of whole days for this increment. The number of days
+		// may vary depending on the length of the increment (month, year, etc) and
+		// the start date.
 		int maximumDays = timespan.fullDays();
 		
 		// If the computed start or end date of the time span is outside of the requested
@@ -292,7 +297,7 @@ public class Condense extends GeoObject {
 		days = timespan.fullDays();
 
 		Tools.debugMessage("maximum days = " + maximumDays);
-		Tools.debugMessage("days = " + days);
+		Tools.debugMessage("actual days = " + days);
 
 		String filename = "";
 
@@ -308,7 +313,11 @@ public class Condense extends GeoObject {
     				getMetadata( filename );
     				break;
 			    
-    			case SSMI:   
+    			case SSMI:
+    				filename = DatasetSSMI.getSSMIFileName(dataPath, startYear, startMonth,
+    						startDay, addYearToInputDirectory, frequency,
+    						polarization);
+
     				dataset = new DatasetSSMI(filename);
     				getMetadata( filename );
     				
