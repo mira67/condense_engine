@@ -19,7 +19,8 @@ public class DataFile extends GeoObject {
 	private boolean fileIsWritable = false;
 
 	// Constructors
-	public DataFile() {};
+	public DataFile() {
+	};
 
 	public DataFile(String filename) throws Exception {
 		this.filename = filename;
@@ -29,7 +30,8 @@ public class DataFile extends GeoObject {
 		try {
 			open();
 		} catch (Exception e) {
-			Tools.warningMessage(" DataFile::DataFile exiting on exception: " + e);
+			Tools.warningMessage(" DataFile::DataFile exiting on exception: "
+					+ e);
 			throw (e);
 		}
 	}
@@ -52,14 +54,16 @@ public class DataFile extends GeoObject {
 		} catch (Exception e) {
 			Tools.warningMessage(" DataFile::open: Abnormal exception caught: "
 					+ e);
-			Tools.warningMessage(" Re-check your file name and path: " + filename);
+			Tools.warningMessage(" Re-check your file name and path: "
+					+ filename);
 			throw (e);
 		}
 
 		fileIsReadable = true;
 	}
 
-	/* create
+	/*
+	 * create
 	 * 
 	 * Create a file for writing.
 	 */
@@ -81,9 +85,12 @@ public class DataFile extends GeoObject {
 		fileIsWritable = true;
 	}
 
-	/* various small methods */
 	public String getName() {
 		return filename;
+	}
+	
+	public long length() {
+		return file.length();
 	}
 
 	/*
@@ -261,16 +268,16 @@ public class DataFile extends GeoObject {
 					+ " is not open for reading.");
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
-		
+
 		int i;
-		
+
 		try {
 			i = dataInputStream.readInt();
 		} catch (Exception e) {
 			Tools.warningMessage("DataFile::readInt: could not read integer");
 			throw (e);
 		}
-			
+
 		return i;
 	}
 
@@ -286,16 +293,16 @@ public class DataFile extends GeoObject {
 					+ " is not open for reading.");
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
-		
+
 		double x;
-		
+
 		try {
 			x = dataInputStream.readDouble();
 		} catch (Exception e) {
 			Tools.warningMessage("DataFile::readDouble: could not read double");
 			throw (e);
 		}
-			
+
 		return x;
 	}
 
@@ -352,13 +359,9 @@ public class DataFile extends GeoObject {
 
 		// Get the size of the file in bytes
 		long length = file.length();
-		// /Tools.debugMessage("    DataFile::readDoubles: file length = " +
-		// length + " bytes, Doubles = " + length/8);
 
 		// Create the array to hold the data. Double = 8 bytes.
 		double[] doubles = new double[(int) length / 8];
-		// /Tools.debugMessage("    DataFile::readDoubles: double array length = "
-		// + doubles.length);
 
 		try {
 			// Read in the data
@@ -366,7 +369,8 @@ public class DataFile extends GeoObject {
 				doubles[i] = dataInputStream.readDouble();
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::readDoubles: error on read - " + up);
+			Tools.warningMessage(" DataFile::readDoubles: error on read - "
+					+ up);
 			throw (up);
 		}
 
@@ -461,7 +465,8 @@ public class DataFile extends GeoObject {
 				dataOutputStream.writeFloat(data[i]);
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::writeFloats: error on write - " + up);
+			Tools.warningMessage(" DataFile::writeFloats: error on write - "
+					+ up);
 			throw (up);
 		}
 	}
@@ -518,7 +523,8 @@ public class DataFile extends GeoObject {
 				dataOutputStream.writeByte(data[i]);
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::writeBytes: error on write - " + up);
+			Tools.warningMessage(" DataFile::writeBytes: error on write - "
+					+ up);
 			throw (up);
 		}
 	}
@@ -547,7 +553,8 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::writeByte2d: error on write - " + up);
+			Tools.warningMessage(" DataFile::writeByte2d: error on write - "
+					+ up);
 			throw (up);
 		}
 	}
@@ -576,7 +583,8 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::writeInt2d: error on write - " + up);
+			Tools.warningMessage(" DataFile::writeInt2d: error on write - "
+					+ up);
 			throw (up);
 		}
 	}
@@ -686,11 +694,6 @@ public class DataFile extends GeoObject {
 					c = 0;
 				}
 			}
-			/*
-			 * // Read in the data for (int i = 0; i < length; i++) {
-			 * bytes[r][c] = dataInputStream.readByte(); c++; if (c == cols) {
-			 * r++; c = 0; } }
-			 */
 		} catch (Exception up) {
 			Tools.warningMessage(" DataFile::readByte2D: error on read - " + up);
 			throw (up);
@@ -775,16 +778,13 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
-		// /Tools.debugMessage("    DataFile::readFloat2d: reading file " +
-		// filename);
-
 		// Get the size of the file in bytes
 		long length = file.length();
 
 		if (length / 4 > rows * cols) {
 			Tools.warningMessage("DataFile::readFloat2d: Supplied rows and cols is greater than file size.");
-			Tools.warningMessage("DataFile::readFloat2d: file length = " + length
-					+ " bytes, Floats = " + length / 4);
+			Tools.warningMessage("DataFile::readFloat2d: file length = "
+					+ length + " bytes, Floats = " + length / 4);
 			Tools.warningMessage("Rows * Cols = " + rows * cols);
 			throw (new Error(
 					"Error in FataFile::readFloat2d: rows and cols mismatch with file"));
@@ -813,7 +813,8 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::readFloat2d: error on read - " + up);
+			Tools.warningMessage(" DataFile::readFloat2d: error on read - "
+					+ up);
 			throw (up);
 		}
 
@@ -838,7 +839,8 @@ public class DataFile extends GeoObject {
 			if (newLine)
 				dataOutputStream.writeBytes(System.lineSeparator());
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::writeString: error on write - " + up);
+			Tools.warningMessage(" DataFile::writeString: error on write - "
+					+ up);
 			throw (up);
 		}
 	}
@@ -880,7 +882,8 @@ public class DataFile extends GeoObject {
 		try {
 			dataOutputStream.writeFloat(data);
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::writeFloat: error on write - " + up);
+			Tools.warningMessage(" DataFile::writeFloat: error on write - "
+					+ up);
 			throw (up);
 		}
 	}
@@ -901,7 +904,8 @@ public class DataFile extends GeoObject {
 		try {
 			dataOutputStream.writeDouble(data);
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::writeDouble: error on write - " + up);
+			Tools.warningMessage(" DataFile::writeDouble: error on write - "
+					+ up);
 			throw (up);
 		}
 	}
