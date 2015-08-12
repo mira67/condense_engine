@@ -23,7 +23,6 @@ public abstract class Database extends GeoObject {
 
 	protected String dbName = "";
 	protected String dbPath = "";
-	protected String tbName = "";
 	protected int chFreq = 0;
 	protected Metadata metadata;
 	protected Status status = Status.DISCONNECTED;
@@ -99,9 +98,15 @@ public abstract class Database extends GeoObject {
 
 		return vectors;
 	}
-	public String checkTable(String tbNames) {
+	
+	/*
+	 * CheckTable
+	 * 
+	 * Returns true if the table exists, false if it does not (and creates the table).
+	 */
+	public Boolean checkTable(String tbNames) {
 		// TODO Auto-generated method stub
-		return "";
+		return false;
 	}
 	
 	public void createMap(String tbN) {

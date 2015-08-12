@@ -20,37 +20,54 @@ public class DatabaseH2 extends Database {
 	private PreparedStatement sqlStmt_tb = null;
 	private PreparedStatement sqlStmt_map = null;
 	private Statement sqlCreate = null;
-	private ResultSet sqlRs = null;
-	private int index = 0;
+	///private ResultSet sqlRs = null;
    	
-	public DatabaseH2(String path, String name, String polarization, int frequency) {
+	public DatabaseH2(String path, String name) {
 		this();
 		dbPath = path;
 		dbName = name;
-		tbName = "ch" + frequency + polarization;
 		status = Status.DISCONNECTED;
-		chFreq = frequency;
 	}
 
 	/*
 	 * connect
 	 * 
-     * (non-Javadoc)
-	 * @see org.nsidc.bigdata.Database#connect()
-	 * 
 	 * Connect to a database. If it does not exist it will be created.
 	 */
 	public void connect() {
-		
+
 		// Open the database.
 		try {
-	        Class.forName("org.h2.Driver");
-	        conn = DriverManager.getConnection(dbPath+dbName, null, null);//jdbc:h2:mem:db1
-	        //conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
-	        //conn = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+ "?user=sa&password=1234", null, null);//DB_CLOSE_DELAY=-1
+			Class.forName("org.h2.Driver");
+			conn = DriverManager.getConnection(dbPath + dbName, null, null);// jdbc:h2:mem:db1
+			// conn =
+			// DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+
+			// "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
+			// conn =
+			// DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+
+			// "?user=sa&password=1234", null, null);//DB_CLOSE_DELAY=-1
 
-	        conn.setAutoCommit(true);
-	     	
+			conn.setAutoCommit(true);
+
+		} catch (Exception e) {
+			Tools.errorMessage("DatabaseH2", "connect",
+					"Could not connect with database " + dbName, e);
+		}
+
+		status = Status.CONNECTED;
+	}
+
+			/*
+			// check map table
+			String tbN = "LOCMAP_S";
+			if (!checkTable(tbN)) {
+				//write to location
+				createMap();
+			}
+			*/
+	        
+	        /*
+	        
 	        //drop table is existed for repeat debugging purpose -  Todo-get to another function for easy management
 	        sqlCreate = conn.createStatement();
 	        Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS " + tbName);
@@ -67,22 +84,12 @@ public class DatabaseH2 extends Database {
 					"(date, locID, bt) " + 
 					"values " + 
 					"(?,?,?)");
-	        
-		} catch(Exception e) {
-			Tools.errorMessage("DatabaseH2", "connect", "Could not connect with database " + dbName, e);
-		}
-		
-		Tools.statusMessage("Connected to database: " + dbName + "  Table name: " + tbName);
-		status = Status.CONNECTED;
-    }
+	        */
 
 	/*
 	 * connectReadOnly
 	 * 
-     * (non-Javadoc)
-	 * @see org.nsidc.bigdata.Database#connectReadOnly()
-	 * 
-	 * Connect to an existing database. If it doesn't exist throw an error.
+  	 * Connect to an existing database. If it doesn't exist throw an error.
 	 */
     public void connectReadOnly() {
 		try {
@@ -101,9 +108,7 @@ public class DatabaseH2 extends Database {
     /*
      * disconnect
      *
-     * Disconnect from an open database.
-     * (non-Javadoc)
-     * @see org.nsidc.bigdata.Database#disconnect()
+     * 
      */
     public void disconnect() {
     	try {
@@ -116,43 +121,44 @@ public class DatabaseH2 extends Database {
     	
 		status = Status.DISCONNECTED;
     }
-    //Check if table already existed, if not create new->return new, otherwise return old
-    //currently only for location table
-    public String checkTable(String tbNames){
-    	
-    	try {
+    
+    // Check if table already exists, if not create new->return true, otherwise return false
+    // Currently only for location table
+	public Boolean checkTable(String tbNames) {
+
+		try {
 			md = conn.getMetaData();
 			ResultSet rs = md.getTables(null, null, tbNames, null);
-	    	while (rs.next()) {
-	    		Tools.statusMessage("LOCATION MAP Table Found: " + rs.getString("TABLE_NAME"));
-	    		if (rs.getString("TABLE_NAME") == tbNames){
-	    			rs.close();
-	    			return "Old";
-	    		}
-	        }
+			while (rs.next()) {
+				Tools.statusMessage("LOCATION MAP Table Found: "
+						+ rs.getString("TABLE_NAME"));
+				if (rs.getString("TABLE_NAME") == tbNames) {
+					rs.close();
+					return true;
+				}
+			}
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	
-      try {
-		sqlCreate = conn.createStatement();
-	   	//Execute SQL query
-	   	Boolean status = sqlCreate.execute("CREATE TABLE IF NOT EXISTS "+ tbNames + "(id INT primary key, row SMALLINT, col SMALLINT)");
-	    sqlStmt_map = conn.prepareStatement(
-					"INSERT INTO "+ tbNames +
-					"(id,row, col) " + 
-					"values " + 
-					"(?,?,?)");
-	  } catch (SQLException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-	  }
-    return "New";
-   }
+
+		try {
+			sqlCreate = conn.createStatement();
+			// Execute SQL query
+			Boolean status = sqlCreate.execute("CREATE TABLE IF NOT EXISTS "
+					+ tbNames
+					+ "(id INT primary key, row SMALLINT, col SMALLINT)");
+			sqlStmt_map = conn.prepareStatement("INSERT INTO " + tbNames
+					+ "(id,row, col) " + "values " + "(?,?,?)");
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
     
-    //If table not existied, create new table and pre-defined SQL for table entries recording
-    public void createMap(String tbNames){
+    //If table does not exist, create a new table and pre-defined SQL for table entries recording
+    public void createMap(){
 		//write location map table
 		int pixelId = 0;
 		Tools.statusMessage("Creating pixel location map...");
@@ -369,7 +375,6 @@ public class DatabaseH2 extends Database {
 		Tools.statusMessage("Database name = " + dbName + "  Status: "
 				+ status.toString());
 		Tools.statusMessage("Database path = " + dbPath);
-		Tools.statusMessage("Database table = " + tbName);
 		Tools.statusMessage("Timestamp entries = " + metadata.timestamps);
 		Tools.statusMessage("Location entries  = " + metadata.locations);
 		Tools.statusMessage("Vector entries    = " + metadata.vectors);

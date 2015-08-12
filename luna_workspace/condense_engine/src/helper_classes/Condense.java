@@ -192,7 +192,7 @@ public class Condense extends GeoObject {
 					database = new DatabaseFileSchema( dataType.toString(), outputPath );			
 					break;
 				case H2:
-					database = new DatabaseH2( databasePath, databaseName, polarization, frequency );			
+					database = new DatabaseH2( databasePath, databaseName );			
 					break;
 				case BLANKDB:
 					database = new DatabaseBlank( dataType.toString() );			
@@ -204,14 +204,6 @@ public class Condense extends GeoObject {
 		
 		// Connect to the database.
 		database.connect();
-		
-		//check map table
-		String tbN = "LOCMAP_S";
-		String rs = database.checkTable(tbN);
-		if (rs == "New"){
-			//write to location
-			database.createMap(tbN);
-		}
 		
 		// Read surface types and coast lines.
 		if (readSurface) readSurface();
