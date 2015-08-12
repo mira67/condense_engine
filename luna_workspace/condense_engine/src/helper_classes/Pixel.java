@@ -6,12 +6,9 @@ package helper_classes;
  * 
  */
 
-// TODO: does this class need to exist? Or should it be its own raster class?
-
 public abstract class Pixel extends RasterGraphic {
 
     public Pixel(int r, int c) {
-    	origin = new RasterLocation(r, c);
+    	location = new RasterLocation(r, c);
     }
-    
 }

@@ -15,13 +15,14 @@ public class PixelIndexedColor extends PixelDisplayable {
 	// Index is the index into the color table.
 	DN index = DEFAULT;
 	
+	// Contstructor with a color table and row,col location. Color defaults.
 	PixelIndexedColor(ColorTable t, int r, int c) {
 		super(r, c);
 		index = DEFAULT;
 		colorTable = t;
 	}
 
-	
+	// Contstructor with a color table, color index, and row,col location
 	PixelIndexedColor(ColorTable t, int i, int r, int c) {
 		super(r, c);
 		index = new DN(i);

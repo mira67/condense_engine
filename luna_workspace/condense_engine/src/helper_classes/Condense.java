@@ -30,7 +30,7 @@ public class Condense extends GeoObject {
 
 	public enum Algorithm 	{ NO_CONDENSATION, TEMPORAL_THRESHOLD, MINMAX, SPECIALSAMPLE }
 
-	public enum DatabaseType { RAM, FILE, H2, PERST, EXTREMEDB, ORIGODB, AEROSPIKE, BLANKDB }
+	public enum DatabaseType { RAM, FILE, H2, BLANKDB }
 
 	/*-------------------------------------------------------------------------
 	// DEFAULTS. USE THE CONFIGURATION FILE TO MODIFY THESE VALUES.
@@ -194,18 +194,6 @@ public class Condense extends GeoObject {
 				case H2:
 					database = new DatabaseH2( databasePath, databaseName, polarization, frequency );			
 					break;
-				case PERST:
-					database = new DatabasePerst( dataType.toString() );			
-					break;
-				case EXTREMEDB:
-					//database = new DatabaseExtremeDB( dataType.toString() );			
-					break;
-				case ORIGODB:
-					//database = new DatabaseOrigoDB( dataType.toString() );			
-					break;
-				case AEROSPIKE:
-					//database = new DatabaseAerospike( dataType.toString() );			
-					break;
 				case BLANKDB:
 					database = new DatabaseBlank( dataType.toString() );			
 					break;
@@ -214,7 +202,9 @@ public class Condense extends GeoObject {
 			Tools.errorMessage("Condense", "Condense", "Could not open the database.", e);
 		}
 		
+		// Connect to the database.
 		database.connect();
+		
 		//check map table
 		String tbN = "LOCMAP_S";
 		String rs = database.checkTable(tbN);
@@ -321,7 +311,8 @@ public class Condense extends GeoObject {
     			case SSMI:   
     				dataset = new DatasetSSMI(filename);
     				getMetadata( filename );
-    				//need fix Metadata for different channel (cases)
+    				
+    				// TODO need fix Metadata for different channel (cases)
     				if ((frequency == 85) || (frequency == 91)){
     					rows = 632;
     					cols = 664;
@@ -468,7 +459,9 @@ public class Condense extends GeoObject {
     		case NONE:
     			return;
     		case SEA_ICE:
+    			// TODO
     		case SSMI:
+    			// TODO
     			break;
 		}
 		
@@ -504,28 +497,6 @@ public class Condense extends GeoObject {
 				break;
 		}
     }
-
-	/* storeReferenceImages
-	 * 
-	 * Store the current pixels in a reference (base) image.
-	 */
-	protected void storeReferenceImages( GriddedVector[][] pixels ) {
-		
-		//TODO needs to be re-thought. store stats?
-		
-		for (int r = 0; r < rows; r++) {
-			for (int c = 0; c < cols; c++) {
-				
-				// Store all the pixels in the database.
-				database.store( pixels[r][c] );
-				
-				// Update the temporary reference image with the new pixels, for
-				// algorithms that use a temporal reference.
-				///TODO mean[r][c] = (int) pixels[r][c].data();
-			}
-		}
-	}
-
 	
 	/* noCondensation
 	 * 
@@ -541,41 +512,10 @@ public class Condense extends GeoObject {
 			}
 		}
 	}
-
-	
-	/* noCondensation
-	 * 
-	 * Don't do any condensation. Add all pixels to the database.
-	 */
-	/*protected void noCondensation() {
-		//
-		int locID = 0;
-		
-		// reform image based data into group of time series for downsampling
-		for (int r = 0; r < rows; r++){
-			for (int c = 0; c < cols; c++){
-				for (int d = 0; d < days; d++){//d<2 to test algorithm 
-					if (data[d] != null){
-						if (data[d][r][c] != null) { 
-							database.store(data[d][r][c].data(),locID,cDateList[d]);
-///							if (data[d][r][c] == null && d > 0) { 
-///							data[d][r][c] = data[d-1][r][c]; // quick fix for missing days data, if day-0 is missing?
-						}
-					}
-///					database.store(data[d][r][c].data(),locID,cDateList[d]);
-				}//days	
-				locID++;
-			}//cols
-		}//rows
-	}
-	*/
 	
 	/* special sampling
 	 *
 	 * pick key samples to store
-	 */
-	/**
-	 * 
 	 */
 	protected void specialsampleCondenstation() {
 		
@@ -621,16 +561,6 @@ public class Condense extends GeoObject {
 			}//cols
 		}//rows
 	}//special sampling method
-	
-	
-	/* blankCondensation
-	 * 
-	 * A stub method for adding another condensation algorithm.
-	 */
-	protected void blankCondensation() {
-		noCondensation();
-	}
-	
 	
 	/* temporalThresholdCondensation
 	 * 
@@ -809,7 +739,7 @@ public class Condense extends GeoObject {
 			}
 		}
 
-		// Now find the standard deviation for the sample population.
+		// Find the standard deviation for the sample population.
 		for (int d = 0; d < days; d++) {
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < cols; c++) {
@@ -820,8 +750,7 @@ public class Condense extends GeoObject {
 			}
 		}
 
-		// SD calculation continued.
-		
+		// SD calculation continued...
 		// Degrees of freedom. Minus one for unbiased standard deviation.
 		double df = days - 1;
 		
@@ -930,8 +859,6 @@ public class Condense extends GeoObject {
    		// Create an output file name for the image.
 	    String timeString = startTime.yearString() +
 		    	startTime.monthString() + startTime.dayOfMonthString();
-	    //myImage.savePNG( outputPath + timeString + "+" + dataType + "+" + increment + "_" +
-		//    	algorithm + "_" + Double.toString(threshold), imageRows, imageCols );
 	    myImage.savePNG( outputPath + timeString + "+" + dataType + "+" + increment + "_" +
 		    			 algorithm + "_" + Double.toString(threshold), metadata.rows(), metadata.cols() );
         
@@ -1169,10 +1096,6 @@ public class Condense extends GeoObject {
 						if (value.equals("ram")) databaseType = DatabaseType.RAM;
 						if (value.equals("file")) databaseType = DatabaseType.FILE;
 						if (value.equals("h2")) databaseType = DatabaseType.H2;
-						if (value.equals("perst")) databaseType = DatabaseType.PERST;
-						if (value.equals("extremedb")) databaseType = DatabaseType.EXTREMEDB;
-						if (value.equals("aerospike")) databaseType = DatabaseType.AEROSPIKE;
-						if (value.equals("origodb")) databaseType = DatabaseType.ORIGODB;
 						if (value.equals("blankdb")) databaseType = DatabaseType.BLANKDB;
 						Tools.statusMessage("Database type: " + databaseType);
 						break;

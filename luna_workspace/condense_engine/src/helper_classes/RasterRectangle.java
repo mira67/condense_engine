@@ -11,7 +11,7 @@ public class RasterRectangle extends RasterGraphic {
 	int height = 0;
 	
 	RasterRectangle( int r, int c, int w, int h ) {
-		origin = new RasterLocation( r, c );
+		location = new RasterLocation( r, c );
 		width = w;
 		height = h;
 	}
@@ -22,9 +22,9 @@ public class RasterRectangle extends RasterGraphic {
 	public int width() { return width; }
 	public int height() { return height; }
 
-	public void row(int r) { origin.row(r); }
-	public void col(int c) { origin.col(c); }
+	public void row(int r) { location.row(r); }
+	public void col(int c) { location.col(c); }
 	
-	public int row() { return origin.row(); }
-	public int col() { return origin.col(); }
+	public int row() { return location.row(); }
+	public int col() { return location.col(); }
 }

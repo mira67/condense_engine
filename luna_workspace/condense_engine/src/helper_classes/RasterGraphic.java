@@ -6,18 +6,18 @@ package helper_classes;
  */
 public abstract class RasterGraphic extends GeoObject {
 
-	RasterLocation origin;
+	RasterLocation location;
 
     // Location methods
-    public void row(int r) {origin.row(r);}
-    public int row() {return origin.row();}
+    public void row(int r) {location.row(r);}
+    public int row() {return location.row();}
     
-    public void col(int c) {origin.col(c);}
-    public int col() {return origin.col();}
+    public void col(int c) {location.col(c);}
+    public int col() {return location.col();}
 	  	  
     public void setLocation( int r, int c ) {
-    	origin.row(r);
-    	origin.col(c);
+    	location.row(r);
+    	location.col(c);
     }
     
 	// Boolean operators for pixels
