@@ -1,6 +1,15 @@
 jfree*/
 downsample/
 libraries/
+.gitignore
 *.class
 *.xmi
 *.snap
+luna_workspace\.metadata\
+*.png
+luna_workspace/.metadata/.plugins/org.eclipse.core.resources/.history/44/a06ffc193e4100151b89af6d9ad30a26
+*.xmi
+*.index
+*.prefs
+luna_workspace/.metadata/.plugins/org.eclipse.jdt.launching/libraryInfos.xml
+*.prefs
