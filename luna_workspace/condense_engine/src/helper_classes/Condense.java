@@ -182,25 +182,27 @@ public class Condense extends GeoObject {
 	 * Condense the data files into a database.
 	 */
 	Condense() {
-	
-		try {
-			switch (databaseType) {
-				case RAM:
-					database = new DatabaseRamSchema( dataType.toString() );
-					break;
-				case FILE:
-					database = new DatabaseFileSchema( dataType.toString(), outputPath );			
-					break;
-				case H2:
-					database = new DatabaseH2( databasePath, databaseName );			
-					break;
-			}
-		} catch (Exception e) {
-			Tools.errorMessage("Condense", "Condense", "Could not open the database.", e);
+
+		switch (databaseType) {
+			case RAM:
+				database = new DatabaseRamSchema(dataType.toString());
+				break;
+			case FILE:
+				database = new DatabaseFileSchema(dataType.toString(), outputPath);
+				break;
+			case H2:
+				database = new DatabaseH2(databasePath, databaseName);
+				break;
 		}
 		
 		// Connect to the database.
-		database.connect();
+		if (!database.connect()) {
+			Tools.errorMessage("Condense", "Condense", "Could not connect to the database.",
+					new Exception("Giving up."));
+		}
+		
+		// For development, clean out any tables and data first.
+		database.clean();
 		
 		// Read surface types and coast lines.
 		if (readSurface) readSurface();
@@ -222,7 +224,6 @@ public class Condense extends GeoObject {
 		database.disconnect();
 		
 		// Warm fuzzy feedback.
-		Tools.statusMessage("Database closed.");
 		Tools.statusMessage("Total data files processed = " + fileCount);
 
 		// We should now have a database full of condensed pixels.
@@ -771,13 +772,12 @@ public class Condense extends GeoObject {
 	 */
 	void generateTestImages() {
 
+		Tools.statusMessage("\nGENERATE TEST IMAGES");
 
 		database.connectReadOnly();
 
 		// Database info for debugging purposes.
-		Tools.statusMessage("\n---------------------------");
 		database.status();
-		Tools.statusMessage("---------------------------\n");
 		
 		metadata = database.getMetadata();
 		

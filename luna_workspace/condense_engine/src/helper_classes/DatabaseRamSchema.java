@@ -36,18 +36,22 @@ public class DatabaseRamSchema extends Database {
 		status = Status.DISCONNECTED;
 	}
 
-	public void connect() {
+	public boolean connect() {
 		status = Status.CONNECTED;
+		return true;
     }
 
-    public void connectReadOnly() {
+    public boolean connectReadOnly() {
 		status = Status.CONNECTED_READ_ONLY;
+		return true;
     }
 
     public void disconnect() {
 		status = Status.DISCONNECTED;
     }
-    
+
+	public void clean() {};
+	
     protected void writeCheck(String methodName) {
     	if (status != Status.CONNECTED) {
 			Tools.errorMessage("DatabaseRamSchema", methodName, 

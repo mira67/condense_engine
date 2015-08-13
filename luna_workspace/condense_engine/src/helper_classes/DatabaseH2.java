@@ -1,8 +1,6 @@
 package helper_classes;
 
 import java.util.ArrayList;
-///TODO
-///import java.util.Iterator;
 import java.sql.*;
 
 /* DatabaseH2
@@ -23,6 +21,7 @@ public class DatabaseH2 extends Database {
 	private Statement sqlCreate;
 	private ResultSet results;
 
+	// Define what tables will be in the database.
 	public enum Tables {
 		METADATA("metadata"), LOCATIONS("locations"), TIMESTAMPS("timestamps"),
 		VECTORS("vectors");
@@ -38,8 +37,7 @@ public class DatabaseH2 extends Database {
 		}
 	}
 
-	String[] tables;
-	
+	// Constructor
 	public DatabaseH2(String path, String name) {
 		dbPath = path;
 		dbName = name;
@@ -51,7 +49,7 @@ public class DatabaseH2 extends Database {
 	 * 
 	 * Connect to the database for writing. If it does not exist it will be created.
 	 */
-	public void connect() {
+	public boolean connect() {
 
 		// Open the database.
 		try {
@@ -67,28 +65,40 @@ public class DatabaseH2 extends Database {
 			Tools.errorMessage("DatabaseH2", "connect",
 					"Could not connect with database " + dbName +
 					", Path: " + dbPath, e);
+			return false;
 		}
 
 		status = Status.CONNECTED;
+		
+		return true;
 	}
 
 
 	/*
 	 * clean
 	 * 
-	 * Reset the database, cleaning out any existing tables.
+	 * Reset the database, clean out all existing data and tables. You
+	 * will lose all your data entries if you do this! Empty tables are
+	 * created afterward.
 	 */
 	public void clean() {
-		for (int i = 0; i < tables.length; i++) {
+		for (Tables table : Tables.values()) {
 			try {
 				sqlCreate = conn.createStatement();
-				Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS " + tables[i]);
-				Tools.debugMessage("DatabaseH2 Table Status " + status);				
+				Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS " + table.name);
+				Tools.debugMessage("DatabaseH2 table clean: " + table.name + " status:" + status);				
 			} catch (Exception e) {
 				// TODO Do nothing right now.
 				// Assume it either didn't exist, or was dropped successfully.
 				// Might want to re-visit this assumption.
 			}
+		}
+		
+		// We've deleted everything. Now make the tables again
+		try {
+			checkTables( true );
+		} catch( Exception e ) {
+			Tools.warningMessage("Could not re-create tables after cleaning the database.");
 		}
 	}
 			/*
@@ -118,9 +128,9 @@ public class DatabaseH2 extends Database {
 	/*
 	 * connectReadOnly
 	 * 
-  	 * Connect to an existing database. If it doesn't exist throw an error.
+  	 * Connect to an existing database for reading. Return true on success.
 	 */
-    public void connectReadOnly() {
+    public boolean connectReadOnly() {
 		try {
 	        Class.forName("org.h2.Driver");
 	        conn = DriverManager.getConnection(dbPath+dbName+";IFEXISTS=TRUE", null, null);//
@@ -129,12 +139,16 @@ public class DatabaseH2 extends Database {
 	        
 	    } catch(Exception e) {
 			Tools.errorMessage("DatabaseH2", "connectReadOnly", "Could not connect with database " + dbName, e);
+			
+			return false;
 		}
 
 		// Make sure the tables exist. False = don't create any. 
 		
 		Tools.statusMessage("Connected to database, read-only: " + dbName);
 		status = Status.CONNECTED_READ_ONLY;
+		
+		return true;
     }
 
     /*
@@ -152,6 +166,8 @@ public class DatabaseH2 extends Database {
     	}
     	
 		status = Status.DISCONNECTED;
+		
+		Tools.statusMessage("Disconnected from database");
     }
 
 	/*
@@ -170,7 +186,7 @@ public class DatabaseH2 extends Database {
 				results = conn.getMetaData().getTables(null, null, table.name(),
 						null);
 				while (results.next()) {
-					Tools.statusMessage("LOCATION MAP Table Found: "
+					Tools.debugMessage("LOCATION MAP Table Found: "
 							+ results.getString("TABLE_NAME"));
 					if (results.getString("TABLE_NAME") == table.name) {
 						results.close();

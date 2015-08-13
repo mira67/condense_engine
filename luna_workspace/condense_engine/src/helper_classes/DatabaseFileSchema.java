@@ -45,7 +45,7 @@ public class DatabaseFileSchema extends Database {
 	 * Attaches to the database. Warning: in a file-based schema, this will
 	 * over-write existing database files.
 	 */
-	public void connect() {
+	public boolean connect() {
 
 		metadataFile = new DataFile();
 		timestampsFile = new DataFile();
@@ -59,9 +59,13 @@ public class DatabaseFileSchema extends Database {
 			vectorsFile.create(vectorsFilename);
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseFileSchema", "create", "could not open file", e);
+			
+			return false;
 		}
 
 		status = Status.CONNECTED;
+		
+		return true;
 	}
 
 	/*
@@ -69,7 +73,7 @@ public class DatabaseFileSchema extends Database {
 	 * 
 	 * Open the database (files) for reading.
 	 */
-	public void connectReadOnly() {
+	public boolean connectReadOnly() {
 		try {
 			metadataFile.open();
 			timestampsFile.open();
@@ -77,9 +81,12 @@ public class DatabaseFileSchema extends Database {
 			vectorsFile.open();
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseFileSchema", "open", "error trying to open database file(s)", e);
+			return false;
 		}
 
 		status = Status.CONNECTED_READ_ONLY;
+		
+		return true;
 	}
 
 	/*
@@ -114,6 +121,13 @@ public class DatabaseFileSchema extends Database {
 		status = Status.DISCONNECTED;
 	}
 
+	/*
+	 * clean
+	 * 
+	 * Any existing files will be overwritten, so we don't need to do anything.
+	 */
+	public void clean() {};
+	
 	/*
 	 * store Metadata
 	 * 

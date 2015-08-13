@@ -27,8 +27,9 @@ public abstract class Database extends GeoObject {
 	protected Metadata metadata;
 	protected Status status = Status.DISCONNECTED;
 	
-	public abstract void connect();
-	public abstract void connectReadOnly();
+	public abstract boolean connect();
+	public abstract boolean connectReadOnly();
+	public abstract void clean();
 	public abstract void disconnect();
 	public void setName(String name) {
 		dbName = name;
