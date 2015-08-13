@@ -23,7 +23,8 @@ public class DatabaseRamSchema extends Database {
 	ArrayList<Timestamp> timestamps;
 	ArrayList<GriddedVector> vectors;
 
-    public DatabaseRamSchema() {
+    public DatabaseRamSchema(String path, String name) {
+    	super(path, name);
 		metadata = new Metadata();
 		timestamps = new ArrayList<Timestamp>();
 		locations = new ArrayList<GriddedLocation>();
@@ -31,9 +32,7 @@ public class DatabaseRamSchema extends Database {
 	}
 
 	public DatabaseRamSchema(String name) {
-		this();
-		dbName = name;
-		status = Status.DISCONNECTED;
+		super("", name);
 	}
 
 	public boolean connect() {

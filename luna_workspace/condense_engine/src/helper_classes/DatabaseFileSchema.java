@@ -11,8 +11,6 @@ import java.util.Iterator;
 
 public class DatabaseFileSchema extends Database {
 
-	String path = "";
-
 	String metadataFilename = "";
 	String locationsFilename = "";
 	String timestampsFilename = "";
@@ -25,10 +23,9 @@ public class DatabaseFileSchema extends Database {
 
 	ArrayList<Timestamp> timestamps = null;
 
-	public DatabaseFileSchema(String name, String p) {
-		dbName = name;
-		path = p;
-
+	public DatabaseFileSchema(String path, String name ) {
+		super(path, name);
+		
 		metadataFilename = path + dbName + "_metadata.db";
 		locationsFilename = path + dbName + "_locations.db";
 		timestampsFilename = path + dbName + "_timestamps.db";
@@ -359,7 +356,7 @@ public class DatabaseFileSchema extends Database {
 
 		Tools.statusMessage("Database name = " + dbName + "  Status: "
 				+ status.toString());
-		Tools.statusMessage("Database path = " + path);
+		Tools.statusMessage("Database path = " + dbPath);
 		Tools.statusMessage("metadataFilename = " + metadataFilename);
 		Tools.statusMessage("locationsFilename = " + locationsFilename);
 		Tools.statusMessage("timestampsFilename = " + timestampsFilename);

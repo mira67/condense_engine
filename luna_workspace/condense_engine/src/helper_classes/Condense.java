@@ -185,10 +185,10 @@ public class Condense extends GeoObject {
 
 		switch (databaseType) {
 			case RAM:
-				database = new DatabaseRamSchema(dataType.toString());
+				database = new DatabaseRamSchema("", dataType.toString());
 				break;
 			case FILE:
-				database = new DatabaseFileSchema(dataType.toString(), outputPath);
+				database = new DatabaseFileSchema(outputPath, dataType.toString());
 				break;
 			case H2:
 				database = new DatabaseH2(databasePath, databaseName);

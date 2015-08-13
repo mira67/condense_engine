@@ -9,7 +9,7 @@ public abstract class Database extends GeoObject {
 	public enum Status {
 		DISCONNECTED("DISCONNECTED"), CONNECTED("CONNECTED"), CONNECTED_READ_ONLY("CONNECTED READ-ONLY"),
 			UNKNOWN("UNKNOWN");
-		
+
 		private final String state;
 
 		private Status(String s) {
@@ -21,11 +21,33 @@ public abstract class Database extends GeoObject {
 		}
 	}
 
+	// Define what tables will be in the database.
+	public enum Table {
+		METADATA("METADATA"), LOCATIONS("LOCATIONS"), TIMESTAMPS("TIMESTAMPS"),
+		VECTORS("VECTORS");
+			
+		protected final String name;
+
+		private Table(String s) {
+			name = s;
+		}
+
+		public String toString() {
+			return name;
+		}
+	}
+
+	
 	protected String dbName = "";
 	protected String dbPath = "";
-	protected int chFreq = 0;
 	protected Metadata metadata;
 	protected Status status = Status.DISCONNECTED;
+	
+	public Database(String path, String name) {
+		dbPath = path;
+		dbName = name;
+		status = Status.DISCONNECTED;
+	}
 	
 	public abstract boolean connect();
 	public abstract boolean connectReadOnly();
@@ -61,8 +83,6 @@ public abstract class Database extends GeoObject {
 			int endIndex);
 
 	// /public abstract ArrayList<GriddedLocation> getLocations();
-
-	// OTHER NONSENSE
 
 	/*
 	 * status
