@@ -12,9 +12,16 @@ public abstract class Dataset extends GeoObject {
 	
 	protected Metadata metadata;
 	protected boolean haveMetadata = false;
-	
-	public abstract int rows();
-	public abstract int cols();
+	protected GriddedLocation[][] locs;
+	// /protected ArrayList<GriddedLocation> locs;
+
+	public int rows() {
+		return metadata.rows;
+	}
+
+	public int cols() {
+		return metadata.cols;
+	}
 
 	public abstract Metadata readMetadata( String filename );
 	public abstract ArrayList<GriddedLocation> locationsAsArrayList();

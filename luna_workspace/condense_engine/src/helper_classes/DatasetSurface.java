@@ -12,7 +12,6 @@ public class DatasetSurface extends Dataset {
 	protected SurfaceVector[][] vectors;
 	protected int rows = 0;
 	protected int cols = 0;
-	protected GriddedLocation[][] locs;
 
 	/*
 	 * Constructor
@@ -147,14 +146,6 @@ public class DatasetSurface extends Dataset {
 
 	public static Timestamp getTimeStatic() {
 		return new Timestamp(2001, 1, 1);
-	}
-
-	public int rows() {
-		return rows;
-	}
-
-	public int cols() {
-		return cols;
 	}
 
 	/*

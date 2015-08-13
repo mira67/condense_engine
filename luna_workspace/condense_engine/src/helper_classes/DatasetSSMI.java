@@ -11,10 +11,6 @@ import java.util.ArrayList;
 
 public class DatasetSSMI extends Dataset {
 
-	// /protected ArrayList<GriddedLocation> locs;
-	protected GriddedLocation locs[][];
-	protected Metadata metadata;
-
 	/*
 	 * Constructor
 	 * 
@@ -70,9 +66,9 @@ public class DatasetSSMI extends Dataset {
 		}
 
 		// Nothing. Return a default name, which will fail to open.
-		// String filename = path + "file_not_found_" + date + ".bin";
+		String filename = path + "file_not_found_" + date + ".bin";
 
-		return "";
+		return filename;
 	}
 
 	/*
@@ -86,9 +82,12 @@ public class DatasetSSMI extends Dataset {
 		// the user will know 'a priori' the dimensions of the data.
 		// A description of the files can be found here:
 		// http://nsidc.org/data/docs/daac/nsidc0001_ssmi_tbs.gd.html
+		//
+		// Different hemispheres and frequencies will have different dimensions
+		// and thus different file sizes.
 		// Below, we use the file size to determine the dimensions of the
-		// data it contains. (The file name could also be parsed for the
-		// hemisphere and frequency info but this is just easier.)
+		// data it contains. (Alternatively, the file name could be parsed
+		// for the hemisphere and frequency info but this is just easier.)
 		
 		long length = 0;
 		
@@ -229,14 +228,11 @@ public class DatasetSSMI extends Dataset {
 		return ssmiVectors;
 	}
 
-	public int rows() {
-		return metadata.rows;
-	}
-
-	public int cols() {
-		return metadata.cols;
-	}
-
+	/*
+	 * locationsAsArrayList
+	 * 
+	 * Return the matrix of locations as an arraylist.
+	 */
 	public ArrayList<GriddedLocation> locationsAsArrayList() {
 		ArrayList<GriddedLocation> list = new ArrayList<GriddedLocation>();
 

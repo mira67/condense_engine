@@ -157,7 +157,7 @@ public class DatabaseH2 extends Database {
 		// Iterate through the tables that should be in the database.
 		for (Table table : Table.values()) {
 
-			// See if the table is in the database.
+			// Ask the database for the table.
 			results = conn.getMetaData().getTables(null, null, table.name, null);
 
 			boolean exists = false;
@@ -192,7 +192,7 @@ public class DatabaseH2 extends Database {
 				exists = true;
 			}
 			
-			// Okay, the table should be in there now. If not, we've got problems.
+			// One way or the other, the table should be in there now. If not, we've got problems.
 			if (!exists) {
 				Tools.errorMessage("DatabaseH2", "checkTables", "Could not find and/or create " +
 						"table: " +table.name, new Exception("Giving up."));

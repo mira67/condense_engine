@@ -15,8 +15,6 @@ import ucar.nc2.Variable;
 
 public class DatasetSeaIce extends Dataset {
 
-	// /protected ArrayList<GriddedLocation> locs;
-	protected GriddedLocation locs[][];
 	Metadata metadata;
 
 	/*
@@ -219,14 +217,6 @@ public class DatasetSeaIce extends Dataset {
 		}
 
 		return seaIceVectors;
-	}
-
-	public int rows() {
-		return metadata.rows;
-	}
-
-	public int cols() {
-		return metadata.cols;
 	}
 
 	/*
