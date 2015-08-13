@@ -5,25 +5,42 @@ import java.util.ArrayList;
 ///import java.util.Iterator;
 import java.sql.*;
 
-/* Database
+/* DatabaseH2
  * 
- * Database emulator: for sensor vector data, locations, timestamps, and metadata. 
+ * Encapsulates the H2 database, for standardized interfacing. 
+ *
+ * Example connection paths:
+ * 			"jdbc:h2:tcp://10.240.210.131:9292/mem:~/"
+ * 			"jdbc:h2:tcp://localhost/~/"
  */
 
 public class DatabaseH2 extends Database {
 	
 	Connection conn;
-	DatabaseMetaData md;
 	
-	// For Hibernate usage. Does nothing.
-	private DatabaseH2() {}
-	private PreparedStatement sqlStmt_tb = null;
-	private PreparedStatement sqlStmt_map = null;
-	private Statement sqlCreate = null;
-	///private ResultSet sqlRs = null;
-   	
+	private PreparedStatement sqlStmt_tb;
+	private PreparedStatement sqlStmt_map;
+	private Statement sqlCreate;
+	private ResultSet results;
+
+	public enum Tables {
+		METADATA("metadata"), LOCATIONS("locations"), TIMESTAMPS("timestamps"),
+		VECTORS("vectors");
+		
+		private final String name;
+
+		private Tables(String s) {
+			name = s;
+		}
+
+		public String toString() {
+			return name;
+		}
+	}
+
+	String[] tables;
+	
 	public DatabaseH2(String path, String name) {
-		this();
 		dbPath = path;
 		dbName = name;
 		status = Status.DISCONNECTED;
@@ -32,31 +49,48 @@ public class DatabaseH2 extends Database {
 	/*
 	 * connect
 	 * 
-	 * Connect to a database. If it does not exist it will be created.
+	 * Connect to the database for writing. If it does not exist it will be created.
 	 */
 	public void connect() {
 
 		// Open the database.
 		try {
 			Class.forName("org.h2.Driver");
-			conn = DriverManager.getConnection(dbPath + dbName, null, null);// jdbc:h2:mem:db1
-			// conn =
-			// DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+
-			// "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
-			// conn =
-			// DriverManager.getConnection("jdbc:h2:tcp://localhost/~/"+dbName+
-			// "?user=sa&password=1234", null, null);//DB_CLOSE_DELAY=-1
+			conn = DriverManager.getConnection(dbPath + dbName, null, null);
 
 			conn.setAutoCommit(true);
 
+			// Make sure the tables exist. True = create them if they don't exist. 
+			checkTables( true );
+			
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2", "connect",
-					"Could not connect with database " + dbName, e);
+					"Could not connect with database " + dbName +
+					", Path: " + dbPath, e);
 		}
 
 		status = Status.CONNECTED;
 	}
 
+
+	/*
+	 * clean
+	 * 
+	 * Reset the database, cleaning out any existing tables.
+	 */
+	public void clean() {
+		for (int i = 0; i < tables.length; i++) {
+			try {
+				sqlCreate = conn.createStatement();
+				Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS " + tables[i]);
+				Tools.debugMessage("DatabaseH2 Table Status " + status);				
+			} catch (Exception e) {
+				// TODO Do nothing right now.
+				// Assume it either didn't exist, or was dropped successfully.
+				// Might want to re-visit this assumption.
+			}
+		}
+	}
 			/*
 			// check map table
 			String tbN = "LOCMAP_S";
@@ -67,11 +101,6 @@ public class DatabaseH2 extends Database {
 			*/
 	        
 	        /*
-	        
-	        //drop table is existed for repeat debugging purpose -  Todo-get to another function for easy management
-	        sqlCreate = conn.createStatement();
-	        Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS " + tbName);
-	        Tools.debugMessage("DatabaseH2 Table Status " + status);
 	        
 	        //test sql statement - create a table
 	        sqlCreate = conn.createStatement();
@@ -95,11 +124,14 @@ public class DatabaseH2 extends Database {
 		try {
 	        Class.forName("org.h2.Driver");
 	        conn = DriverManager.getConnection(dbPath+dbName+";IFEXISTS=TRUE", null, null);//
-	        //in-memory db test
-	        //conn = DriverManager.getConnection("jdbc:h2:tcp://10.240.210.131:9292/mem:~/"+dbName+ "Test"+";DB_CLOSE_DELAY=-1", null, null);//DB_CLOSE_DELAY=-1
-		} catch(Exception e) {
+
+	        checkTables( false );
+	        
+	    } catch(Exception e) {
 			Tools.errorMessage("DatabaseH2", "connectReadOnly", "Could not connect with database " + dbName, e);
 		}
+
+		// Make sure the tables exist. False = don't create any. 
 		
 		Tools.statusMessage("Connected to database, read-only: " + dbName);
 		status = Status.CONNECTED_READ_ONLY;
@@ -121,43 +153,69 @@ public class DatabaseH2 extends Database {
     	
 		status = Status.DISCONNECTED;
     }
-    
-    // Check if table already exists, if not create new->return true, otherwise return false
-    // Currently only for location table
-	public Boolean checkTable(String tbNames) {
 
-		try {
-			md = conn.getMetaData();
-			ResultSet rs = md.getTables(null, null, tbNames, null);
-			while (rs.next()) {
-				Tools.statusMessage("LOCATION MAP Table Found: "
-						+ rs.getString("TABLE_NAME"));
-				if (rs.getString("TABLE_NAME") == tbNames) {
-					rs.close();
-					return true;
+	/*
+	 * checkTables
+	 * 
+	 * Check to see if the tables already exist. If not, create a new one if the
+	 * flag is set to true.
+	 */
+
+	public void checkTables(Boolean createIfDoesNotExist) throws Exception {
+
+		// Iterate through the tables.
+		for (Tables table : Tables.values()) {
+			
+			try {
+				results = conn.getMetaData().getTables(null, null, table.name(),
+						null);
+				while (results.next()) {
+					Tools.statusMessage("LOCATION MAP Table Found: "
+							+ results.getString("TABLE_NAME"));
+					if (results.getString("TABLE_NAME") == table.name) {
+						results.close();
+					}
+				}
+				results.close();
+			} catch (SQLException e) {
+				Tools.errorMessage("DatabaseH2", "checkTables", "When looking for a table: ", e);
+				throw(e);
+			}
+
+			if (createIfDoesNotExist) {
+				if (!createTable(table.name)) {
+					Tools.errorMessage("DatabaseH2", "checkTables", "Failed to create table: " 
+							+table.name, new Exception("Giving up."));
 				}
 			}
-			rs.close();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+	}
 
+	/*
+	 * createTable
+	 * 
+	 * Create a new table in the database if it doesn't already exist. Returns
+	 * true on success.
+	 */
+	protected boolean createTable(String tableName) {
 		try {
+
 			sqlCreate = conn.createStatement();
-			// Execute SQL query
-			sqlCreate.execute("CREATE TABLE IF NOT EXISTS "
-					+ tbNames
+			sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + tableName
 					+ "(id INT primary key, row SMALLINT, col SMALLINT)");
-			sqlStmt_map = conn.prepareStatement("INSERT INTO " + tbNames
+			sqlStmt_map = conn.prepareStatement("INSERT INTO " + tableName
 					+ "(id,row, col) " + "values " + "(?,?,?)");
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			Tools.warningMessage("Could not create table: " + tableName);
+			Tools.warningMessage("Exception: " + e);
+			return false;
 		}
-		return false;
+
+		return true;
 	}
-    
+	
+	
     //If table does not exist, create a new table and pre-defined SQL for table entries recording
     public void createMap(){
 		//write location map table

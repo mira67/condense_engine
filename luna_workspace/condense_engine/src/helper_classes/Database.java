@@ -104,7 +104,7 @@ public abstract class Database extends GeoObject {
 	 * 
 	 * Returns true if the table exists, false if it does not (and creates the table).
 	 */
-	public Boolean checkTable(String tbNames) {
+	public Boolean checkTables(String tbNames) {
 		// TODO Auto-generated method stub
 		return false;
 	}
