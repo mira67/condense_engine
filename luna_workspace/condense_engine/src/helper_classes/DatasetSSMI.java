@@ -190,8 +190,7 @@ public class DatasetSSMI extends Dataset {
 			// Read the data
 			int[][] data = file.read2ByteInts2D(rows, cols);
 
-			// Filter out missing data points. BTs are encoded by a factor of
-			// 10.
+			// Filter out missing data points. BTs are encoded by a factor of 10.
 			// data = Tools.discardBadData(data, 1000, 4000);
 
 			// TODO for testing
