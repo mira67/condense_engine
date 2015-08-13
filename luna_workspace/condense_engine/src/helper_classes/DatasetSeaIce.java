@@ -101,15 +101,15 @@ public class DatasetSeaIce extends Dataset {
 
 				// Be sure to store the rows and columns in the metadata, which
 				// will later be part of the database.
-				metadata.rows(shape[0]);
-				metadata.cols(shape[1]);
+				metadata.rows = shape[0];
+				metadata.cols = shape[1];
 
 				// Create a location array based on the lats/lons where
 				// each vector is located.
 				locs = new GriddedLocation[rows()][cols()];
 
-				for (int r = 0; r < metadata.rows(); r++) {
-					for (int c = 0; c < metadata.cols(); c++) {
+				for (int r = 0; r < metadata.rows; r++) {
+					for (int c = 0; c < metadata.cols; c++) {
 						locs[r][c] = new GriddedLocation(r, c,
 								latArray.getDouble(r), lonArray.getDouble(c));
 					}
@@ -222,11 +222,11 @@ public class DatasetSeaIce extends Dataset {
 	}
 
 	public int rows() {
-		return metadata.rows();
+		return metadata.rows;
 	}
 
 	public int cols() {
-		return metadata.cols();
+		return metadata.cols;
 	}
 
 	/*

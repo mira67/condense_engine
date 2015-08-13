@@ -136,8 +136,8 @@ public class DatabaseRamSchema extends Database {
 	public int numberOfVectors() { return vectors.size(); }
 	public ArrayList<GriddedVector> getVectors() { return vectors; }
 	
-	public int rows() { return metadata.rows(); }
-	public int cols() { return metadata.cols(); }
+	public int rows() { return metadata.rows; }
+	public int cols() { return metadata.cols; }
 	
 	/* getVectorsAtTime
 	 * 
@@ -248,8 +248,8 @@ public class DatabaseRamSchema extends Database {
 		Tools.statusMessage("Timestamp entries = " + metadata.timestamps);
 		Tools.statusMessage("Location entries  = " + metadata.locations);
 		Tools.statusMessage("Vector entries    = " + metadata.vectors);
-		Tools.statusMessage("Rows              = " + metadata.rows());
-		Tools.statusMessage("Cols              = " + metadata.cols());
+		Tools.statusMessage("Rows              = " + metadata.rows);
+		Tools.statusMessage("Cols              = " + metadata.cols);
 	}
 
 	@Override

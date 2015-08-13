@@ -137,6 +137,7 @@ public class DatabaseH2 extends Database {
 					return true;
 				}
 			}
+			rs.close();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -145,7 +146,7 @@ public class DatabaseH2 extends Database {
 		try {
 			sqlCreate = conn.createStatement();
 			// Execute SQL query
-			Boolean status = sqlCreate.execute("CREATE TABLE IF NOT EXISTS "
+			sqlCreate.execute("CREATE TABLE IF NOT EXISTS "
 					+ tbNames
 					+ "(id INT primary key, row SMALLINT, col SMALLINT)");
 			sqlStmt_map = conn.prepareStatement("INSERT INTO " + tbNames
@@ -167,8 +168,8 @@ public class DatabaseH2 extends Database {
 			Tools.errorMessage("DatabaseH2", "createMap", "Metadata has not been set", new Exception());
 		}
 	
-		for (int r = 0; r < metadata.rows(); r++){
-			for (int c = 0; c < metadata.cols(); c++){
+		for (int r = 0; r < metadata.rows; r++){
+			for (int c = 0; c < metadata.cols; c++){
 				store(pixelId, r, c);
 				pixelId++;
 			}
@@ -195,6 +196,7 @@ public class DatabaseH2 extends Database {
 		// TODO: store the metadata in the database
 	}
 	
+	// TODO
 	public void store(Timestamp t) {}
 	public void store(ArrayList<GriddedLocation> locs) {}
 	public void store(GriddedLocation loc) {}
@@ -212,7 +214,7 @@ public class DatabaseH2 extends Database {
 	        sqlStmt_tb.setInt(2, locID);
 	        sqlStmt_tb.setInt(3, data);
 	        int rowsAffected = sqlStmt_tb.executeUpdate();
-	        //Tools.debugMessage("Affected rows = " + rowsAffected);
+	        Tools.debugMessage("Affected rows = " + rowsAffected);
 	        conn.commit();
 	        
 		} catch(Exception e) {
@@ -233,7 +235,7 @@ public class DatabaseH2 extends Database {
 	        sqlStmt_map.setInt(2, row);
 	        sqlStmt_map.setInt(3, col);
 	        int rowsAffected = sqlStmt_map.executeUpdate();
-	        //Tools.debugMessage("Affected rows = " + rowsAffected);
+	        Tools.debugMessage("Affected rows = " + rowsAffected);
 	        conn.commit();
 	        
 		} catch(Exception e) {
@@ -256,21 +258,21 @@ public class DatabaseH2 extends Database {
 	/*
 	 *  Add an array of locations
 	 */
-	public void add( GriddedLocation[][] loc) { 
-		for (int r = 0; r < loc.length; r++) {
-			for (int c = 0; c < loc[0].length; c++) {
-				//TODO locations.add(loc[r][c]);
+	public void add( GriddedLocation[][] locs) { 
+		for (int r = 0; r < locs.length; r++) {
+			for (int c = 0; c < locs[0].length; c++) {
+				store(locs[r][c]);
 			}
 		}
 	}
 
 	/*
-	 *  Add an array of sensor vectors (like surface data)
+	 *  Add an array of sensor vectors
 	 */
 	public void add( GriddedVector[][] v) { 
 		for (int r = 0; r < v.length; r++) {
 			for (int c = 0; c < v[0].length; c++) {
-				//TODO vectors.add(v[r][c]);
+				store(v[r][c]);
 			}
 		}
 	}
@@ -321,8 +323,8 @@ public class DatabaseH2 extends Database {
 	}
 	
 	
-	public int rows() { return metadata.rows(); }
-	public int cols() { return metadata.cols(); }
+	public int rows() { return metadata.rows; }
+	public int cols() { return metadata.cols; }
 	
 	/* getVectorsAtTime
 	 * 

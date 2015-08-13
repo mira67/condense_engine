@@ -801,7 +801,7 @@ public class Condense extends GeoObject {
 		Tools.statusMessage("Pixels: " + pixList.size());
 		
 		// Make an integer array out of the pixel data
-		int[][] sensorData = createArrayFromVectorList( metadata.rows(), metadata.cols(), pixList );
+		int[][] sensorData = createArrayFromVectorList( metadata.rows, metadata.cols, pixList );
 
 		// Make a color table.
 		ColorTable colors = new ColorTable();
@@ -844,7 +844,7 @@ public class Condense extends GeoObject {
 
 	    // Display the image.
    		myImage.display( "Time (day): " + startTime.dateString() + " - " + endTime.dateString() +
-   				"  " + algorithm + " " + threshold, metadata.rows(), metadata.cols() );
+   				"  " + algorithm + " " + threshold, metadata.rows, metadata.cols );
 
    		//Grayscale image
    		// change the color table?
@@ -852,13 +852,13 @@ public class Condense extends GeoObject {
    		
 	    // Display the image.
    		myImage.display( "Time (day): " + startTime.dateString() + " - " + endTime.dateString() +
-   				"  " + algorithm + " " + threshold, metadata.rows(), metadata.cols() );
+   				"  " + algorithm + " " + threshold, metadata.rows, metadata.cols );
 
    		// Create an output file name for the image.
 	    String timeString = startTime.yearString() +
 		    	startTime.monthString() + startTime.dayOfMonthString();
 	    myImage.savePNG( outputPath + timeString + "+" + dataType + "+" + increment + "_" +
-		    			 algorithm + "_" + Double.toString(threshold), metadata.rows(), metadata.cols() );
+		    			 algorithm + "_" + Double.toString(threshold), metadata.rows, metadata.cols );
         
    		
 	    // Diagnostics

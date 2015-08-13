@@ -23,7 +23,7 @@ public class DatasetSurface extends Dataset {
 		metadata = new Metadata();
 		readMetadata(null);
 
-		locs = new GriddedLocation[metadata.rows()][metadata.cols()];
+		locs = new GriddedLocation[metadata.rows][metadata.cols];
 	}
 
 	/*
@@ -41,8 +41,8 @@ public class DatasetSurface extends Dataset {
 		cols = 1441;
 
 		// Set up the metadata for the surface database
-		metadata.rows(rows);
-		metadata.cols(cols);
+		metadata.rows = rows;
+		metadata.cols = cols;
 
 		haveMetadata = true;
 

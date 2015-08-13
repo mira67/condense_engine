@@ -80,11 +80,11 @@ public abstract class Database extends GeoObject {
 	public static GriddedVector[][] createArrayFromSensorVectorList(
 			ArrayList<GriddedVector> list, Metadata m) {
 
-		GriddedVector[][] vectors = new GriddedVector[m.rows()][m.cols()];
+		GriddedVector[][] vectors = new GriddedVector[m.rows][m.cols];
 
 		// Initialize the array
-		for (int r = 0; r < m.rows(); r++) {
-			for (int c = 0; c < m.cols(); c++) {
+		for (int r = 0; r < m.rows; r++) {
+			for (int c = 0; c < m.cols; c++) {
 				vectors[r][c] = new GriddedVector(r, c);
 			}
 		}

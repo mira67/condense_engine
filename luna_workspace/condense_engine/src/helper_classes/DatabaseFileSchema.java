@@ -132,8 +132,8 @@ public class DatabaseFileSchema extends Database {
 		// Write the data
 		try {
 			// Write the metadata
-			metadataFile.writeInt(m.rows());
-			metadataFile.writeInt(m.cols());
+			metadataFile.writeInt(m.rows);
+			metadataFile.writeInt(m.cols);
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseFileSchema", "store", "error on file write", e);
 		}
@@ -260,8 +260,8 @@ public class DatabaseFileSchema extends Database {
 		// Read the data
 		try {
 			// Write the metadata
-			metadata.rows(metadataFile.readInt());
-			metadata.cols(metadataFile.readInt());
+			metadata.rows = metadataFile.readInt();
+			metadata.cols = metadataFile.readInt();
 			metadata.timestamps = metadataFile.readInt();
 			metadata.locations = metadataFile.readInt();
 			metadata.vectors = metadataFile.readInt();

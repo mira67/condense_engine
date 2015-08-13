@@ -24,7 +24,7 @@ public class DatasetSSMI extends Dataset {
 		metadata = new Metadata();
 		readMetadata(filename);
 
-		locs = new GriddedLocation[metadata.rows()][metadata.cols()];
+		locs = new GriddedLocation[metadata.rows][metadata.cols];
 		readLocations();
 	}
 
@@ -103,29 +103,29 @@ public class DatasetSSMI extends Dataset {
 		
 		// Southern hemisphere,	85.5 and 91.7 GHz, 839296 Bytes
 		if (length == 839296) {
-			metadata.rows(664);
-			metadata.cols(632);
+			metadata.rows = 664;
+			metadata.cols = 632;
 			return metadata;
 		}
 		
 		// Southern hemisphere,	everything else, 209824 Bytes
 		if (length == 209824) {
-			metadata.rows(332);
-			metadata.cols(316);
+			metadata.rows = 332;
+			metadata.cols = 316;
 			return metadata;
 		}
 		
 		// Northern hemisphere,	85.5 and 91.7 GHz, 1089536 Bytes
 		if (length == 1089536) {
-			metadata.rows(896);
-			metadata.cols(608);
+			metadata.rows = 896;
+			metadata.cols = 608;
 			return metadata;
 		}
 
 		// Northern hemisphere,	everything else, 272384 Bytes
 		if (length == 272384) {
-			metadata.rows(448);
-			metadata.cols(304);
+			metadata.rows = 448;
+			metadata.cols = 304;
 			return metadata;
 		}
 
@@ -158,8 +158,8 @@ public class DatasetSSMI extends Dataset {
 	 * Read the locations for this gridded dataset.
 	 */
 	protected void readLocations() {
-		for (int r = 0; r < metadata.rows(); r++) {
-			for (int c = 0; c < metadata.cols(); c++) {
+		for (int r = 0; r < metadata.rows; r++) {
+			for (int c = 0; c < metadata.cols; c++) {
 				locs[r][c] = new GriddedLocation(r, c);
 			}
 		}
@@ -230,11 +230,11 @@ public class DatasetSSMI extends Dataset {
 	}
 
 	public int rows() {
-		return metadata.rows();
+		return metadata.rows;
 	}
 
 	public int cols() {
-		return metadata.cols();
+		return metadata.cols;
 	}
 
 	public ArrayList<GriddedLocation> locationsAsArrayList() {

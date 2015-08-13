@@ -88,7 +88,7 @@ public class DataFile extends GeoObject {
 	public String getName() {
 		return filename;
 	}
-	
+
 	public long length() {
 		return file.length();
 	}
@@ -111,7 +111,7 @@ public class DataFile extends GeoObject {
 	/*
 	 * readStrings
 	 * 
-	 * Read the string data from the file, each line is one string.
+	 * Read string data from the file, each line is one string.
 	 */
 	public ArrayList<String> readStrings() throws Exception {
 
@@ -177,7 +177,7 @@ public class DataFile extends GeoObject {
 				bytes[i] = dataInputStream.readByte();
 			}
 		} catch (Exception up) {
-			System.err.println("DataFile::readBytes: error on read - " + up);
+			Tools.warningMessage("DataFile::readBytes: error on read - " + up);
 			throw (up);
 		}
 
@@ -213,7 +213,7 @@ public class DataFile extends GeoObject {
 				shorts[i] = dataInputStream.readShort();
 			}
 		} catch (Exception up) {
-			System.err.println("DataFile::readShorts: error on read - " + up);
+			Tools.warningMessage("DataFile::readShorts: error on read - " + up);
 			throw (up);
 		}
 
@@ -249,7 +249,7 @@ public class DataFile extends GeoObject {
 				longs[i] = dataInputStream.readLong();
 			}
 		} catch (Exception up) {
-			System.err.println("DataFile::readLongs: error on read - " + up);
+			Tools.warningMessage("DataFile::readLongs: error on read - " + up);
 			throw (up);
 		}
 
@@ -713,7 +713,6 @@ public class DataFile extends GeoObject {
 		if (!fileIsReadable) {
 			Tools.warningMessage("DataFile::read2ByteInts2D: " + filename
 					+ " is not open for reading.");
-			System.out.println("2bytes: not open for readin");
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
@@ -729,7 +728,6 @@ public class DataFile extends GeoObject {
 			Tools.warningMessage(" DataFile::read2ByteInts2D: Supplied rows and cols greater than file size.");
 			Tools.warningMessage(" Rows * Cols = " + rows * cols);
 			Tools.warningMessage(" File length = " + length + " bytes");
-			System.out.println("2bytes: miss match");
 			throw (new Error(
 					"Error in FataFile::read2ByteInts2D: rows and cols mismatch with file"));
 		}
@@ -755,11 +753,10 @@ public class DataFile extends GeoObject {
 					c = 0;
 				}
 			}
-		} catch (Exception up) {
-			System.out.println("2bytes: errors on read");
+		} catch (Exception e) {
 			Tools.warningMessage(" DataFile::read2ByteInts2D: error on read - "
-					+ up);
-			throw (up);
+					+ e);
+			throw(e);
 		}
 
 		return ints;
