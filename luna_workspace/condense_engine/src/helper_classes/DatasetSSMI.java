@@ -159,6 +159,8 @@ public class DatasetSSMI extends Dataset {
 	protected void readLocations() {
 		for (int r = 0; r < metadata.rows; r++) {
 			for (int c = 0; c < metadata.cols; c++) {
+				
+				// TODO: lat/lons
 				locs[r][c] = new GriddedLocation(r, c);
 			}
 		}

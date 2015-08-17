@@ -9,6 +9,9 @@ package helper_classes;
 
 public class Metadata {
 
+	// Database id (there should be only one).
+	protected int id = 0;
+	
 	protected int rows;
 	protected int cols;
 	protected int timestamps = 0;

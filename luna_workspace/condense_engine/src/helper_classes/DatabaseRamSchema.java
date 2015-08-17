@@ -1,6 +1,7 @@
 package helper_classes;
 
-import java.sql.Date;
+///todo
+///import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -70,7 +71,13 @@ public class DatabaseRamSchema extends Database {
 	
 	public void store(Timestamp t) {timestamps.add(t);}
 	public void store(ArrayList<GriddedLocation> locs) {locations.addAll(locs);}
-	public void store(GriddedLocation loc) {locations.add( loc );}
+	
+	public int store(GriddedLocation loc) {
+		locations.add( loc );	
+		metadata.locations++;
+		return metadata.locations;
+	}
+	
 	public void store(GriddedVector v) {vectors.add(v);}
 
 	/*
@@ -255,14 +262,45 @@ public class DatabaseRamSchema extends Database {
 		Tools.statusMessage("Cols              = " + metadata.cols);
 	}
 
+	
 	@Override
-	public void store(int data, int locID, Date date) {
+	public void store(int id, int R, int C) {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void store(int id, int R, int C) {
+	public void storeMetadata(Metadata m) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void storeTimestamp(Timestamp t) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public int storeLocation(GriddedLocation loc) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public void storeLocationArray(GriddedLocation[][] locs) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void storeVector(GriddedVector v) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void storeVectorArray(GriddedVector[][] v) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -16,7 +16,7 @@ public class DatabaseH2 extends Database {
 
 	Connection conn;
 
-	private PreparedStatement sqlStmt_tb;
+	///private PreparedStatement sqlStmt_tb;
 	private PreparedStatement sqlStmt_map;
 	private Statement sqlCreate;
 	private ResultSet results;
@@ -34,6 +34,8 @@ public class DatabaseH2 extends Database {
 	 */
 	public boolean connect() {
 
+		createIfDoesNotExist = true;
+
 		// Open the database.
 		try {
 			Class.forName("org.h2.Driver");
@@ -42,7 +44,7 @@ public class DatabaseH2 extends Database {
 			conn.setAutoCommit(true);
 
 			// Make sure the tables exist. Create them if they don't exist.
-			checkTables(true);
+			//checkTables(true);
 
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2", "connect",
@@ -81,7 +83,7 @@ public class DatabaseH2 extends Database {
 
 		// We've deleted everything. Now make the tables again
 		try {
-			checkTables(true);
+			//checkTables(true);
 		} catch (Exception e) {
 			Tools.warningMessage("Could not re-create tables after cleaning the database.");
 		}
@@ -93,13 +95,16 @@ public class DatabaseH2 extends Database {
 	 * Connect to an existing database for reading. Return true on success.
 	 */
 	public boolean connectReadOnly() {
+		
+		createIfDoesNotExist = false;
+		
 		try {
 			Class.forName("org.h2.Driver");
 			conn = DriverManager.getConnection(dbPath + dbName
 					+ ";IFEXISTS=TRUE", null, null);//
 
 			// Make sure the tables exist. Don't create any if they don't exist.
-			checkTables(false);
+			//checkTables(false);
 
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2", "connectReadOnly",
@@ -173,14 +178,14 @@ public class DatabaseH2 extends Database {
 			}
 
 			// If the table doesn't exist, create it.
-			if (!exists && createIfDoesNotExist) {
+			/*if (!exists && createIfDoesNotExist) {
 				if (!createTable(table)) {
 					Tools.errorMessage("DatabaseH2", "checkTables",
 							"Failed to create table: " + table.name,
 							new Exception("Giving up."));
 				}
 				exists = true;
-			}
+			}*/
 
 			// One way or the other, the table should be in there now. If not,
 			// we've got problems.
@@ -203,9 +208,10 @@ public class DatabaseH2 extends Database {
 			Tools.debugMessage("Creating table: " + table.name);
 			sqlCreate = conn.createStatement();
 			sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + table.name
-					+ "(id INT primary key, row SMALLINT, col SMALLINT)");
-			sqlStmt_map = conn.prepareStatement("INSERT INTO " + table.name
-					+ "(id,row, col) " + "values " + "(?,?,?)");
+					+ table.columnNames());
+		///			+ "(id INT primary key, row SMALLINT, col SMALLINT)");
+		///	sqlStmt_map = conn.prepareStatement("INSERT INTO " + table.name
+		///			+ "(id,row, col) " + "values " + "(?,?,?)");
 		} catch (SQLException e) {
 			Tools.warningMessage("Could not create table: " + table.name);
 			Tools.warningMessage("Exception: " + e);
@@ -266,23 +272,77 @@ public class DatabaseH2 extends Database {
     // STORAGE METHODS
     //
     
-	public void store( Metadata m ) {
-		writeCheck("Metadata");
+	// TODO
+	
+    /*
+     * storeMetadata
+     * 
+     * Store metadata for the dataset and database, or update existing data.
+     */
+	public void storeMetadata( Metadata m ) {
+
 		metadata = m;
-		// TODO: store the metadata in the database
+		
+		try {
+			if (createIfDoesNotExist) sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + Table.METADATA.name()
+					+ Table.METADATA.columnNames());
+
+			sqlCreate.execute("INSERT INTO " + Table.METADATA.name() + " VALUES(" +
+					+ metadata.id + "," +
+					+ metadata.rows + "," +
+					+ metadata.cols + "," +
+					+ metadata.timestamps + "," +
+					+ metadata.locations + "," +
+					+ metadata.vectors + ")");
+
+		} catch (Exception e) {
+			Tools.errorMessage("DatabaseH2", "storeMetadata", "When storing metadata", e);
+		}
+		
+		
+		return;
 	}
 	
-	// TODO
-	public void store(Timestamp t) {}
-	public void store(ArrayList<GriddedLocation> locs) {}
-	public void store(GriddedLocation loc) {}
-	public void store(GriddedVector v) {}
+	/*
+	 *  storeLocation
+	 *  
+	 *  Store a single gridded location. The returned id is a unique table identifier
+	 *  for this location.
+	 */
+	public int storeLocation(GriddedLocation loc) {
+		try {
+			if (createIfDoesNotExist) sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + Table.LOCATIONS.name()
+					+ Table.LOCATIONS.columnNames());
+
+			sqlCreate.execute("INSERT INTO " + Table.LOCATIONS.name() + " VALUES(" +
+					+ metadata.locations + "," +
+					+ loc.row() + "," +
+					+ loc.col() + "," +
+					+ loc.lat() + "," +
+					+ loc.lon() + ")");
+
+		} catch (Exception e) {
+			Tools.errorMessage("DatabaseH2",
+					"store (GriddedLocation)",
+					"When storing location", e);
+		}
+		
+        metadata.locations++;
+		
+		return metadata.locations;
+	}
+
+	public void storeTimestamp(Timestamp t) {}
+	///public void storeLocationList(ArrayList<GriddedLocation> locs) {}
+	
+	public void storeVector(GriddedVector v) {}
 
 	/*
 	 * Store a vector by values
 	 * 
 	 */
-	public void store(int data, int locID, Date date) {
+	public void storeVector(int a, int b, int c, int d) {}
+	/*
 		//TODO vectors.add( new GriddedVector( data, row, col, time));
 		//temporal storage method for database/spark testing
 		try {
@@ -297,12 +357,13 @@ public class DatabaseH2 extends Database {
 			Tools.errorMessage("DatabaseH2", "store", "Could not store with database " + dbName, e);
 		}
 		
-	}
+	}*/
 	
 	/*
-	 * store a loc map id: {row, col}
+	 * Store a location
 	 * 
 	 */
+	// TODO: need this?
 	public void store(int id, int row, int col) {
 		//TODO vectors.add( new GriddedVector( data, row, col, time));
 		//temporal storage method for database/spark testing
@@ -322,11 +383,13 @@ public class DatabaseH2 extends Database {
 
 	/*
 	 * store a vector array
+	 * 
 	 */
-	public void store(GriddedVector[][] v) {
+	//TODO: id?
+	public void storeVectorArray(GriddedVector[][] v) {
 		for (int r = 0; r < v.length; r++) {
 			for (int c = 0; c < v[0].length; c++) {
-				store(v[r][c]);
+				storeVector(v[r][c]);
 			}
 		}
 	}
@@ -334,10 +397,11 @@ public class DatabaseH2 extends Database {
 	/*
 	 *  Add an array of locations
 	 */
-	public void add( GriddedLocation[][] locs) { 
+	//TODO: id?
+	public void storeLocationArray( GriddedLocation[][] locs) { 
 		for (int r = 0; r < locs.length; r++) {
 			for (int c = 0; c < locs[0].length; c++) {
-				store(locs[r][c]);
+				locs[r][c].id = storeLocation(locs[r][c]);
 			}
 		}
 	}
@@ -348,7 +412,7 @@ public class DatabaseH2 extends Database {
 	public void add( GriddedVector[][] v) { 
 		for (int r = 0; r < v.length; r++) {
 			for (int c = 0; c < v[0].length; c++) {
-				store(v[r][c]);
+				storeVector(v[r][c]);
 			}
 		}
 	}
@@ -451,19 +515,14 @@ public class DatabaseH2 extends Database {
 	public void status() {
 		updateMetadata();
 		
-		Tools.statusMessage("Database name = " + dbName + "  Status: "
+		Tools.statusMessage("  ========================================");
+		Tools.statusMessage("  Database name = " + dbName + "  Status: "
 				+ status.toString());
-		Tools.statusMessage("Database path = " + dbPath);
-		Tools.statusMessage("Timestamp entries = " + metadata.timestamps);
-		Tools.statusMessage("Location entries  = " + metadata.locations);
-		Tools.statusMessage("Vector entries    = " + metadata.vectors);
+		Tools.statusMessage("  Database path = " + dbPath);
+		Tools.statusMessage("  Timestamp entries = " + metadata.timestamps);
+		Tools.statusMessage("  Location entries  = " + metadata.locations);
+		Tools.statusMessage("  Vector entries    = " + metadata.vectors);
+		Tools.statusMessage("  ========================================");
 	}
-
-	@Override
-	public void store(int data, int row, int col, int time) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }
 

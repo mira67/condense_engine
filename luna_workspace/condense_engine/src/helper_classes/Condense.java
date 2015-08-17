@@ -121,7 +121,7 @@ public class Condense extends GeoObject {
     int fileCount = 0;
     
     // Gridded image pixel locations.
-    Location locations[][];
+    GriddedLocation locations[][];
     
     // Condensed date list
     Date cDateList[];
@@ -309,13 +309,11 @@ public class Condense extends GeoObject {
     						polarization);
 
     				dataset = new DatasetSSMI(filename);
+    				
     				getMetadata( filename );
     				
-    				// TODO need fix Metadata for different channel (cases)
-    				if ((frequency == 85) || (frequency == 91)){
-    					rows = 632;
-    					cols = 664;
-    				}
+    				getLocations();
+    				
     				break;
     				
     			case NONE:
@@ -389,13 +387,13 @@ public class Condense extends GeoObject {
 			
 
 			// Remove bad data
-			data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue, NODATA);
+			///data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue, NODATA);
 			
 			Tools.statusMessage(date.yearString() + "." + date.monthString() +
 					"." + date.dayOfMonthString() + "  File name: " + filename);
 			
 			// Add the timestamp to the database.
-    		database.store(time);
+    		database.storeTimestamp(time);
     		
 			// Next day.
 			date.incrementOneDay();
@@ -435,7 +433,7 @@ public class Condense extends GeoObject {
 		cols = dataset.cols();
 		
 		// We need to store the metadata in the database.
-    	database.store( metadata );
+    	database.storeMetadata( metadata );
     	
     	haveMetadata = true;
     	
@@ -454,6 +452,8 @@ public class Condense extends GeoObject {
 					new Exception());
 		}
 		
+		locations = new GriddedLocation[metadata.rows][metadata.cols];
+		
 		switch (dataType) {
     		case NONE:
     			return;
@@ -461,11 +461,18 @@ public class Condense extends GeoObject {
     			// TODO
     		case SSMI:
     			// TODO
+    			// temporary locations, for testing
+    			for (int r = 0; r < metadata.rows; r++) {
+    				for (int c = 0; c < metadata.cols; c++) {
+    					locations[r][c] = new GriddedLocation(r, c, (double) Tools.randomInt(90), (double) Tools.randomInt(180));
+    				}
+    			}
     			break;
 		}
 		
-		database.store(dataset.locationsAsArrayList());
-    	
+		///database.store(dataset.locationsAsArrayList());
+		database.storeLocationArray(locations);
+		
 		return;
 	}
 	
@@ -506,7 +513,7 @@ public class Condense extends GeoObject {
 		for (int d = 0; d < days; d++) {
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < cols; c++) {
-					database.store( data[d][r][c] );
+					database.storeVector( data[d][r][c] );
 				}
 			}
 		}
@@ -529,7 +536,7 @@ public class Condense extends GeoObject {
 		Tools.statusMessage("thr " + thr + " days" + days);
 		Number [][] pixel_ts = new Number[days][2];
 		Number[][] sampled_ts = new Number[thr][];
-		int locID = 0;
+		///int locID = 0;
 		
 		// reform image based data into group of time series for downsampling
 		for (int r = 0; r < rows; r++){
@@ -552,11 +559,11 @@ public class Condense extends GeoObject {
 				sampled_ts = Downsampling.largestTriangleThreeBuckets(pixel_ts, thr);//condense,can be simplified
 				//debug
 				Tools.debugMessage("sampled data length = " + sampled_ts.length);
-				
+				/*
 				for (int downsampled_id = 0; downsampled_id < thr; downsampled_id++){
 					database.store( data[sampled_ts[downsampled_id][0].intValue()][r][c].data,locID,cDateList[sampled_ts[downsampled_id][0].intValue()]);//only store sampled data
-				}
-				locID++;
+				}*/
+				///locID++;
 			}//cols
 		}//rows
 	}//special sampling method
@@ -589,7 +596,7 @@ public class Condense extends GeoObject {
 							if (data[d][r][c].data() > (mean[r][c] + sd[r][c]*threshold) ||
 								data[d][r][c].data() < (mean[r][c] - sd[r][c]*threshold) ) {
 
-								database.store( data[d][r][c] );		
+								database.storeVector( data[d][r][c] );		
 							}
 						}
 					}
@@ -666,8 +673,8 @@ public class Condense extends GeoObject {
 					} // data != null
 				}  // Day
 
-				if (min[r][c].data() != NODATA) database.store( min[r][c] );		
-				if (max[r][c].data() != NODATA) database.store( max[r][c] );
+				if (min[r][c].data() != NODATA) database.storeVector( min[r][c] );		
+				if (max[r][c].data() != NODATA) database.storeVector( max[r][c] );
 												
 			} // Column
 		} // Row

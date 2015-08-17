@@ -1,6 +1,7 @@
 package helper_classes;
 
-import java.sql.Date;
+///todo
+///import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -130,7 +131,7 @@ public class DatabaseFileSchema extends Database {
 	 * 
 	 * Create a data file (database) containing the metadata.
 	 */
-	public void store(Metadata m) {
+	public void storeMetadata(Metadata m) {
 
 		// Sanity check
 		if (status != Status.CONNECTED) {
@@ -155,11 +156,12 @@ public class DatabaseFileSchema extends Database {
 	 * 
 	 * Create a data file (database) containing an array of locations.
 	 */
-	public void store(GriddedLocation[][] locs) {
+	//TODO: id?
+	public void storeLocationArray(GriddedLocation[][] locs) {
 
 		for (int r = 0; r < locs.length; r++) {
 			for (int c = 0; c < locs[0].length; c++) {
-				store(locs[r][c]);
+				storeLocation(locs[r][c]);
 			}
 		}
 	}
@@ -169,11 +171,11 @@ public class DatabaseFileSchema extends Database {
 	 * 
 	 * Create a data file (database) containing an arraylist of locations.
 	 */
-	public void store(ArrayList<GriddedLocation> locs) {
+	public void storeLocationList(ArrayList<GriddedLocation> locs) {
 		Iterator<GriddedLocation> iterator = locs.iterator();
 		while (iterator.hasNext()) {
 			GriddedLocation location = iterator.next();
-			store(location);
+			storeLocation(location);
 		}
 	}
 
@@ -182,7 +184,7 @@ public class DatabaseFileSchema extends Database {
 	 * 
 	 * Create a data file (database) entry for a single location.
 	 */
-	public void store(GriddedLocation loc) {
+	public int storeLocation(GriddedLocation loc) {
 
 		try {
 			locationsFile.writeInt(loc.row());
@@ -193,12 +195,16 @@ public class DatabaseFileSchema extends Database {
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseFileSchema", "store", "Location: error on file write", e);
 		}
+		
+		metadata.locations++;
+		
+		return metadata.locations;
 	}
 
 	/*
 	 * store a Timestamp
 	 */
-	public void store(Timestamp t) {
+	public void storeTimestamp(Timestamp t) {
 
 		try {
 			timestampsFile.writeDouble(t.days());
@@ -213,7 +219,7 @@ public class DatabaseFileSchema extends Database {
 	 * store a vector by values
 	 * 
 	 */
-	public void store(int data, int row, int col, int time) {
+	public void storeVector(int data, int row, int col, int time) {
 		try {
 			vectorsFile.writeInt(data);
 			vectorsFile.writeInt(row);
@@ -229,7 +235,7 @@ public class DatabaseFileSchema extends Database {
 	/*
 	 * store a vector
 	 */
-	public void store(GriddedVector v) {
+	public void storeVector(GriddedVector v) {
 
 		try {
 			vectorsFile.writeInt(v.data());
@@ -246,10 +252,10 @@ public class DatabaseFileSchema extends Database {
 	/*
 	 * store a vector array
 	 */
-	public void store(GriddedVector[][] v) {
+	public void storeVectorArray(GriddedVector[][] v) {
 		for (int r = 0; r < v.length; r++) {
 			for (int c = 0; c < v[0].length; c++) {
-				store(v[r][c]);
+				storeVector(v[r][c]);
 			}
 		}
 	}
@@ -364,12 +370,6 @@ public class DatabaseFileSchema extends Database {
 		Tools.statusMessage("Timestamp entries = " + metadata.timestamps);
 		Tools.statusMessage("Location entries  = " + metadata.locations);
 		Tools.statusMessage("Vector entries    = " + metadata.vectors);
-	}
-
-	@Override
-	public void store(int data, int locID, Date date) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override

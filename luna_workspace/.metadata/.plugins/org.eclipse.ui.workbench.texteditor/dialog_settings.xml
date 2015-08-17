@@ -2,22 +2,25 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="Metadata" key="selection"/>
+		<item value="createMap" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="metadata"/>
-			<item value="writeCheck"/>
-			<item value="index"/>
-			<item value="tbName"/>
 			<item value="createMap"/>
-			<item value="tbNames"/>
-			<item value="checkTable"/>
-			<item value="data"/>
+			<item value="table.name()"/>
+			<item value="Tables"/>
+			<item value="chFreq"/>
+			<item value="flush"/>
+			<item value="closed"/>
+			<item value="generateTestImages"/>
+			<item value="database"/>
 		</list>
 		<list key="replacehistory">
+			<item value="table.name"/>
+			<item value="Table"/>
+			<item value="Tools.warningMessage"/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">

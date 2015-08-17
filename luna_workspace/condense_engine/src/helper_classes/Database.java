@@ -1,11 +1,17 @@
 package helper_classes;
 
-import java.sql.Date;
+///todo
+///import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
 
 public abstract class Database extends GeoObject {
 	
+	/*
+	 * Status
+	 * 
+	 * Define the possible statuses for the database.
+	 */
 	public enum Status {
 		DISCONNECTED("DISCONNECTED"), CONNECTED("CONNECTED"), CONNECTED_READ_ONLY("CONNECTED READ-ONLY"),
 			UNKNOWN("UNKNOWN");
@@ -21,19 +27,33 @@ public abstract class Database extends GeoObject {
 		}
 	}
 
-	// Define what tables will be in the database.
+	/*
+	 *  Table
+	 *  
+	 *  Define what tables will be in the SQL database. The 'name' is the name of the table,
+	 *  the 'columns' define what the data entries will be in the table (use SQL format).
+	 */
 	public enum Table {
-		METADATA("METADATA"), LOCATIONS("LOCATIONS"), TIMESTAMPS("TIMESTAMPS"),
-		VECTORS("VECTORS");
+		METADATA("METADATA","(ID INT PRIMARY KEY, ROWS SMALLINT, COLS SMALLINT, TIMESTAMPS SMALLINT, LOCATIONS SMALLINT, VECTORS INT)"),
+		LOCATIONS("LOCATIONS","(ID INT PRIMARY KEY, ROW SMALLINT, COL SMALLINT, LAT DOUBLE, LON DOUBLE)"),
+		TIMESTAMPS("TIMESTAMPS","BOGUS"),
+		VECTORS("VECTORS","BOGUS");
 			
 		protected final String name;
+		protected final String SQLcolumns;
 
-		private Table(String s) {
+		private Table(String s, String c) {
 			name = s;
+			SQLcolumns = c;
 		}
 
 		public String toString() {
 			return name;
+		}
+		
+
+		public String columnNames() {
+			return SQLcolumns;
 		}
 	}
 
@@ -42,6 +62,9 @@ public abstract class Database extends GeoObject {
 	protected String dbPath = "";
 	protected Metadata metadata;
 	protected Status status = Status.DISCONNECTED;
+	
+	// If the database or tables do not exist, create them?
+	protected Boolean createIfDoesNotExist = true;
 	
 	public Database(String path, String name) {
 		dbPath = path;
@@ -59,17 +82,19 @@ public abstract class Database extends GeoObject {
 
 	// STORAGE METHODS
 
-	public abstract void store(Metadata m);
+	public abstract void storeMetadata(Metadata m);
 
-	public abstract void store(Timestamp t);
+	public abstract void storeTimestamp(Timestamp t);
 
-	public abstract void store(ArrayList<GriddedLocation> locs);
-	public abstract void store(GriddedLocation loc);
+	public abstract int storeLocation(GriddedLocation loc);
+	public abstract void storeLocationArray(GriddedLocation[][] locs);
+	///public abstract void storeLocationList(ArrayList<GriddedLocation> locs);
 
-	public abstract void store(int data, int row, int col, int time); // Raw vector storage
-	public abstract void store(GriddedVector v);
-	public abstract void store(GriddedVector[][] v);
-	public abstract void store(int data, int locID, Date date);
+	//this is crap
+	///public abstract void storeVector(int id, int row, int col, int data, int time); // Raw vector storage
+	
+	public abstract void storeVector(GriddedVector v);
+	public abstract void storeVectorArray(GriddedVector[][] v);
 	public abstract void store(int id, int R, int C);
 
 	// RETRIEVAL METHODS

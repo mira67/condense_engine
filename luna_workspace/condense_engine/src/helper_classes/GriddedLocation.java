@@ -11,6 +11,9 @@ public class GriddedLocation extends Location {
 	protected GeoLocation geoloc;		// Decimal degrees
 	protected RasterLocation rastloc;
 	
+	// Database table entry id. -1 indicates not entered.
+	protected int id = -1;
+	
 	protected boolean hasLatLon = false;
 	
 	protected GriddedLocation() {}
