@@ -371,10 +371,4 @@ public class DatabaseFileSchema extends Database {
 		Tools.statusMessage("Location entries  = " + metadata.locations);
 		Tools.statusMessage("Vector entries    = " + metadata.vectors);
 	}
-
-	@Override
-	public void store(int id, int R, int C) {
-		// TODO Auto-generated method stub
-		
-	}
 }

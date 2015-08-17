@@ -95,7 +95,6 @@ public abstract class Database extends GeoObject {
 	
 	public abstract void storeVector(GriddedVector v);
 	public abstract void storeVectorArray(GriddedVector[][] v);
-	public abstract void store(int id, int R, int C);
 
 	// RETRIEVAL METHODS
 

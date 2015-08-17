@@ -9,6 +9,7 @@ import java.sql.*;
  *
  * Example connection paths:
  * 			"jdbc:h2:tcp://localhost/~/"
+ * 			"jdbc:h2:tcp://localhost/~/Desktop/myProject/Databases/"
  * 			"jdbc:h2:tcp://10.240.210.131:9292/mem:~/"
  */
 
@@ -17,7 +18,7 @@ public class DatabaseH2 extends Database {
 	Connection conn;
 
 	///private PreparedStatement sqlStmt_tb;
-	private PreparedStatement sqlStmt_map;
+	///private PreparedStatement sqlStmt_map;
 	private Statement sqlCreate;
 	private ResultSet results;
 
@@ -42,9 +43,6 @@ public class DatabaseH2 extends Database {
 			conn = DriverManager.getConnection(dbPath + dbName, null, null);
 
 			conn.setAutoCommit(true);
-
-			// Make sure the tables exist. Create them if they don't exist.
-			//checkTables(true);
 
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2", "connect",
@@ -77,15 +75,8 @@ public class DatabaseH2 extends Database {
 			} catch (Exception e) {
 				// TODO Do nothing right now.
 				// Assume it either didn't exist, or was dropped successfully.
-				// Might want to re-visit this assumption.
+				// Might want to re-visit this assumption at a later time.
 			}
-		}
-
-		// We've deleted everything. Now make the tables again
-		try {
-			//checkTables(true);
-		} catch (Exception e) {
-			Tools.warningMessage("Could not re-create tables after cleaning the database.");
 		}
 	}
 
@@ -102,9 +93,6 @@ public class DatabaseH2 extends Database {
 			Class.forName("org.h2.Driver");
 			conn = DriverManager.getConnection(dbPath + dbName
 					+ ";IFEXISTS=TRUE", null, null);//
-
-			// Make sure the tables exist. Don't create any if they don't exist.
-			//checkTables(false);
 
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2", "connectReadOnly",
@@ -241,39 +229,11 @@ public class DatabaseH2 extends Database {
 			"values " + 
 			"(?,?,?)");
     */
-	public void createMap(){
-		//write location map table
-		int pixelId = 0;
-		Tools.statusMessage("Creating pixel location map...");
-		
-		if (metadata == null) {
-			Tools.errorMessage("DatabaseH2", "createMap", "Metadata has not been set", new Exception());
-		}
 	
-		for (int r = 0; r < metadata.rows; r++){
-			for (int c = 0; c < metadata.cols; c++){
-				store(pixelId, r, c);
-				pixelId++;
-			}
-		}
-		
-		Tools.statusMessage("Done with MAP, starting condense...");
-    }
-
-    
-    protected void writeCheck(String methodName) {
-    	if (status != Status.CONNECTED) {
-			Tools.errorMessage("DatabaseH2", methodName, 
-					"Database " + dbName + " is not open for writing", new Exception());
-		}
-    }
-    
     //
     // STORAGE METHODS
     //
     
-	// TODO
-	
     /*
      * storeMetadata
      * 
@@ -359,27 +319,7 @@ public class DatabaseH2 extends Database {
 		
 	}*/
 	
-	/*
-	 * Store a location
-	 * 
-	 */
-	// TODO: need this?
-	public void store(int id, int row, int col) {
-		//TODO vectors.add( new GriddedVector( data, row, col, time));
-		//temporal storage method for database/spark testing
-		try {
-	        sqlStmt_map.setInt(1, id);
-	        sqlStmt_map.setInt(2, row);
-	        sqlStmt_map.setInt(3, col);
-	        int rowsAffected = sqlStmt_map.executeUpdate();
-	        Tools.debugMessage("Affected rows = " + rowsAffected);
-	        conn.commit();
-	        
-		} catch(Exception e) {
-			Tools.errorMessage("DatabaseH2", "store", "Could not store with database map table" + dbName, e);
-		}
-		
-	}
+
 
 	/*
 	 * store a vector array
@@ -526,3 +466,24 @@ public class DatabaseH2 extends Database {
 	}
 }
 
+/*
+ * Store a location
+ * 
+ */
+// TODO: need this?
+/*public void store(int id, int row, int col) {
+	//TODO vectors.add( new GriddedVector( data, row, col, time));
+	//temporal storage method for database/spark testing
+	try {
+        sqlStmt_map.setInt(1, id);
+        sqlStmt_map.setInt(2, row);
+        sqlStmt_map.setInt(3, col);
+        int rowsAffected = sqlStmt_map.executeUpdate();
+        Tools.debugMessage("Affected rows = " + rowsAffected);
+        conn.commit();
+        
+	} catch(Exception e) {
+		Tools.errorMessage("DatabaseH2", "store", "Could not store with database map table" + dbName, e);
+	}
+	
+}*/

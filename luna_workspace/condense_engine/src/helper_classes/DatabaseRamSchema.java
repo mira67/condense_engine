@@ -264,12 +264,6 @@ public class DatabaseRamSchema extends Database {
 
 	
 	@Override
-	public void store(int id, int R, int C) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void storeMetadata(Metadata m) {
 		// TODO Auto-generated method stub
 		
