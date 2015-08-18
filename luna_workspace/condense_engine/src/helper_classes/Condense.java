@@ -494,13 +494,8 @@ public class Condense extends GeoObject {
 	 * Don't do any condensation. Add all pixels to the database.
 	 */
 	protected void noCondensation() {
-		
 		for (int d = 0; d < days; d++) {
-			for (int r = 0; r < rows; r++) {
-				for (int c = 0; c < cols; c++) {
-					database.storeVector( data[d][r][c] );
-				}
-			}
+			database.storeVectorArray( data[d], locations );
 		}
 	}
 	
@@ -581,6 +576,10 @@ public class Condense extends GeoObject {
 							if (data[d][r][c].data() > (mean[r][c] + sd[r][c]*threshold) ||
 								data[d][r][c].data() < (mean[r][c] - sd[r][c]*threshold) ) {
 
+								// Attach the location ID to this vector.
+								data[d][r][c].loc.id = locations[r][c].id;
+								
+								// Store the vector.
 								database.storeVector( data[d][r][c] );		
 							}
 						}
@@ -615,8 +614,10 @@ public class Condense extends GeoObject {
 			for (int c = 0; c < cols; c++) {
 				
 				// Initialize the pixels, by default they have no data.
-				min[r][c] = new GriddedVector(r, c);
-				max[r][c] = new GriddedVector(r, c);
+				///min[r][c] = new GriddedVector(r, c);
+				min[r][c] = new GriddedVector(locations[r][c]);
+				///max[r][c] = new GriddedVector(r, c);
+				max[r][c] = new GriddedVector(locations[r][c]);
 				
 				// Cycle through the days, looking for a min or max value that exceeds
 				// the threshold.
@@ -630,7 +631,7 @@ public class Condense extends GeoObject {
 						
 						// Ignore NaNs and other bad data
 						if (Math.abs(data[d][r][c].data()) < Math.abs(NODATA) ) {
-						
+							
 							if (r == r1 && c == c1) Tools.debugMessage(
 								"     ---> mean = " + mean[r1][c1] + " sd = " + sd[r1][c1] +
 								"   data = " + data[d][r][c].data());
@@ -788,11 +789,13 @@ public class Condense extends GeoObject {
 		Tools.statusMessage("Create image....  (time index = " + imageStartIndex + " to " + imageEndIndex + ")");
 
         // Get the pixels for the image
-		ArrayList<GriddedVector> pixList = database.getVectors(imageStartIndex, imageEndIndex);
-		Tools.statusMessage("Pixels: " + pixList.size());
+		///ArrayList<GriddedVector> pixList = database.getVectors(imageStartIndex, imageEndIndex);
+		Tools.statusMessage("NOT IMPLEMENTED");
+		///Tools.statusMessage("Pixels: " + pixList.size());
 		
 		// Make an integer array out of the pixel data
-		int[][] sensorData = createArrayFromVectorList( metadata.rows, metadata.cols, pixList );
+		///int[][] sensorData = createArrayFromVectorList( metadata.rows, metadata.cols, pixList );
+		Tools.statusMessage("NOT IMPLEMENTED");
 
 		// Make a color table.
 		ColorTable colors = new ColorTable();
@@ -800,8 +803,8 @@ public class Condense extends GeoObject {
 		
 		// Create the image from the pixels.
 		Image myImage = new Image();
-    	RasterLayer layer = new RasterLayer( colors, sensorData );
-    	myImage.addLayer(layer);
+    	///RasterLayer layer = new RasterLayer( colors, sensorData );
+    	///myImage.addLayer(layer);
 
     	// If the surface database was read, superimpose it.
 		/*if (readSurface) {
@@ -854,7 +857,7 @@ public class Condense extends GeoObject {
    		
 	    // Diagnostics
 	    int total = rows*cols;
-	    int allPixels = database.getTimestamps().size() * total;
+	    int allPixels = database.metadata.timestamps * total;
 	    int storedPixels = database.numberOfVectors();
 	    
    		Tools.statusMessage("");
@@ -918,13 +921,13 @@ public class Condense extends GeoObject {
 			// All the lines in the file.
 			ArrayList<String> lines = file.readStrings();
 			
-			Iterator<String> i = lines.iterator();
+			Iterator<String> lineIter = lines.iterator();
 			
-			// Read through the lines in the configuration file.
-			while(i.hasNext()) {
+			// Process the lines in the configuration file.
+			while(lineIter.hasNext()) {
 				
 				// Read the line
-				String input = i.next();
+				String input = lineIter.next();
 				
 				// Before cleaning up the string, save any literal text values.
 				String textValue = Tools.parseString( input, 1, "=" );
@@ -945,6 +948,7 @@ public class Condense extends GeoObject {
 				
 				switch(variable) {
 					case ";":		// Comment line
+					case "!":		// Comment line
 					case "#":		// Comment line
 					case "*":		// Comment line
 						break;

@@ -3,7 +3,7 @@ package helper_classes;
 ///todo
 ///import java.sql.Date;
 import java.util.ArrayList;
-import java.util.Iterator;
+///import java.util.Iterator;
 
 /* Database
  * 
@@ -84,8 +84,8 @@ public class DatabaseRamSchema extends Database {
 	 * store a vector by values
 	 * 
 	 */
-	public void store(int data, int row, int col, int time) {
-		vectors.add( new GriddedVector( data, row, col, time));
+	public void store(int data, GriddedLocation loc, Timestamp time) {
+		vectors.add( new GriddedVector( data, loc, time));
 	}
 
 	/*
@@ -153,7 +153,7 @@ public class DatabaseRamSchema extends Database {
 	 * 
 	 * Return all the vectors in the database at the specified time index.
 	 */
-	public ArrayList<GriddedVector> getVectorsAtTime( int time ) {
+	/*public ArrayList<GriddedVector> getVectorsAtTime( int time ) {
 		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
 		
 		Iterator<GriddedVector> iterator = vectors.iterator();
@@ -163,14 +163,14 @@ public class DatabaseRamSchema extends Database {
         }
 		
 		return subset;
-	}	
+	}*/	
 
 	
 	/* getVectorsAtTimeIndex
 	 * 
 	 * Return all the vectors in the database at the specified time index.
 	 */
-	public ArrayList<GriddedVector> getVectorsAtTimeIndex( int index ) {
+	/*public ArrayList<GriddedVector> getVectorsAtTimeIndex( int index ) {
 
 		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
 		
@@ -202,14 +202,14 @@ public class DatabaseRamSchema extends Database {
 		subset = getVectorsAtTime( (int) t.days() );
 
 		return subset;
-	}	
+	}*/	
 
 	
 	/* getVectorsInTimeRange
 	 * 
 	 * Return all the vectors in the database in the range of indices.
 	 */
-	public ArrayList<GriddedVector> getVectors( int first, int last ) {
+	/*public ArrayList<GriddedVector> getVectors( int first, int last ) {
 
 		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
 		
@@ -248,7 +248,7 @@ public class DatabaseRamSchema extends Database {
 		
 
 		return subset;
-	}	
+	}*/	
 
 	public void status() {
 		updateMetadata();
@@ -296,11 +296,11 @@ public class DatabaseRamSchema extends Database {
 		
 	}
 
-	@Override
+	/*@Override
 	public void storeVectorArray(GriddedVector[][] v) {
 		// TODO Auto-generated method stub
 		
-	}
+	}*/
 
 }
 

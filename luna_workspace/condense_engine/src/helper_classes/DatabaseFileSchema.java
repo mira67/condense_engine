@@ -241,10 +241,10 @@ public class DatabaseFileSchema extends Database {
 
 		try {
 			vectorsFile.writeInt(v.data());
-			vectorsFile.writeInt(v.row());
-			vectorsFile.writeInt(v.col());
-			vectorsFile.writeDouble(v.time());
+			vectorsFile.writeInt(v.loc.id);
+			vectorsFile.writeDouble(v.timestamp.id);
 			metadata.vectors++;
+			
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseFileSchema", "store", "vector: error when writing to file: "
 					+ vectorsFilename, e);
@@ -348,7 +348,8 @@ public class DatabaseFileSchema extends Database {
 				int col =  vectorsFile.readInt();
 				double time =  vectorsFile.readDouble();
 				if (time >= startTime.days() && time <= endTime.days()) {
-					vectorList.add( new GriddedVector(value, row, col, time));
+					vectorList.add( new GriddedVector(value, new GriddedLocation(row,col),
+							new Timestamp(time)));
 				}
 			}
 		} catch( Exception e ) {

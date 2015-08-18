@@ -204,8 +204,8 @@ public class DatasetSSMI extends Dataset {
 			// Convert from NETcdf bytes to vectorData.
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < cols; c++) {
-					ssmiVectors[r][c] = new SSMIVector(data[r][c], r, c);
-					ssmiVectors[r][c].time(time.days());
+					ssmiVectors[r][c] = new SSMIVector(data[r][c], new GriddedLocation(r,c));
+					ssmiVectors[r][c].timestamp = new Timestamp(time.days());
 
 				}
 			}

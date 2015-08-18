@@ -2,8 +2,8 @@ package helper_classes;
 
 ///todo
 ///import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Iterator;
+///import java.util.ArrayList;
+///import java.util.Iterator;
 
 public abstract class Database extends GeoObject {
 	
@@ -56,14 +56,7 @@ public abstract class Database extends GeoObject {
 	public abstract int storeTimestamp(Timestamp t);
 
 	public abstract int storeLocation(GriddedLocation loc);
-	public abstract void storeLocationArray(GriddedLocation[][] locs);
-	///public abstract void storeLocationList(ArrayList<GriddedLocation> locs);
-
-	//this is crap
-	///public abstract void storeVector(int id, int row, int col, int data, int time); // Raw vector storage
-	
 	public abstract void storeVector(GriddedVector v);
-	public abstract void storeVectorArray(GriddedVector[][] v);
 
 	// RETRIEVAL METHODS
 
@@ -71,11 +64,50 @@ public abstract class Database extends GeoObject {
 	public abstract Metadata getMetadata();
 	public abstract int numberOfTimestamps();
 	public abstract int numberOfVectors();
-	public abstract ArrayList<Timestamp> getTimestamps();
-	public abstract ArrayList<GriddedVector> getVectors(int startIndex,
-			int endIndex);
+	
+	///public abstract ArrayList<Timestamp> getTimestamps();
+	///public abstract ArrayList<GriddedVector> getVectors(int startIndex,
+	///		int endIndex);
 
 	// /public abstract ArrayList<GriddedLocation> getLocations();
+
+	/*
+	 *  storeLocationArray
+	 *  
+	 *  Store an array of locations in the database.
+	 */
+	public void storeLocationArray( GriddedLocation[][] locs) { 
+		for (int r = 0; r < locs.length; r++) {
+			for (int c = 0; c < locs[0].length; c++) {
+				locs[r][c].id = storeLocation(locs[r][c]);
+			}
+		}
+	}
+
+	/*
+	 * storeVectorArray
+	 * 
+	 * Store an array of gridded vectors in the database.
+ 	 * Assumes the locations and timestamp IDs have already been added to the database
+ 	 * and vector fields.
+	 * 
+	 */
+	public void storeVectorArray(GriddedVector[][] v, GriddedLocation[][] locations) {
+		
+		Tools.statusMessage("==> Adding vectors to the database.");
+		
+		for (int r = 0; r < v.length; r++) {
+			for (int c = 0; c < v[0].length; c++) {
+				
+				// Make sure the vectors have the all the location information
+				// Location information, especially the ID, may have been updated
+				// when it was added to the database.
+				v[r][c].loc = locations[r][c];
+				
+				storeVector(v[r][c]);
+			}
+		}
+	}
 
 	/*
 	 * status
@@ -91,7 +123,7 @@ public abstract class Database extends GeoObject {
 	 * what's in the list, based on their row/col locations. Undefined vectors
 	 * will be zeros.
 	 */
-	public static GriddedVector[][] createArrayFromSensorVectorList(
+	/*public static GriddedVector[][] createArrayFromSensorVectorList(
 			ArrayList<GriddedVector> list, Metadata m) {
 
 		GriddedVector[][] vectors = new GriddedVector[m.rows][m.cols];
@@ -111,7 +143,7 @@ public abstract class Database extends GeoObject {
 		}
 
 		return vectors;
-	}
+	}*/
 	
 	/*
 	 * CheckTable

@@ -44,7 +44,6 @@ public class GriddedLocation extends Location {
 		hasLatLon = true;
 	}
   
-	
 	/* equals
 	 *
 	 * Do two locations match exactly?

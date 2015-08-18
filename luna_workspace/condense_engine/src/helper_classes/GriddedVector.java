@@ -8,45 +8,23 @@ package helper_classes;
 public class GriddedVector extends GeoObject {
 
 	// Data is a 4-byte integer
-	//   - byte [3]: classification (256 possibilities, 0 - 255)
+	// - byte [3]: classification (256 possibilities, 0 - 255)
 	protected int data = NODATA;
-	private int time = 0; // Time: days since epoch*1000
-
-	// TODO: maybe an index into the locations, rather than the actual location?
+	
+	protected Timestamp timestamp;
 	protected GriddedLocation loc;
 
-	protected GriddedVector() {}
-
-	public GriddedVector(int r, int c) {
-		loc = new GriddedLocation(r, c);
+	protected GriddedVector() {
 	}
 
-	public GriddedVector(int value, int r, int c) {
-		loc = new GriddedLocation(r, c);
+	public GriddedVector(GriddedLocation l) {
+		loc = l;
+	}
+
+	public GriddedVector(int value, GriddedLocation l, Timestamp t) {
+		loc = l;
 		data(value);
-	}
-
-	public GriddedVector(int value, int r, int c, double t) {
-		loc = new GriddedLocation(r, c);
-		data(value);
-		time(t);
-	}
-
-	public GriddedVector(int r, int c, double lat, double lon) {
-		loc = new GriddedLocation(r, c, lat, lon);
-	}
-
-	// Time methods
-	public void time(double t) {
-		time = (int) t * 1000;
-	}
-
-	public double time() {
-		return time / 1000.0;
-	}
-
-	public int encodedTime() {
-		return time;
+		timestamp = t;
 	}
 
 	public int row() {
@@ -72,7 +50,7 @@ public class GriddedVector extends GeoObject {
 	public GriddedLocation location() {
 		return loc;
 	}
-
+	
 	/*
 	 * classification
 	 * 
@@ -132,19 +110,21 @@ public class GriddedVector extends GeoObject {
 	 * Given a 2-D array of vectors, replace any data that exceeds min/max
 	 * thresholds with a 'no data' value.
 	 */
-	 public static GriddedVector[][] filterBadData( GriddedVector array[][], int min, int max, int noData) {
-		 
-		 for (int r = 0; r < array.length; r++){
-			 for (int c = 0; c < array[0].length; c++){
-				 
-				 if (array[r][c] == null) continue;
-				 
-				 if (array[r][c].data() < min || array[r][c].data() > max)
-					 array[r][c].data(noData);
-			 }
-			 
-		 }
-		 
-		 return array;
-	 }
+	public static GriddedVector[][] filterBadData(GriddedVector array[][],
+			int min, int max, int noData) {
+
+		for (int r = 0; r < array.length; r++) {
+			for (int c = 0; c < array[0].length; c++) {
+
+				if (array[r][c] == null)
+					continue;
+
+				if (array[r][c].data() < min || array[r][c].data() > max)
+					array[r][c].data(noData);
+			}
+
+		}
+
+		return array;
+	}
 }

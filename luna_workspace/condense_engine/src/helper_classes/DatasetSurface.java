@@ -113,7 +113,7 @@ public class DatasetSurface extends Dataset {
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < cols; c++) {
 					int value = Tools.unsignedByteToInt(surfaceBytes[r][c]);
-					vectors[r][c] = new SurfaceVector(value, r, c);
+					vectors[r][c] = new SurfaceVector(value, locs[r][c]);
 				}
 			}
 			file.close();

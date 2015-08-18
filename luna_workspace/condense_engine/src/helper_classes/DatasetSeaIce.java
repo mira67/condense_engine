@@ -200,8 +200,8 @@ public class DatasetSeaIce extends Dataset {
 					// ((float)netcdfData.get(0,r,c) * 2.55), r, c );
 
 					seaIceVectors[r][c] = new SeaIceVector(
-							(int) netcdfData.get(0, r, c), r, c);
-					seaIceVectors[r][c].time(time.days());
+							(int) netcdfData.get(0, r, c), new GriddedLocation(r,c));
+					seaIceVectors[r][c].timestamp = new Timestamp(time.days());
 				}
 			}
 		} catch (Exception error) {

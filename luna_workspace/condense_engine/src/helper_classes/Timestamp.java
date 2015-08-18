@@ -32,6 +32,8 @@ public class Timestamp {
 	private int minute;
 	private int dayOfYear;
 
+	protected int id = -1;	// Database table unique primary key. -1 means not in the database.
+	
 	protected String dateSeparator = ".";
 
 	/*---------------------------------------------------------------------------
