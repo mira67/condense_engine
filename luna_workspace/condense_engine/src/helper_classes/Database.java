@@ -27,37 +27,6 @@ public abstract class Database extends GeoObject {
 		}
 	}
 
-	/*
-	 *  Table
-	 *  
-	 *  Define what tables will be in the SQL database. The 'name' is the name of the table,
-	 *  the 'columns' define what the data entries will be in the table (use SQL format).
-	 */
-	public enum Table {
-		METADATA("METADATA","(ID INT PRIMARY KEY, ROWS SMALLINT, COLS SMALLINT, TIMESTAMPS SMALLINT, LOCATIONS SMALLINT, VECTORS INT)"),
-		LOCATIONS("LOCATIONS","(ID INT PRIMARY KEY, ROW SMALLINT, COL SMALLINT, LAT DOUBLE, LON DOUBLE)"),
-		TIMESTAMPS("TIMESTAMPS","BOGUS"),
-		VECTORS("VECTORS","BOGUS");
-			
-		protected final String name;
-		protected final String SQLcolumns;
-
-		private Table(String s, String c) {
-			name = s;
-			SQLcolumns = c;
-		}
-
-		public String toString() {
-			return name;
-		}
-		
-
-		public String columnNames() {
-			return SQLcolumns;
-		}
-	}
-
-	
 	protected String dbName = "";
 	protected String dbPath = "";
 	protected Metadata metadata;
@@ -84,7 +53,7 @@ public abstract class Database extends GeoObject {
 
 	public abstract void storeMetadata(Metadata m);
 
-	public abstract void storeTimestamp(Timestamp t);
+	public abstract int storeTimestamp(Timestamp t);
 
 	public abstract int storeLocation(GriddedLocation loc);
 	public abstract void storeLocationArray(GriddedLocation[][] locs);

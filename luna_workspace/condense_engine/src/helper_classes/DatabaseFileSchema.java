@@ -204,7 +204,7 @@ public class DatabaseFileSchema extends Database {
 	/*
 	 * store a Timestamp
 	 */
-	public void storeTimestamp(Timestamp t) {
+	public int storeTimestamp(Timestamp t) {
 
 		try {
 			timestampsFile.writeDouble(t.days());
@@ -213,6 +213,8 @@ public class DatabaseFileSchema extends Database {
 			Tools.errorMessage("DatabaseFileSchema", "store", "Timestamp: error when writing to file: "
 					+ timestampsFilename, e);
 		}
+		
+		return metadata.timestamps;
 	}
 
 	/*

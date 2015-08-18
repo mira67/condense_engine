@@ -8,9 +8,6 @@ package helper_classes;
  */
 
 public class Metadata {
-
-	// Id for the database table entry (there should be only one).
-	protected int id = 0;
 	
 	protected int rows = 0;
 	protected int cols = 0;

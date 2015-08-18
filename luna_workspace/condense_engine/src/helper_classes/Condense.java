@@ -3,7 +3,7 @@ package helper_classes;
 /* Main program to experiment with algorithms for condensed data sets.
  */
 
-import java.sql.Date;
+///import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -122,10 +122,7 @@ public class Condense extends GeoObject {
     
     // Gridded image pixel locations.
     GriddedLocation locations[][];
-    
-    // Condensed date list
-    Date cDateList[];
-	
+    	
     /*-------------------------------------------------------------------------
 	// MAIN PROGRAM
 	//-----------------------------------------------------------------------*/
@@ -216,9 +213,7 @@ public class Condense extends GeoObject {
 		}
 		
 		// Database info for debugging purposes.
-		Tools.statusMessage("\n---------------------------");
 		database.status();
-		Tools.statusMessage("---------------------------\n");
 		
 		// All done. Close the database.
 		database.disconnect();
@@ -234,8 +229,10 @@ public class Condense extends GeoObject {
 	
 	/* readSurface
 	 * 
+	 * Read the surface data.
+	 * 
 	 * Special case: the surface type could potentially be used in a condensation
-	 * algorithm. Read the surface data.
+	 * algorithm. 
 	 */
 	protected void readSurface() {
 		DatasetSurface datasetSurface = new DatasetSurface();
@@ -283,7 +280,7 @@ public class Condense extends GeoObject {
 		if (timespan.startTimestamp().days() < startDate.days()) timespan.startTimestamp( startDate );
 		if (timespan.endTimestamp().days() > finalDate.days()) timespan.endTimestamp( finalDate );
 
-		// Total days we're processing. Add one to include the final date.
+		// Total days we're processing.
 		days = timespan.fullDays();
 
 		Tools.debugMessage("maximum days = " + maximumDays);
@@ -324,20 +321,14 @@ public class Condense extends GeoObject {
 			
 		}
 			
-		// The date of the file we are reading.
+		// The initial date of the files we are reading.
 		Timestamp date = new Timestamp( startDate.year(), startDate.month(), startDate.dayOfMonth());
-		
-		cDateList = new Date[days];
 		
 		// Loop through the number of days, reading the data file for each day.
 		// If a date doesn't exist (maybe it's monthly data?) ignore it.
 		for (int d = 0; d < days; d++) {
 
-			Timestamp time = new Timestamp( date.year(), date.month(), date.dayOfMonth() );
-			
-			//
-			String cDate = date.yearString() + "-" + date.monthString() + "-" + date.dayOfMonthString();
-			cDateList[d] = Date.valueOf(cDate);
+			///Timestamp time = new Timestamp( date.year(), date.month(), date.dayOfMonth() );
 			
 			switch (dataType) {
 	    		case NONE:
@@ -346,19 +337,16 @@ public class Condense extends GeoObject {
 	    			filename = DatasetSeaIce.getSeaIceFileName(dataPath, date.year(), date.month(),
 	    										 date.dayOfMonth(), addYearToInputDirectory);
 	    			
-	    			if (filename.length() > 0) {
-	    				try {
+    				try {
 	    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename );
 
 	    					// Success
 	    					fileCount++;
-	    				}
-	    				catch( Exception e ) {return false;}
-	    			} else {
-	    				Tools.warningMessage("Could not find data file for date " +
-	    						date.yearString() + "/" + date.monthString() +
-	    						"/" + date.dayOfMonthString());
-	    			}
+	    					
+	    					// Add the timestamp to the database.
+	    		    		database.storeTimestamp(date);
+	    		    		
+    				} catch( Exception e ) {return false;}
 	    			
 	    			break;
 	    			
@@ -367,21 +355,19 @@ public class Condense extends GeoObject {
 	    								date.year(), date.month(), date.dayOfMonth(),
 	    								addYearToInputDirectory, frequency, polarization);
 	    			
-	    			if (filename.length() > 0) {
-	    				try {
-	    					data[d] = (GriddedVector[][]) DatasetSSMI.readData( filename,
-	    							date.year(), date.month(), date.dayOfMonth(), time,
+    				try {
+    					data[d] = (GriddedVector[][]) DatasetSSMI.readData( filename,
+///	    							date.year(), date.month(), date.dayOfMonth(), time,
+	    							date.year(), date.month(), date.dayOfMonth(), date,
 	    							rows, cols);
 	    					
-	    					// Success
-	    					fileCount++;
-	    				}
-	    				
-	    				catch( Exception e ) {
-	    					System.out.println("quit process files, false: " + e);
-	    					return false;
-	    				}
-	    			}
+    					// Success
+    					fileCount++;
+    					
+    					// Add the timestamp to the database.
+    		    		database.storeTimestamp(date);
+    				} catch( Exception e ) {return false;}
+    				
 	    			break;
 			}
 			
@@ -392,9 +378,7 @@ public class Condense extends GeoObject {
 			Tools.statusMessage(date.yearString() + "." + date.monthString() +
 					"." + date.dayOfMonthString() + "  File name: " + filename);
 			
-			// Add the timestamp to the database.
-    		database.storeTimestamp(time);
-    		
+
 			// Next day.
 			date.incrementOneDay();
 		}
@@ -406,7 +390,7 @@ public class Condense extends GeoObject {
 		startMonth = date.month();
 		startDay = date.dayOfMonth();
 				
-		return true;//need fix end condition
+		return true;
 	}
 
 	
@@ -433,6 +417,7 @@ public class Condense extends GeoObject {
 		cols = dataset.cols();
 		
 		// We need to store the metadata in the database.
+		Tools.statusMessage("==> Adding metadata to the database.");
     	database.storeMetadata( metadata );
     	
     	haveMetadata = true;
@@ -470,7 +455,7 @@ public class Condense extends GeoObject {
     			break;
 		}
 		
-		///database.store(dataset.locationsAsArrayList());
+		Tools.statusMessage("==> Adding locations to the database.");
 		database.storeLocationArray(locations);
 		
 		return;
@@ -663,7 +648,6 @@ public class Condense extends GeoObject {
 							// Same thing, for minimum values.
 							if (data[d][r][c].data() < (mean[r][c] - sd[r][c]*threshold) ) {
 
-								///Tools.debugMessage("exceeded threshold: "+r+","+c);
 								// A new minimum value? Save it.
 								if (data[d][r][c].data() < min[r][c].data() ||
 									min[r][c].data() == NODATA) min[r][c] = data[d][r][c];

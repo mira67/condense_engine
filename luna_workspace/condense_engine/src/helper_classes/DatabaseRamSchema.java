@@ -270,8 +270,11 @@ public class DatabaseRamSchema extends Database {
 	}
 
 	@Override
-	public void storeTimestamp(Timestamp t) {
+	public int storeTimestamp(Timestamp t) {
 		// TODO Auto-generated method stub
+		metadata.timestamps++;
+		
+		return metadata.timestamps;
 		
 	}
 
