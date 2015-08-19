@@ -343,8 +343,30 @@ public class DatabaseH2 extends Database {
 		return new Timestamp();
 	}
 	
+	/* getTimestamps
+	 * 
+	 * Return an ArrayList of all timestamps in the database.
+	 */
 	public ArrayList<Timestamp> getTimestamps() {
-		return new ArrayList<Timestamp>();
+		ArrayList<Timestamp> timestamps = new ArrayList<Timestamp>();
+
+	    String query = "SELECT * FROM " + Table.TIMESTAMPS.name() +	" ORDER BY ID";
+	    
+		try {
+			Statement statement = conn.createStatement();
+			ResultSet rs = statement.executeQuery(query);
+		    
+			while (rs.next()) {
+				Timestamp t = new Timestamp(rs.getInt("ID"), rs.getFloat("TIMESTAMP"));
+				timestamps.add(t);
+			}
+			rs.close();
+			statement.close();
+		} catch(SQLException e) {
+			Tools.errorMessage("DatabaseH2", "getTimestamps", "query failed", e);
+		}
+				
+		return timestamps;
 	}
 
 	public ArrayList<GriddedLocation> getLocations() { 

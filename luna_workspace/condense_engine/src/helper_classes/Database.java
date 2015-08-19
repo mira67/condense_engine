@@ -2,7 +2,7 @@ package helper_classes;
 
 ///todo
 ///import java.sql.Date;
-///import java.util.ArrayList;
+import java.util.ArrayList;
 ///import java.util.Iterator;
 
 public abstract class Database extends GeoObject {
@@ -65,11 +65,9 @@ public abstract class Database extends GeoObject {
 	public abstract int numberOfTimestamps();
 	public abstract int numberOfVectors();
 	
-	///public abstract ArrayList<Timestamp> getTimestamps();
-	///public abstract ArrayList<GriddedVector> getVectors(int startIndex,
-	///		int endIndex);
-
-	// /public abstract ArrayList<GriddedLocation> getLocations();
+	public abstract ArrayList<GriddedLocation> getLocations();
+	public abstract ArrayList<Timestamp> getTimestamps();
+	public abstract ArrayList<GriddedVector> getVectors(int startIndex, int endIndex);
 
 	/*
 	 *  storeLocationArray

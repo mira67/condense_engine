@@ -59,6 +59,23 @@ public class Timestamp {
 	/*
 	 * Timestamp
 	 * 
+	 * Constructor using days since January 1, 1970 as the epoch date,
+	 * and a database index ID number
+	 */
+	public Timestamp(int indexID, double daysInput) {
+
+		days = daysInput;
+
+		cal = Timestamp.daysSinceEpochToCal(daysInput);
+
+		updateLocalVariables();
+		
+		id = indexID;
+	}
+
+	/*
+	 * Timestamp
+	 * 
 	 * Constructor using January 1 of the specified year. Use 1601 for NSIDC
 	 * data.
 	 */
@@ -235,15 +252,19 @@ public class Timestamp {
 	// Print methods.
 
 	public void printLong() {
-		System.out.println("Timestamp: Days = " + days() + "  Year = " + year()
-				+ "  Month = " + month()
-				+ // When viewed, month is indexed from 1.
-				"  Date = " + dayOfMonth() + "  Hour = " + hour()
-				+ "  Minute = " + minute() + "  DOY = " + dayOfYear());
+		System.out.println(
+				" Timestamp: ID = " + id +
+				" Days = " + days() +
+				" Year = " + year() +
+				" Month = " + month() + // When viewed, month is indexed from 1.
+				" Date = " + dayOfMonth() +
+				" Hour = " + hour() + 
+				" Minute = " + minute() +
+				" DOY = " + dayOfYear());
 	}
 
 	public void print() {
-		System.out.print(dateString() + " " + hour() + ":" + minute() + " "
+		System.out.print(id + " " + dateString() + " " + hour() + ":" + minute() + " "
 				+ dayOfYear());
 	}
 

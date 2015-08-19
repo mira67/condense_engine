@@ -292,6 +292,19 @@ public class DatabaseFileSchema extends Database {
 	}
 
 	/*
+	 * getLocations
+	 * 
+	 * Retrieve all the locations from the database file, and return them as
+	 * an array list.
+	 */
+	public ArrayList<GriddedLocation> getLocations() {
+		ArrayList<GriddedLocation> locations = new ArrayList<GriddedLocation>();
+		
+		Tools.statusMessage("GetLocations not implemented in DatabaseFileSchema");
+		return locations;
+	}
+
+	/*
 	 * getTimestamps
 	 * 
 	 * Retrieve all the timestamps from the database file, and return them as

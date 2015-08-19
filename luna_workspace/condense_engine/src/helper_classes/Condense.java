@@ -796,6 +796,19 @@ public class Condense extends GeoObject {
 					new Exception());
 		}
 		
+		// Get the list of timestamps in the database.
+		ArrayList<Timestamp> timestamps = database.getTimestamps();
+		
+		// For debugging purposes: print out the timestamps.
+		Tools.statusMessage("------- Timestamps");
+		Iterator<Timestamp> i = timestamps.iterator();
+		while(i.hasNext()) {
+			Timestamp t = (Timestamp) i.next();
+			t.print();
+			Tools.message("");
+		}
+		Tools.statusMessage("------- End Timestamps");
+		
         Timestamp startTime = database.getTimestamp( imageStartIndex );
         Timestamp endTime = database.getTimestamp( imageEndIndex );
 
