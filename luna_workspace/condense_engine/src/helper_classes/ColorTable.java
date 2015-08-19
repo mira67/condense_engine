@@ -40,6 +40,10 @@ public class ColorTable extends GeoObject {
     
     public void prism() { prism(256); }
     
+    /* prism
+     * 
+     * Create a chromatic color table with 'number' of colors, 
+     */
     public void prism(int number) {
        	clear();
     	
@@ -60,7 +64,8 @@ public class ColorTable extends GeoObject {
     		add(new Color(red,green,blue));
     	}
     	
-    	set(0, BLACK);
-    	set(255, WHITE);
+    	// First and last colors on the the table will be black and white.
+    	set(low, BLACK);
+    	set(high, WHITE);
     }
 }

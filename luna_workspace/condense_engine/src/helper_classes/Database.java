@@ -13,8 +13,10 @@ public abstract class Database extends GeoObject {
 	 * Define the possible statuses for the database.
 	 */
 	public enum Status {
-		DISCONNECTED("DISCONNECTED"), CONNECTED("CONNECTED"), CONNECTED_READ_ONLY("CONNECTED READ-ONLY"),
-			UNKNOWN("UNKNOWN");
+		DISCONNECTED("DISCONNECTED"),
+		CONNECTED("CONNECTED"),
+		CONNECTED_READ_ONLY("CONNECTED READ-ONLY"),
+		UNKNOWN("UNKNOWN");
 
 		private final String state;
 
@@ -52,15 +54,13 @@ public abstract class Database extends GeoObject {
 	// STORAGE METHODS
 
 	public abstract void storeMetadata(Metadata m);
-
 	public abstract int storeTimestamp(Timestamp t);
-
 	public abstract int storeLocation(GriddedLocation loc);
 	public abstract void storeVector(GriddedVector v);
 
 	// RETRIEVAL METHODS
 
-	public abstract Timestamp get(int i);
+	public abstract Timestamp getTimestamp(int id);
 	public abstract Metadata getMetadata();
 	public abstract int numberOfTimestamps();
 	public abstract int numberOfVectors();
@@ -144,19 +144,4 @@ public abstract class Database extends GeoObject {
 
 		return vectors;
 	}*/
-	
-	/*
-	 * CheckTable
-	 * 
-	 * Returns true if the table exists, false if it does not (and creates the table).
-	 */
-	public Boolean checkTables(String tbNames) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-	
-	public void createMap(String tbN) {
-		// TODO Auto-generated method stub
-		
-	}
 }

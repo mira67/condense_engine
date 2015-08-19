@@ -1,9 +1,7 @@
 package helper_classes;
 
-///todo
-///import java.sql.Date;
 import java.util.ArrayList;
-///import java.util.Iterator;
+import java.util.Iterator;
 
 /* Database
  * 
@@ -64,8 +62,7 @@ public class DatabaseRamSchema extends Database {
     // STORAGE METHODS
     //
     
-	public void store( Metadata m ) {
-		writeCheck("Metadata");
+	public void storeMetadata( Metadata m ) {
 		metadata = m;
 	}
 	
@@ -81,42 +78,12 @@ public class DatabaseRamSchema extends Database {
 	public void store(GriddedVector v) {vectors.add(v);}
 
 	/*
-	 * store a vector by values
-	 * 
-	 */
-	public void store(int data, GriddedLocation loc, Timestamp time) {
-		vectors.add( new GriddedVector( data, loc, time));
-	}
-
-	/*
 	 * store a vector array
 	 */
 	public void store(GriddedVector[][] v) {
 		for (int r = 0; r < v.length; r++) {
 			for (int c = 0; c < v[0].length; c++) {
 				store(v[r][c]);
-			}
-		}
-	}
-
-	/*
-	 *  Add an array of locations
-	 */
-	public void add( GriddedLocation[][] loc) { 
-		for (int r = 0; r < loc.length; r++) {
-			for (int c = 0; c < loc[0].length; c++) {
-				locations.add(loc[r][c]);
-			}
-		}
-	}
-
-	/*
-	 *  Add an array of sensor vectors (like surface data)
-	 */
-	public void add( GriddedVector[][] v) { 
-		for (int r = 0; r < v.length; r++) {
-			for (int c = 0; c < v[0].length; c++) {
-				vectors.add(v[r][c]);
 			}
 		}
 	}
@@ -136,7 +103,7 @@ public class DatabaseRamSchema extends Database {
 		metadata.locations = locations.size();				
 	}
 	
-	public Timestamp get(int i) { return timestamps.get(i); }
+	public Timestamp getTimestamp(int i) { return timestamps.get(i); }
 	
 	public int numberOfTimestamps() { return timestamps.size(); }
 	public ArrayList<Timestamp> getTimestamps() { return timestamps; }
@@ -149,28 +116,28 @@ public class DatabaseRamSchema extends Database {
 	public int rows() { return metadata.rows; }
 	public int cols() { return metadata.cols; }
 	
-	/* getVectorsAtTime
+	/* getVectorsAtTimestamp
 	 * 
-	 * Return all the vectors in the database at the specified time index.
+	 * Return all the vectors in the database at the specified timestamp.
 	 */
-	/*public ArrayList<GriddedVector> getVectorsAtTime( int time ) {
+	public ArrayList<GriddedVector> getVectorsAtTimestamp( Timestamp time ) {
 		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
 		
 		Iterator<GriddedVector> iterator = vectors.iterator();
         while (iterator.hasNext()) {
             GriddedVector vector = iterator.next();
-            if (vector.time() == time) subset.add(vector);
+            if (vector.timestamp == time) subset.add(vector);
         }
 		
 		return subset;
-	}*/	
+	}	
 
 	
 	/* getVectorsAtTimeIndex
 	 * 
 	 * Return all the vectors in the database at the specified time index.
 	 */
-	/*public ArrayList<GriddedVector> getVectorsAtTimeIndex( int index ) {
+	public ArrayList<GriddedVector> getVectorsAtTimeIndex( int index ) {
 
 		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
 		
@@ -199,17 +166,17 @@ public class DatabaseRamSchema extends Database {
         // If we didn't find anything... Subset will be empty.
         if (t == null || counter > timestamps.size()) return subset;
         
-		subset = getVectorsAtTime( (int) t.days() );
+		subset = getVectorsAtTimestamp( t );
 
 		return subset;
-	}*/	
+	}	
 
 	
 	/* getVectorsInTimeRange
 	 * 
-	 * Return all the vectors in the database in the range of indices.
+	 * Return all the vectors in the database in the range of time IDs.
 	 */
-	/*public ArrayList<GriddedVector> getVectors( int first, int last ) {
+	public ArrayList<GriddedVector> getVectors( int first, int last ) {
 
 		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
 		
@@ -243,12 +210,10 @@ public class DatabaseRamSchema extends Database {
             if (t == null ) continue;
             
             // Add any vectors we found to the subset list.
-    		subset.addAll( getVectorsAtTime( (int) t.days() ) );
+    		subset.addAll( getVectorsAtTimestamp( t ));
 		}
-		
-
 		return subset;
-	}*/	
+	}
 
 	public void status() {
 		updateMetadata();
@@ -261,21 +226,10 @@ public class DatabaseRamSchema extends Database {
 		Tools.statusMessage("Rows              = " + metadata.rows);
 		Tools.statusMessage("Cols              = " + metadata.cols);
 	}
-
 	
-	@Override
-	public void storeMetadata(Metadata m) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public int storeTimestamp(Timestamp t) {
-		// TODO Auto-generated method stub
-		metadata.timestamps++;
-		
+		metadata.timestamps++;		
 		return metadata.timestamps;
-		
 	}
 
 	@Override
@@ -285,22 +239,9 @@ public class DatabaseRamSchema extends Database {
 	}
 
 	@Override
-	public void storeLocationArray(GriddedLocation[][] locs) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public void storeVector(GriddedVector v) {
 		// TODO Auto-generated method stub
 		
 	}
-
-	/*@Override
-	public void storeVectorArray(GriddedVector[][] v) {
-		// TODO Auto-generated method stub
-		
-	}*/
-
 }
 

@@ -338,7 +338,7 @@ public class DatabaseH2 extends Database {
 		return metadata;
 	}
 	
-	public Timestamp get(int i) {
+	public Timestamp getTimestamp(int id) {
 		// TODO
 		return new Timestamp();
 	}

@@ -318,7 +318,7 @@ public class DatabaseFileSchema extends Database {
 	 * 
 	 * Return the timestamp at index i;
 	 */
-	public Timestamp get(int index) {
+	public Timestamp getTimestamp(int index) {
 		if (timestamps == null) timestamps = getTimestamps();
 		
 		return timestamps.get(index);

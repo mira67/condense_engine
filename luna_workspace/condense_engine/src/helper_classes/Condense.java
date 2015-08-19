@@ -241,7 +241,8 @@ public class Condense extends GeoObject {
 	    surfaceVectors = datasetSurface.readData(surfaceFile, surfaceLats, surfaceLons);
 	}
 	
-	/* readData
+	/* 
+	 * readData
 	 * 
 	 * Read the dataset files. Since the different types of data will most likely
 	 * have different formats and file names, this method must tailor itself
@@ -288,39 +289,9 @@ public class Condense extends GeoObject {
 
 		String filename = "";
 
-		// Have we opened the datasets yet?
-		if (data == null) {
+		// Have we opened the dataset?
+		if (data == null) openDataset( maximumDays );
 
-			switch (dataType) {
-		    
-    			case SEA_ICE:
-    				filename = DatasetSeaIce.getSeaIceFileName(dataPath, startYear,
-    						startMonth, startDay, addYearToInputDirectory);
-    				dataset = new DatasetSeaIce(filename);
-    				getMetadata( filename );
-    				break;
-			    
-    			case SSMI:
-    				filename = DatasetSSMI.getSSMIFileName(dataPath, startYear, startMonth,
-    						startDay, addYearToInputDirectory, frequency,
-    						polarization);
-
-    				dataset = new DatasetSSMI(filename);
-    				
-    				getMetadata( filename );
-    				
-    				getLocations();
-    				
-    				break;
-    				
-    			case NONE:
-	    			break;
-
-			}
-			data = new GriddedVector[maximumDays][rows][cols];
-			
-		}
-			
 		// The initial date of the files we are reading.
 		Timestamp date = new Timestamp( startDate.year(), startDate.month(), startDate.dayOfMonth());
 		
@@ -328,8 +299,6 @@ public class Condense extends GeoObject {
 		// If a date doesn't exist (maybe it's monthly data?) ignore it.
 		for (int d = 0; d < days; d++) {
 
-			///Timestamp time = new Timestamp( date.year(), date.month(), date.dayOfMonth() );
-			
 			switch (dataType) {
 	    		case NONE:
 	    			break;
@@ -357,7 +326,6 @@ public class Condense extends GeoObject {
 	    			
     				try {
     					data[d] = (GriddedVector[][]) DatasetSSMI.readData( filename,
-///	    							date.year(), date.month(), date.dayOfMonth(), time,
 	    							date.year(), date.month(), date.dayOfMonth(), date,
 	    							rows, cols);
 	    					
@@ -393,12 +361,53 @@ public class Condense extends GeoObject {
 		return true;
 	}
 
+
+	/*
+	 * openDataset
+	 * 
+	 * Open a Dataset object, based on the selection of "datatype". The amount
+	 * of space allocated for the data is determined by the maximum days value, 
+	 * which is the time increment used for reading sequential files.
+	 */
+	protected void openDataset(int maximumDays) {
+
+		String filename = "";
+			
+		switch (dataType) {
+		    
+   			case SEA_ICE:
+   				filename = DatasetSeaIce.getSeaIceFileName(dataPath, startYear,
+   						startMonth, startDay, addYearToInputDirectory);
+   				dataset = new DatasetSeaIce(filename);
+   				getMetadata( filename );
+   				break;
+			    
+   			case SSMI:
+   				filename = DatasetSSMI.getSSMIFileName(dataPath, startYear, startMonth,
+   						startDay, addYearToInputDirectory, frequency,
+   						polarization);
+
+   				dataset = new DatasetSSMI(filename);
+    				
+   				getMetadata( filename );
+    				
+   				getLocations();
+    				
+   				break;
+    				
+   			case NONE:
+    			break;
+
+		}
+		data = new GriddedVector[maximumDays][rows][cols];	
+	}
 	
-	/* getMetadata
+	/* 
+	 * getMetadata
 	 * 
 	 * Got the metadata? If not, go get it from the supplied file.
 	 */
-	public void getMetadata( String filename ) {
+	protected void getMetadata( String filename ) {
 		
 		if (haveMetadata) return;
 		
@@ -426,11 +435,12 @@ public class Condense extends GeoObject {
 	}
 
 	
-	/* getLocations
+	/* 
+	 * getLocations
 	 * 
 	 * Got the locations? Metadata must be read first.
 	 */
-	public void getLocations() {
+	protected void getLocations() {
 		
 		if (!haveMetadata) {
 			Tools.errorMessage("Condense", "getLocations", "Metadata must be read before retrieving locations.",
@@ -463,7 +473,8 @@ public class Condense extends GeoObject {
 	
 	
 	
-	/* condenseData
+	/*
+	 * condenseData
 	 * 
 	 * Condense the most recent data time span.
 	 */
@@ -489,7 +500,8 @@ public class Condense extends GeoObject {
 		}
     }
 	
-	/* noCondensation
+	/*
+	 * noCondensation
 	 * 
 	 * Don't do any condensation. Add all pixels to the database.
 	 */
@@ -590,7 +602,8 @@ public class Condense extends GeoObject {
 	}
 
 	
-	/* minmaxCondensation
+	/* 
+	 * minmaxCondensation
 	 * 
 	 * Condense the pixels to the minimum and maximum values, if they exceed thresholds,
 	 * over the course of the temporal increment (typically one week).
@@ -768,9 +781,10 @@ public class Condense extends GeoObject {
 
 		database.connectReadOnly();
 
-		// Database info for debugging purposes.
+		// Database status for debugging purposes.
 		database.status();
 		
+		// Get the metadata
 		metadata = database.getMetadata();
 		
 		// Display an image. Pixels between imageStartIndex and imageEndIndex will
@@ -782,8 +796,8 @@ public class Condense extends GeoObject {
 					new Exception());
 		}
 		
-        Timestamp startTime = database.get( imageStartIndex );
-        Timestamp endTime = database.get( imageEndIndex );
+        Timestamp startTime = database.getTimestamp( imageStartIndex );
+        Timestamp endTime = database.getTimestamp( imageEndIndex );
 
         Tools.statusMessage("");
 		Tools.statusMessage("Create image....  (time index = " + imageStartIndex + " to " + imageEndIndex + ")");
