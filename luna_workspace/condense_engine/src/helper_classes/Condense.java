@@ -799,7 +799,7 @@ public class Condense extends GeoObject {
 		// Get the list of timestamps in the database.
 		ArrayList<Timestamp> timestamps = database.getTimestamps();
 		
-		// For debugging purposes: print out the timestamps.
+		// For debugging purposes: print out all the timestamps.
 		Tools.statusMessage("------- Timestamps");
 		Iterator<Timestamp> i = timestamps.iterator();
 		while(i.hasNext()) {
@@ -809,20 +809,19 @@ public class Condense extends GeoObject {
 		}
 		Tools.statusMessage("------- End Timestamps");
 		
-        Timestamp startTime = database.getTimestamp( imageStartIndex );
-        Timestamp endTime = database.getTimestamp( imageEndIndex );
+		// The time range of images we want to display...
+        Timestamp startTime = timestamps.get( imageStartIndex );
+        Timestamp endTime = timestamps.get( imageEndIndex );
 
         Tools.statusMessage("");
 		Tools.statusMessage("Create image....  (time index = " + imageStartIndex + " to " + imageEndIndex + ")");
 
         // Get the pixels for the image
-		///ArrayList<GriddedVector> pixList = database.getVectors(imageStartIndex, imageEndIndex);
-		Tools.statusMessage("NOT IMPLEMENTED");
-		///Tools.statusMessage("Pixels: " + pixList.size());
+		ArrayList<GriddedVector> pixList = database.getVectors(imageStartIndex, imageEndIndex);
+		Tools.statusMessage("Pixels: " + pixList.size());
 		
 		// Make an integer array out of the pixel data
-		///int[][] sensorData = createArrayFromVectorList( metadata.rows, metadata.cols, pixList );
-		Tools.statusMessage("NOT IMPLEMENTED");
+		int[][] sensorData = createArrayFromVectorList( metadata.rows, metadata.cols, pixList );
 
 		// Make a color table.
 		ColorTable colors = new ColorTable();
@@ -830,8 +829,8 @@ public class Condense extends GeoObject {
 		
 		// Create the image from the pixels.
 		Image myImage = new Image();
-    	///RasterLayer layer = new RasterLayer( colors, sensorData );
-    	///myImage.addLayer(layer);
+    	RasterLayer layer = new RasterLayer( colors, sensorData );
+    	myImage.addLayer(layer);
 
     	// If the surface database was read, superimpose it.
 		/*if (readSurface) {

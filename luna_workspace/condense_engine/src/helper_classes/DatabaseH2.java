@@ -52,6 +52,11 @@ public class DatabaseH2 extends Database {
 	private Statement sqlCreate;
 	private boolean metadataStored = false;
 
+	// If we read all the locations or timestamps from the database, keep
+	// a record of them (so we don't have to do it again).
+	ArrayList<GriddedLocation> locations = null;
+	ArrayList<Timestamp> timestamps = null;
+	
 	// Constructor
 	public DatabaseH2(String path, String name) {
 		super(path, name);
@@ -338,9 +343,61 @@ public class DatabaseH2 extends Database {
 		return metadata;
 	}
 	
-	public Timestamp getTimestamp(int id) {
-		// TODO
-		return new Timestamp();
+	/* getTimestamp
+	 * 
+	 * Query the database for the specified id (id is the timestamps table index).
+	 */
+	 public Timestamp getTimestamp(int id) {
+	 	Timestamp t = null;
+		
+		String query = "SELECT * FROM " + Table.TIMESTAMPS.name() +	" WHERE ID = " + id;
+	    
+		try {
+			Statement statement = conn.createStatement();
+			ResultSet rs = statement.executeQuery(query);
+		    
+			if (rs.next()) {
+				t = new Timestamp(
+					rs.getInt("ID"),
+					rs.getFloat("TIMESTAMP"));
+			}
+			rs.close();
+			statement.close();
+		} catch(SQLException e) {
+			Tools.errorMessage("DatabaseH2", "getTimestamp", "query failed", e);
+		}
+		
+		return t;
+	}
+	
+	/* getLocation
+	 * 
+	 * Query the database for the specified id (id is the Locations table index).
+	 */
+	public GriddedLocation getLocation(int id) {
+		GriddedLocation loc = null;
+		
+		String query = "SELECT * FROM " + Table.LOCATIONS.name() +	" WHERE ID = " + id;
+	    
+		try {
+			Statement statement = conn.createStatement();
+			ResultSet rs = statement.executeQuery(query);
+		    
+			if (rs.next()) {
+				loc = new GriddedLocation(
+					rs.getInt("ID"),
+					rs.getInt("ROW"),
+					rs.getInt("COL"),
+					rs.getDouble("LAT"),
+					rs.getDouble("LON"));
+			}
+			rs.close();
+			statement.close();
+		} catch(SQLException e) {
+			Tools.errorMessage("DatabaseH2", "getLocation", "query failed", e);
+		}
+		
+		return loc;
 	}
 	
 	/* getTimestamps
@@ -348,7 +405,12 @@ public class DatabaseH2 extends Database {
 	 * Return an ArrayList of all timestamps in the database.
 	 */
 	public ArrayList<Timestamp> getTimestamps() {
-		ArrayList<Timestamp> timestamps = new ArrayList<Timestamp>();
+
+		// Have we already read them in? Don't bother... but only if we're
+		// not writing into the database.
+		if (timestamps != null && status == Status.CONNECTED_READ_ONLY) return timestamps;
+		
+		timestamps = new ArrayList<Timestamp>();
 
 	    String query = "SELECT * FROM " + Table.TIMESTAMPS.name() +	" ORDER BY ID";
 	    
@@ -369,61 +431,105 @@ public class DatabaseH2 extends Database {
 		return timestamps;
 	}
 
-	public ArrayList<GriddedLocation> getLocations() { 
-		// TODO
-		return new ArrayList<GriddedLocation>();
+	/* getLocations
+	 * 
+	 * Return an arraylist of all locations in the database.
+	 */
+	 public ArrayList<GriddedLocation> getLocations() { 
+
+		// Have we already read them in? Don't bother... but only if we're
+		// not writing into the database.
+		if (locations != null && status == Status.CONNECTED_READ_ONLY) return locations;
+			
+		locations = new ArrayList<GriddedLocation>();
+
+	    String query = "SELECT * FROM " + Table.LOCATIONS.name() +	" ORDER BY ID";
+	    
+		try {
+			Statement statement = conn.createStatement();
+			ResultSet rs = statement.executeQuery(query);
+		    
+			while (rs.next()) {
+				GriddedLocation loc = new GriddedLocation(
+						rs.getInt("ROW"),
+						rs.getInt("COL"),
+						rs.getDouble("LAT"),
+						rs.getDouble("LON"));
+				
+				loc.id = rs.getInt("ID");
+				locations.add(loc);
+			}
+			rs.close();
+			statement.close();
+		} catch(SQLException e) {
+			Tools.errorMessage("DatabaseH2", "getLocations", "query failed", e);
+		}
+				
+		return locations;
 	 }
 	
 	
-	public ArrayList<GriddedVector> getVectors() {
+	/*public ArrayList<GriddedVector> getVectors() {
 		// TODO
 		return new ArrayList<GriddedVector>();
-	}
+	}*/
 	
 	/* getVectorsAtTime
 	 * 
-	 * Return all the vectors in the database at the specified time index.
+	 * Return all the vectors in the database at the specified time index ID.
 	 */
-	public ArrayList<GriddedVector> getVectorsAtTime( int time ) {
-		// TODO
-		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
-		return subset;
-	}	
+	public ArrayList<GriddedVector> getVectorsAtTime( int timeID ) {
 
-	
-	/* getVectorsAtTimeIndex
-	 * 
-	 * Return all the vectors in the database at the specified time index.
-	 */
-	public ArrayList<GriddedVector> getVectorsAtTimeIndex( int index ) {
-
-		// TODO
-		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
+		// When we create the vectors, we'll need the locations and timestamps.
+		locations = getLocations();
+		timestamps = getTimestamps();
 		
-		return subset;
+		ArrayList<GriddedVector> vectors = new ArrayList<GriddedVector>();
+		
+	    ///String query = "SELECT * FROM " + Table.VECTORS.name() + " WHERE TIMESTAMPID = " + timeID;
+	    String query = "SELECT * FROM " + Table.VECTORS.name();
+	    
+		try {
+			GriddedLocation loc;
+			Timestamp time;
+			GriddedVector vec;
+			
+			Statement statement = conn.createStatement();
+			ResultSet rs = statement.executeQuery(query);
+
+			while (rs.next()) {
+				loc = getLocation(rs.getInt("LOCATIONID"));
+				time = getTimestamp(rs.getInt("TIMESTAMPID"));
+				
+				// Create the vector from the value, location and timestamp.
+				vec = new GriddedVector(rs.getInt("VALUE"),	loc, time );
+				
+				// Add it to the arraylist.
+				vectors.add(vec);
+			}
+			
+			rs.close();
+			statement.close();
+		} catch(SQLException e) {
+			Tools.errorMessage("DatabaseH2", "getVectorsAtTime", "query failed", e);
+		}
+
+		return vectors;
 	}	
 
-	
 	/* getVectorsInTimeRange
 	 * 
 	 * Return all the vectors in the database in the range of indices.
 	 */
 	public ArrayList<GriddedVector> getVectors( int first, int last ) {
 
-		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
+		ArrayList<GriddedVector> vectors = new ArrayList<GriddedVector>();
 		
-		// TODO
-		
-		if (first > last || first < 0) {
-			Tools.warningMessage("DatabaseH2::getVectorsInTimeRange: Warning: " +
-					"Requested time range " + first + " to " + last +
-					" may exceed the range of the timestamps in the datbase " +
-					"or be malformed. Be sure to index from zero.");
-			
-			return subset;
+		for (int i = first; i <= last; i++) {
+			vectors.addAll( getVectorsAtTime(i) );			
 		}
-		
-		return subset;
+	
+		return vectors;
 	}	
 
 	public int numberOfTimestamps() { return metadata.timestamps; }	

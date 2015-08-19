@@ -29,6 +29,14 @@ public class GriddedLocation extends Location {
 
 		hasLatLon = true;
 	}
+
+	public GriddedLocation(int indexID, int r, int c, double lat, double lon) {
+		rastloc = new RasterLocation(r,c);
+		geoloc = new GeoLocation(lat,lon);
+		id = indexID;
+		
+		hasLatLon = true;
+	}
 	
 	public int row() { return rastloc.row(); }
 	public int col() { return rastloc.col(); }
