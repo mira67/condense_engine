@@ -310,7 +310,7 @@ public class Condense extends GeoObject {
     					// Add the timestamp to the database.
     					date.id = database.storeTimestamp(date);
     					
-    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename, date.id );
+    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename, locations, date.id );
 
     					// Success
     					fileCount++;
@@ -329,7 +329,7 @@ public class Condense extends GeoObject {
     					date.id = database.storeTimestamp(date);
     					
     					// Read the data
-    					data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, date.id);
+    					data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, locations, date.id);
 	    					
     					// Success
     					fileCount++;
@@ -589,7 +589,7 @@ public class Condense extends GeoObject {
 								data[d][r][c].data() < (mean[r][c] - sd[r][c]*threshold) ) {
 
 								// Attach the location ID to this vector.
-								data[d][r][c].loc.id = locations[r][c].id;
+								data[d][r][c].location = locations[r][c];
 								
 								// Store the vector.
 								database.storeVector( data[d][r][c] );		
@@ -920,7 +920,7 @@ public class Condense extends GeoObject {
 	 * Given an array-list of vectors, create an integer array containing only the vectors'
 	 * scalar data values at each row/col location.
 	 */
-	public static int[][] createArrayFromVectorList( int rows, int cols, ArrayList<GriddedVector> list) {
+	public static int[][] createArrayFromVectorList(int rows, int cols, ArrayList<GriddedVector> list) {
 		int[][] array = new int[rows][cols];
 		
 		Iterator<GriddedVector> i = list.iterator();
@@ -937,6 +937,20 @@ public class Condense extends GeoObject {
 		return array;
 	}
 	
+	/* findLocation
+	 * 
+	 * Search for an index in an array of gridded locations. Warning: returns
+	 * null if it doesn't find it.
+	 */
+	public static GriddedLocation findLocation( GriddedLocation[][] locs, int index ) {
+		for (int r = 0; r < locs.length; r++) {
+			for (int c = 0; c < locs[0].length; c++) {
+				if (locs[r][c].id == index) return locs[r][c];
+			}
+		}
+		
+		return null;
+	}
 	
 	/* readConfigFile
 	 * 

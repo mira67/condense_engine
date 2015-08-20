@@ -241,7 +241,7 @@ public class DatabaseFileSchema extends Database {
 
 		try {
 			vectorsFile.writeInt(v.data());
-			vectorsFile.writeInt(v.loc.id);
+			vectorsFile.writeInt(v.locationID());
 			vectorsFile.writeInt(v.timestampID);
 			metadata.vectors++;
 			
@@ -289,6 +289,17 @@ public class DatabaseFileSchema extends Database {
 		}
 		
 		return metadata;
+	}
+
+	/* getLocation
+	 * 
+	 * Retrieve a single location from the database file based on the location ID.
+	 */
+	public GriddedLocation getLocation(int id) {
+		GriddedLocation loc = new GriddedLocation( 0,0,0,0,0 );
+		
+		Tools.statusMessage("GetLocation not implemented in DatabaseFileSchema");
+		return loc;
 	}
 
 	/*
@@ -354,11 +365,13 @@ public class DatabaseFileSchema extends Database {
 		try {
 			for (int i = 0; i < metadata.vectors; i++) {
 				int value = vectorsFile.readInt();
-				int row =  vectorsFile.readInt();
-				int col =  vectorsFile.readInt();
+				int locID =  vectorsFile.readInt();
 				int timeID =  vectorsFile.readInt();
+				
+				GriddedLocation loc = getLocation( locID );
+				
 				if (timeID >= startIndex && timeID <= endIndex) {
-					vectorList.add( new GriddedVector(value, new GriddedLocation(row,col), timeID));
+					vectorList.add( new GriddedVector(value, loc, timeID));
 				}
 			}
 		} catch( Exception e ) {

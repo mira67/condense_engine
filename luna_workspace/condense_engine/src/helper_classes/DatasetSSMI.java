@@ -171,7 +171,7 @@ public class DatasetSSMI extends Dataset {
 	 * 
 	 * Read the SSMI data from a file. FileName should include the full path.
 	 */
-	public SSMIVector[][] readData(String filename, int timestampID) throws Exception {
+	public SSMIVector[][] readData(String filename, GriddedLocation[][] locs, int timestampID) throws Exception {
 
 		SSMIVector[][] ssmiVectors = null;
 
@@ -203,7 +203,7 @@ public class DatasetSSMI extends Dataset {
 			// Convert from NETcdf bytes to vectorData.
 			for (int r = 0; r < rows(); r++) {
 				for (int c = 0; c < cols(); c++) {
-					ssmiVectors[r][c] = new SSMIVector(data[r][c], new GriddedLocation(r,c), timestampID);
+					ssmiVectors[r][c] = new SSMIVector(data[r][c], locs[r][c], timestampID);
 				}
 			}
 		} catch (Exception error) {

@@ -22,7 +22,7 @@ public class SSMIVector extends GriddedVector {
 	
 	
 	public void print() {
-		System.out.println( loc.row() + "," + loc.col() + " " + data() );  /// TBD needs work
+		System.out.println( location.row() + "," + location.col() + " " + data() );  /// TBD needs work
 	}
 
 }

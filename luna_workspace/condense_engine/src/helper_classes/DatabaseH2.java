@@ -318,7 +318,7 @@ public class DatabaseH2 extends Database {
 			sqlCreate.execute("INSERT INTO " + Table.VECTORS.name() + " VALUES(" +
 					metadata.vectors + "," +
 					v.data() + "," +
-					v.loc.id + "," +
+					v.location.id + "," +
 					v.timestampID + ")");
 
 		} catch (Exception e) {
@@ -468,11 +468,6 @@ public class DatabaseH2 extends Database {
 		return locations;
 	 }
 	
-	
-	/*public ArrayList<GriddedVector> getVectors() {
-		// TODO
-		return new ArrayList<GriddedVector>();
-	}*/
 	
 	/* getVectorsAtTime
 	 * 

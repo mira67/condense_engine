@@ -159,7 +159,7 @@ public class DatasetSeaIce extends Dataset {
 	 * 
 	 * Read the sea ice data from a file. FileName should include the full path.
 	 */
-	public SeaIceVector[][] readData(String filename, int timestampID) throws Exception {
+	public SeaIceVector[][] readData(String filename, GriddedLocation[][] locs, int timestampID) throws Exception {
 
 		SeaIceVector[][] seaIceVectors = null;
 
@@ -202,7 +202,7 @@ public class DatasetSeaIce extends Dataset {
 					// ((float)netcdfData.get(0,r,c) * 2.55), r, c );
 
 					seaIceVectors[r][c] = new SeaIceVector(
-							(int) netcdfData.get(0, r, c), new GriddedLocation(r,c), timestampID);
+							(int) netcdfData.get(0, r, c), locs[r][c], timestampID);
 				}
 			}
 		} catch (Exception e) {

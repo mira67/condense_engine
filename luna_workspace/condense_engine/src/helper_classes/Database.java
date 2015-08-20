@@ -100,7 +100,7 @@ public abstract class Database extends GeoObject {
 				// Make sure the vectors have the all the location information
 				// Location information, especially the ID, may have been updated
 				// when it was added to the database.
-				v[r][c].loc = locations[r][c];
+				v[r][c].location = locations[r][c];
 				
 				storeVector(v[r][c]);
 			}

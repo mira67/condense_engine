@@ -12,44 +12,29 @@ public class GriddedVector extends GeoObject {
 	protected int data = NODATA;
 	
 	protected int timestampID;
-	protected GriddedLocation loc;
+	protected GriddedLocation location;
 
 	protected GriddedVector() {
 	}
 
-	public GriddedVector(GriddedLocation location) {
-		loc = location;
+	public GriddedVector(GriddedLocation loc) {
+		location = loc;
 	}
 
-	public GriddedVector(int value, GriddedLocation location, int timeID) {
-		loc = location;
+	public GriddedVector(int value, GriddedLocation loc, int timeID) {
 		data(value);
+		location = loc;
 		timestampID = timeID;
 	}
 
-	public int row() {
-		return loc.row();
-	}
-
-	public int col() {
-		return loc.col();
-	}
-
-	public double lat() {
-		return loc.lat();
-	}
-
-	public double lon() {
-		return loc.lon();
-	}
-
-	public boolean hasLatLon() {
-		return loc.hasLatLon;
-	}
-
-	public GriddedLocation location() {
-		return loc;
-	}
+	
+	public int row() {return location.row();}
+	public int col() {return location.col();}
+	public double lat() {return location.lat();}
+	public double lon() {return location.lon();}
+	public boolean hasLatLon() {return location.hasLatLon;}
+	public GriddedLocation location() {return location;}
+	public int locationID() {return location.id;}
 	
 	/*
 	 * classification
@@ -93,11 +78,11 @@ public class GriddedVector extends GeoObject {
 	 */
 	public void print() {
 		System.out.println("value = " + data +
-				" locationID = " + loc.id +
-				" row = " + loc.row() +
-				" col = " + loc.col() +
-				" lat = " + loc.lat() +
-				" lon = " + loc.lon() +
+				" locationID = " + location.id +
+				" row = " + location.row() +
+				" col = " + location.col() +
+				" lat = " + location.lat() +
+				" lon = " + location.lon() +
 				" timestampID = " + timestampID );
 	}
 
