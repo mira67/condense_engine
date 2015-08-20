@@ -253,9 +253,9 @@ public class Condense extends GeoObject {
 	 * 
 	 * The method exits if the time increment overruns the total time span. For example,
 	 * if the user says 'process all data in monthly increments, but stop on May 15th',
-	 * this method will process up to May 15th and return the days in the month (n=31).
+	 * this method will process up to May 15th and return.
 	 * 
-	 * Returns false if the start day for processing greater than the final day
+	 * Returns false if the start day for processing is greater than the final day
 	 * (i.e., the ultimate final day as the user specified for processing).
 	 * 
 	 * Doesn't care if a file is missing. Assumes the data isn't available and plows ahead.
@@ -271,9 +271,9 @@ public class Condense extends GeoObject {
 		// Timespan is the total time to process in each incremental 'gulp'.
 		Timespan timespan = new Timespan(startDate, increment);
 		
-		// Convert it to a number of whole days for this increment. The number of days
+		// Convert it to a number of whole days for this time increment. The number of days
 		// may vary depending on the length of the increment (month, year, etc) and
-		// the start date.
+		// the start date. This is maximum possible days we'll process in any one gulp.
 		int maximumDays = timespan.fullDays();
 		
 		// If the computed start or end date of the time span is outside of the requested
@@ -296,50 +296,44 @@ public class Condense extends GeoObject {
 		Timestamp date = new Timestamp( startDate.year(), startDate.month(), startDate.dayOfMonth());
 		
 		// Loop through the number of days, reading the data file for each day.
-		// If a date doesn't exist (maybe it's monthly data?) ignore it.
+		// If a date doesn't exist, ignore it and move on.
 		for (int d = 0; d < days; d++) {
-
-			switch (dataType) {
-	    		case NONE:
-	    			break;
-	    		case SEA_ICE:
-	    			filename = DatasetSeaIce.getSeaIceFileName(dataPath, date.year(), date.month(),
+			
+			// Add the timestamp to the database.
+			date.id = database.storeTimestamp(date);
+			
+			try {
+				
+				switch (dataType) {
+					case NONE:
+						break;
+					case SEA_ICE:
+						filename = DatasetSeaIce.getSeaIceFileName(dataPath, date.year(), date.month(),
 	    										 date.dayOfMonth(), addYearToInputDirectory);
-	    			
-    				try {
-    					// Add the timestamp to the database.
-    					date.id = database.storeTimestamp(date);
     					
     					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename, locations, date.id );
 
     					// Success
     					fileCount++;
 
-    				} catch( Exception e ) {return false;}
 	    			
-	    			break;
+    					break;
 	    			
-	    		case SSMI:
-	    			filename = DatasetSSMI.getSSMIFileName(dataPath,
+					case SSMI:
+						filename = DatasetSSMI.getSSMIFileName(dataPath,
 	    								date.year(), date.month(), date.dayOfMonth(),
 	    								addYearToInputDirectory, frequency, polarization);
 	    			
-    				try {
-    					// Add the timestamp to the database.
-    					date.id = database.storeTimestamp(date);
-    					
-    					// Read the data
-    					data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, locations, date.id);
+						// Read the data
+						data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, locations, date.id);
 	    					
-    					// Success
-    					fileCount++;
-    					
-    				} catch( Exception e ) {return false;}
-    				
+						// Success
+						fileCount++;
+   				
 	    			break;
-			}
+				}
+			} catch(Exception e) {return false;}
 			
-
 			// Remove bad data
 			///data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue, NODATA);
 			
@@ -438,7 +432,7 @@ public class Condense extends GeoObject {
 	/* 
 	 * getLocations
 	 * 
-	 * Got the locations? Metadata must be read first.
+	 * Got the data locations? Metadata must be read first.
 	 */
 	protected void getLocations() {
 		
@@ -470,8 +464,6 @@ public class Condense extends GeoObject {
 		
 		return;
 	}
-	
-	
 	
 	/*
 	 * condenseData
@@ -787,8 +779,8 @@ public class Condense extends GeoObject {
 		// Get the metadata
 		metadata = database.getMetadata();
 		
-		// Display an image. Pixels between imageStartIndex and imageEndIndex will
-		// be used to make the image.
+		// Pixels between imageStartIndex and imageEndIndex will
+		// be used to make an image.
 		if (imageStartIndex > metadata.timestamps ||
 			imageEndIndex > metadata.timestamps ) {
 

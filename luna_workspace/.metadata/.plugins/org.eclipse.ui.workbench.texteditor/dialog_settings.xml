@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="storeVec" key="selection"/>
+		<item value="maximumDays" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="storevec"/>
-			<item value="adding "/>
-			<item value="new GriddedV"/>
-			<item value="storeVector"/>
-			<item value="storeVec"/>
-			<item value="loc"/>
-			<item value="storeLocationA"/>
-			<item value="locations"/>
+			<item value="maximumDays"/>
+			<item value="initialStartYear"/>
+			<item value="timestampID"/>
+			<item value="rows"/>
+			<item value="year"/>
+			<item value="time"/>
+			<item value="id"/>
+			<item value="storeTime"/>
 		</list>
 		<list key="replacehistory">
 			<item value="table.name"/>

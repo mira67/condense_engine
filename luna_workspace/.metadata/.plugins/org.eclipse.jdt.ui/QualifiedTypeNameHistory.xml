@@ -26,4 +26,5 @@
 <fullyQualifiedTypeName name="java.io.File"/>
 <fullyQualifiedTypeName name="java.io.IOException"/>
 <fullyQualifiedTypeName name="org.jfree.chart.ChartUtilities"/>
+<fullyQualifiedTypeName name="helper_classes.Tools"/>
 </qualifiedTypeNameHistroy>

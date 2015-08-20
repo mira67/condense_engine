@@ -3,7 +3,7 @@ package helper_classes;
 /* Main program to experiment with algorithms for condensed data sets.
  */
 
-import java.sql.Date;
+///import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -121,11 +121,8 @@ public class Condense extends GeoObject {
     int fileCount = 0;
     
     // Gridded image pixel locations.
-    Location locations[][];
-    
-    // Condensed date list
-    Date cDateList[];
-	
+    GriddedLocation locations[][];
+    	
     /*-------------------------------------------------------------------------
 	// MAIN PROGRAM
 	//-----------------------------------------------------------------------*/
@@ -182,25 +179,27 @@ public class Condense extends GeoObject {
 	 * Condense the data files into a database.
 	 */
 	Condense() {
-	
-		try {
-			switch (databaseType) {
-				case RAM:
-					database = new DatabaseRamSchema( dataType.toString() );
-					break;
-				case FILE:
-					database = new DatabaseFileSchema( dataType.toString(), outputPath );			
-					break;
-				case H2:
-					database = new DatabaseH2( databasePath, databaseName );			
-					break;
-			}
-		} catch (Exception e) {
-			Tools.errorMessage("Condense", "Condense", "Could not open the database.", e);
+
+		switch (databaseType) {
+			case RAM:
+				database = new DatabaseRamSchema("", dataType.toString());
+				break;
+			case FILE:
+				database = new DatabaseFileSchema(outputPath, dataType.toString());
+				break;
+			case H2:
+				database = new DatabaseH2(databasePath, databaseName);
+				break;
 		}
 		
 		// Connect to the database.
-		database.connect();
+		if (!database.connect()) {
+			Tools.errorMessage("Condense", "Condense", "Could not connect to the database.",
+					new Exception("Giving up."));
+		}
+		
+		// For development, clean out any tables and data first.
+		database.clean();
 		
 		// Read surface types and coast lines.
 		if (readSurface) readSurface();
@@ -214,15 +213,12 @@ public class Condense extends GeoObject {
 		}
 		
 		// Database info for debugging purposes.
-		Tools.statusMessage("\n---------------------------");
 		database.status();
-		Tools.statusMessage("---------------------------\n");
 		
 		// All done. Close the database.
 		database.disconnect();
 		
 		// Warm fuzzy feedback.
-		Tools.statusMessage("Database closed.");
 		Tools.statusMessage("Total data files processed = " + fileCount);
 
 		// We should now have a database full of condensed pixels.
@@ -233,8 +229,10 @@ public class Condense extends GeoObject {
 	
 	/* readSurface
 	 * 
+	 * Read the surface data.
+	 * 
 	 * Special case: the surface type could potentially be used in a condensation
-	 * algorithm. Read the surface data.
+	 * algorithm. 
 	 */
 	protected void readSurface() {
 		DatasetSurface datasetSurface = new DatasetSurface();
@@ -243,7 +241,8 @@ public class Condense extends GeoObject {
 	    surfaceVectors = datasetSurface.readData(surfaceFile, surfaceLats, surfaceLons);
 	}
 	
-	/* readData
+	/* 
+	 * readData
 	 * 
 	 * Read the dataset files. Since the different types of data will most likely
 	 * have different formats and file names, this method must tailor itself
@@ -254,9 +253,9 @@ public class Condense extends GeoObject {
 	 * 
 	 * The method exits if the time increment overruns the total time span. For example,
 	 * if the user says 'process all data in monthly increments, but stop on May 15th',
-	 * this method will process up to May 15th and return the days in the month (n=31).
+	 * this method will process up to May 15th and return.
 	 * 
-	 * Returns false if the start day for processing greater than the final day
+	 * Returns false if the start day for processing is greater than the final day
 	 * (i.e., the ultimate final day as the user specified for processing).
 	 * 
 	 * Doesn't care if a file is missing. Assumes the data isn't available and plows ahead.
@@ -272,9 +271,9 @@ public class Condense extends GeoObject {
 		// Timespan is the total time to process in each incremental 'gulp'.
 		Timespan timespan = new Timespan(startDate, increment);
 		
-		// Convert it to a number of whole days for this increment. The number of days
+		// Convert it to a number of whole days for this time increment. The number of days
 		// may vary depending on the length of the increment (month, year, etc) and
-		// the start date.
+		// the start date. This is maximum possible days we'll process in any one gulp.
 		int maximumDays = timespan.fullDays();
 		
 		// If the computed start or end date of the time span is outside of the requested
@@ -282,7 +281,7 @@ public class Condense extends GeoObject {
 		if (timespan.startTimestamp().days() < startDate.days()) timespan.startTimestamp( startDate );
 		if (timespan.endTimestamp().days() > finalDate.days()) timespan.endTimestamp( finalDate );
 
-		// Total days we're processing. Add one to include the final date.
+		// Total days we're processing.
 		days = timespan.fullDays();
 
 		Tools.debugMessage("maximum days = " + maximumDays);
@@ -290,112 +289,58 @@ public class Condense extends GeoObject {
 
 		String filename = "";
 
-		// Have we opened the datasets yet?
-		if (data == null) {
+		// Have we opened the dataset?
+		if (data == null) openDataset( maximumDays );
 
-			switch (dataType) {
-		    
-    			case SEA_ICE:
-    				filename = DatasetSeaIce.getSeaIceFileName(dataPath, startYear,
-    						startMonth, startDay, addYearToInputDirectory);
-    				dataset = new DatasetSeaIce(filename);
-    				getMetadata( filename );
-    				break;
-			    
-    			case SSMI:
-    				filename = DatasetSSMI.getSSMIFileName(dataPath, startYear, startMonth,
-    						startDay, addYearToInputDirectory, frequency,
-    						polarization);
-
-    				dataset = new DatasetSSMI(filename);
-    				getMetadata( filename );
-    				
-    				// TODO need fix Metadata for different channel (cases)
-    				if ((frequency == 85) || (frequency == 91)){
-    					rows = 632;
-    					cols = 664;
-    				}
-    				break;
-    				
-    			case NONE:
-	    			break;
-
-			}
-			data = new GriddedVector[maximumDays][rows][cols];
-			
-		}
-			
-		// The date of the file we are reading.
+		// The initial date of the files we are reading.
 		Timestamp date = new Timestamp( startDate.year(), startDate.month(), startDate.dayOfMonth());
 		
-		cDateList = new Date[days];
-		
 		// Loop through the number of days, reading the data file for each day.
-		// If a date doesn't exist (maybe it's monthly data?) ignore it.
+		// If a date doesn't exist, ignore it and move on.
 		for (int d = 0; d < days; d++) {
-
-			Timestamp time = new Timestamp( date.year(), date.month(), date.dayOfMonth() );
 			
-			//
-			String cDate = date.yearString() + "-" + date.monthString() + "-" + date.dayOfMonthString();
-			cDateList[d] = Date.valueOf(cDate);
+			// Add the timestamp to the database.
+			date.id = database.storeTimestamp(date);
 			
-			switch (dataType) {
-	    		case NONE:
-	    			break;
-	    		case SEA_ICE:
-	    			filename = DatasetSeaIce.getSeaIceFileName(dataPath, date.year(), date.month(),
+			try {
+				
+				switch (dataType) {
+					case NONE:
+						break;
+					case SEA_ICE:
+						filename = DatasetSeaIce.getSeaIceFileName(dataPath, date.year(), date.month(),
 	    										 date.dayOfMonth(), addYearToInputDirectory);
-	    			
-	    			if (filename.length() > 0) {
-	    				try {
-	    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename );
+    					
+    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename, locations, date.id );
 
-	    					// Success
-	    					fileCount++;
-	    				}
-	    				catch( Exception e ) {return false;}
-	    			} else {
-	    				Tools.warningMessage("Could not find data file for date " +
-	    						date.yearString() + "/" + date.monthString() +
-	    						"/" + date.dayOfMonthString());
-	    			}
+    					// Success
+    					fileCount++;
+
 	    			
-	    			break;
+    					break;
 	    			
-	    		case SSMI:
-	    			filename = DatasetSSMI.getSSMIFileName(dataPath,
+					case SSMI:
+						filename = DatasetSSMI.getSSMIFileName(dataPath,
 	    								date.year(), date.month(), date.dayOfMonth(),
 	    								addYearToInputDirectory, frequency, polarization);
 	    			
-	    			if (filename.length() > 0) {
-	    				try {
-	    					data[d] = (GriddedVector[][]) DatasetSSMI.readData( filename,
-	    							date.year(), date.month(), date.dayOfMonth(), time,
-	    							rows, cols);
+						// Read the data
+						data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, locations, date.id);
 	    					
-	    					// Success
-	    					fileCount++;
-	    				}
-	    				
-	    				catch( Exception e ) {
-	    					System.out.println("quit process files, false: " + e);
-	    					return false;
-	    				}
-	    			}
+						// Success
+						fileCount++;
+   				
 	    			break;
-			}
+				}
+			} catch(Exception e) {return false;}
 			
-
 			// Remove bad data
-			data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue, NODATA);
+			///data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue, NODATA);
 			
 			Tools.statusMessage(date.yearString() + "." + date.monthString() +
 					"." + date.dayOfMonthString() + "  File name: " + filename);
 			
-			// Add the timestamp to the database.
-    		database.store(time);
-    		
+
 			// Next day.
 			date.incrementOneDay();
 		}
@@ -407,15 +352,56 @@ public class Condense extends GeoObject {
 		startMonth = date.month();
 		startDay = date.dayOfMonth();
 				
-		return true;//need fix end condition
+		return true;
 	}
 
+
+	/*
+	 * openDataset
+	 * 
+	 * Open a Dataset object, based on the selection of "datatype". The amount
+	 * of space allocated for the data is determined by the maximum days value, 
+	 * which is the time increment used for reading sequential files.
+	 */
+	protected void openDataset(int maximumDays) {
+
+		String filename = "";
+			
+		switch (dataType) {
+		    
+   			case SEA_ICE:
+   				filename = DatasetSeaIce.getSeaIceFileName(dataPath, startYear,
+   						startMonth, startDay, addYearToInputDirectory);
+   				dataset = new DatasetSeaIce(filename);
+   				getMetadata( filename );
+   				break;
+			    
+   			case SSMI:
+   				filename = DatasetSSMI.getSSMIFileName(dataPath, startYear, startMonth,
+   						startDay, addYearToInputDirectory, frequency,
+   						polarization);
+
+   				dataset = new DatasetSSMI(filename);
+    				
+   				getMetadata( filename );
+    				
+   				getLocations();
+    				
+   				break;
+    				
+   			case NONE:
+    			break;
+
+		}
+		data = new GriddedVector[maximumDays][rows][cols];	
+	}
 	
-	/* getMetadata
+	/* 
+	 * getMetadata
 	 * 
 	 * Got the metadata? If not, go get it from the supplied file.
 	 */
-	public void getMetadata( String filename ) {
+	protected void getMetadata( String filename ) {
 		
 		if (haveMetadata) return;
 		
@@ -434,7 +420,8 @@ public class Condense extends GeoObject {
 		cols = dataset.cols();
 		
 		// We need to store the metadata in the database.
-    	database.store( metadata );
+		Tools.statusMessage("==> Adding metadata to the database.");
+    	database.storeMetadata( metadata );
     	
     	haveMetadata = true;
     	
@@ -442,16 +429,19 @@ public class Condense extends GeoObject {
 	}
 
 	
-	/* getLocations
+	/* 
+	 * getLocations
 	 * 
 	 * Got the locations? Metadata must be read first.
 	 */
-	public void getLocations() {
+	protected void getLocations() {
 		
 		if (!haveMetadata) {
 			Tools.errorMessage("Condense", "getLocations", "Metadata must be read before retrieving locations.",
 					new Exception());
 		}
+		
+		locations = new GriddedLocation[metadata.rows][metadata.cols];
 		
 		switch (dataType) {
     		case NONE:
@@ -460,17 +450,25 @@ public class Condense extends GeoObject {
     			// TODO
     		case SSMI:
     			// TODO
+    			// temporary locations, for testing
+    			for (int r = 0; r < metadata.rows; r++) {
+    				for (int c = 0; c < metadata.cols; c++) {
+    					locations[r][c] = new GriddedLocation(r, c, (double) Tools.randomInt(90), (double) Tools.randomInt(180));
+    				}
+    			}
     			break;
 		}
 		
-		database.store(dataset.locationsAsArrayList());
-    	
+		Tools.statusMessage("==> Adding locations to the database.");
+		database.storeLocationArray(locations);
+		
 		return;
 	}
 	
 	
 	
-	/* condenseData
+	/*
+	 * condenseData
 	 * 
 	 * Condense the most recent data time span.
 	 */
@@ -496,18 +494,14 @@ public class Condense extends GeoObject {
 		}
     }
 	
-	/* noCondensation
+	/*
+	 * noCondensation
 	 * 
 	 * Don't do any condensation. Add all pixels to the database.
 	 */
 	protected void noCondensation() {
-		
 		for (int d = 0; d < days; d++) {
-			for (int r = 0; r < rows; r++) {
-				for (int c = 0; c < cols; c++) {
-					database.store( data[d][r][c] );
-				}
-			}
+			database.storeVectorArray( data[d], locations );
 		}
 	}
 	
@@ -528,7 +522,7 @@ public class Condense extends GeoObject {
 		Tools.statusMessage("thr " + thr + " days" + days);
 		Number [][] pixel_ts = new Number[days][2];
 		Number[][] sampled_ts = new Number[thr][];
-		int locID = 0;
+		///int locID = 0;
 		
 		// reform image based data into group of time series for downsampling
 		for (int r = 0; r < rows; r++){
@@ -551,11 +545,11 @@ public class Condense extends GeoObject {
 				sampled_ts = Downsampling.largestTriangleThreeBuckets(pixel_ts, thr);//condense,can be simplified
 				//debug
 				Tools.debugMessage("sampled data length = " + sampled_ts.length);
-				
+				/*
 				for (int downsampled_id = 0; downsampled_id < thr; downsampled_id++){
 					database.store( data[sampled_ts[downsampled_id][0].intValue()][r][c].data,locID,cDateList[sampled_ts[downsampled_id][0].intValue()]);//only store sampled data
-				}
-				locID++;
+				}*/
+				///locID++;
 			}//cols
 		}//rows
 	}//special sampling method
@@ -588,7 +582,11 @@ public class Condense extends GeoObject {
 							if (data[d][r][c].data() > (mean[r][c] + sd[r][c]*threshold) ||
 								data[d][r][c].data() < (mean[r][c] - sd[r][c]*threshold) ) {
 
-								database.store( data[d][r][c] );		
+								// Attach the location ID to this vector.
+								data[d][r][c].location = locations[r][c];
+								
+								// Store the vector.
+								database.storeVector( data[d][r][c] );		
 							}
 						}
 					}
@@ -598,7 +596,8 @@ public class Condense extends GeoObject {
 	}
 
 	
-	/* minmaxCondensation
+	/* 
+	 * minmaxCondensation
 	 * 
 	 * Condense the pixels to the minimum and maximum values, if they exceed thresholds,
 	 * over the course of the temporal increment (typically one week).
@@ -622,8 +621,10 @@ public class Condense extends GeoObject {
 			for (int c = 0; c < cols; c++) {
 				
 				// Initialize the pixels, by default they have no data.
-				min[r][c] = new GriddedVector(r, c);
-				max[r][c] = new GriddedVector(r, c);
+				///min[r][c] = new GriddedVector(r, c);
+				min[r][c] = new GriddedVector(locations[r][c]);
+				///max[r][c] = new GriddedVector(r, c);
+				max[r][c] = new GriddedVector(locations[r][c]);
 				
 				// Cycle through the days, looking for a min or max value that exceeds
 				// the threshold.
@@ -637,7 +638,7 @@ public class Condense extends GeoObject {
 						
 						// Ignore NaNs and other bad data
 						if (Math.abs(data[d][r][c].data()) < Math.abs(NODATA) ) {
-						
+							
 							if (r == r1 && c == c1) Tools.debugMessage(
 								"     ---> mean = " + mean[r1][c1] + " sd = " + sd[r1][c1] +
 								"   data = " + data[d][r][c].data());
@@ -655,7 +656,6 @@ public class Condense extends GeoObject {
 							// Same thing, for minimum values.
 							if (data[d][r][c].data() < (mean[r][c] - sd[r][c]*threshold) ) {
 
-								///Tools.debugMessage("exceeded threshold: "+r+","+c);
 								// A new minimum value? Save it.
 								if (data[d][r][c].data() < min[r][c].data() ||
 									min[r][c].data() == NODATA) min[r][c] = data[d][r][c];
@@ -665,8 +665,8 @@ public class Condense extends GeoObject {
 					} // data != null
 				}  // Day
 
-				if (min[r][c].data() != NODATA) database.store( min[r][c] );		
-				if (max[r][c].data() != NODATA) database.store( max[r][c] );
+				if (min[r][c].data() != NODATA) database.storeVector( min[r][c] );		
+				if (max[r][c].data() != NODATA) database.storeVector( max[r][c] );
 												
 			} // Column
 		} // Row
@@ -771,14 +771,14 @@ public class Condense extends GeoObject {
 	 */
 	void generateTestImages() {
 
+		Tools.statusMessage("\nGENERATE TEST IMAGES");
 
 		database.connectReadOnly();
 
-		// Database info for debugging purposes.
-		Tools.statusMessage("\n---------------------------");
+		// Database status for debugging purposes.
 		database.status();
-		Tools.statusMessage("---------------------------\n");
 		
+		// Get the metadata
 		metadata = database.getMetadata();
 		
 		// Display an image. Pixels between imageStartIndex and imageEndIndex will
@@ -790,8 +790,24 @@ public class Condense extends GeoObject {
 					new Exception());
 		}
 		
-        Timestamp startTime = database.get( imageStartIndex );
-        Timestamp endTime = database.get( imageEndIndex );
+		// Get the list of timestamps in the database.
+		ArrayList<Timestamp> timestamps = database.getTimestamps();
+		
+		// For debugging purposes: print out all the timestamps.
+		Tools.statusMessage("------- Timestamps");
+		Iterator<Timestamp> i = timestamps.iterator();
+		while(i.hasNext()) {
+			Timestamp t = (Timestamp) i.next();
+			t.print();
+			Tools.message("");
+		}
+		Tools.statusMessage("------- End Timestamps");
+		
+		// The time range of images we want to display...
+		// These are NOT the database indexes but rather the nth timestamps
+		// in the arraylist of timestamps.
+        Timestamp startTime = timestamps.get( imageStartIndex-1 );
+        Timestamp endTime = timestamps.get( imageEndIndex-1 );
 
         Tools.statusMessage("");
 		Tools.statusMessage("Create image....  (time index = " + imageStartIndex + " to " + imageEndIndex + ")");
@@ -800,8 +816,13 @@ public class Condense extends GeoObject {
 		ArrayList<GriddedVector> pixList = database.getVectors(imageStartIndex, imageEndIndex);
 		Tools.statusMessage("Pixels: " + pixList.size());
 		
+		// For debugging -- print out the contents of the first 10 vectors
+		for (int j = 0; j < 10; j++) {
+			pixList.get(j).print();
+		}
+		
 		// Make an integer array out of the pixel data
-		int[][] sensorData = createArrayFromVectorList( metadata.rows(), metadata.cols(), pixList );
+		int[][] sensorData = createArrayFromVectorList( metadata.rows, metadata.cols, pixList );
 
 		// Make a color table.
 		ColorTable colors = new ColorTable();
@@ -844,7 +865,7 @@ public class Condense extends GeoObject {
 
 	    // Display the image.
    		myImage.display( "Time (day): " + startTime.dateString() + " - " + endTime.dateString() +
-   				"  " + algorithm + " " + threshold, metadata.rows(), metadata.cols() );
+   				"  " + algorithm + " " + threshold, metadata.rows, metadata.cols );
 
    		//Grayscale image
    		// change the color table?
@@ -852,18 +873,18 @@ public class Condense extends GeoObject {
    		
 	    // Display the image.
    		myImage.display( "Time (day): " + startTime.dateString() + " - " + endTime.dateString() +
-   				"  " + algorithm + " " + threshold, metadata.rows(), metadata.cols() );
+   				"  " + algorithm + " " + threshold, metadata.rows, metadata.cols );
 
    		// Create an output file name for the image.
 	    String timeString = startTime.yearString() +
 		    	startTime.monthString() + startTime.dayOfMonthString();
 	    myImage.savePNG( outputPath + timeString + "+" + dataType + "+" + increment + "_" +
-		    			 algorithm + "_" + Double.toString(threshold), metadata.rows(), metadata.cols() );
+		    			 algorithm + "_" + Double.toString(threshold), metadata.rows, metadata.cols );
         
    		
 	    // Diagnostics
 	    int total = rows*cols;
-	    int allPixels = database.getTimestamps().size() * total;
+	    int allPixels = database.metadata.timestamps * total;
 	    int storedPixels = database.numberOfVectors();
 	    
    		Tools.statusMessage("");
@@ -893,7 +914,7 @@ public class Condense extends GeoObject {
 	 * Given an array-list of vectors, create an integer array containing only the vectors'
 	 * scalar data values at each row/col location.
 	 */
-	public static int[][] createArrayFromVectorList( int rows, int cols, ArrayList<GriddedVector> list) {
+	public static int[][] createArrayFromVectorList(int rows, int cols, ArrayList<GriddedVector> list) {
 		int[][] array = new int[rows][cols];
 		
 		Iterator<GriddedVector> i = list.iterator();
@@ -910,6 +931,20 @@ public class Condense extends GeoObject {
 		return array;
 	}
 	
+	/* findLocation
+	 * 
+	 * Search for an index in an array of gridded locations. Warning: returns
+	 * null if it doesn't find it.
+	 */
+	public static GriddedLocation findLocation( GriddedLocation[][] locs, int index ) {
+		for (int r = 0; r < locs.length; r++) {
+			for (int c = 0; c < locs[0].length; c++) {
+				if (locs[r][c].id == index) return locs[r][c];
+			}
+		}
+		
+		return null;
+	}
 	
 	/* readConfigFile
 	 * 
@@ -927,13 +962,13 @@ public class Condense extends GeoObject {
 			// All the lines in the file.
 			ArrayList<String> lines = file.readStrings();
 			
-			Iterator<String> i = lines.iterator();
+			Iterator<String> lineIter = lines.iterator();
 			
-			// Read through the lines in the configuration file.
-			while(i.hasNext()) {
+			// Process the lines in the configuration file.
+			while(lineIter.hasNext()) {
 				
 				// Read the line
-				String input = i.next();
+				String input = lineIter.next();
 				
 				// Before cleaning up the string, save any literal text values.
 				String textValue = Tools.parseString( input, 1, "=" );
@@ -954,6 +989,7 @@ public class Condense extends GeoObject {
 				
 				switch(variable) {
 					case ";":		// Comment line
+					case "!":		// Comment line
 					case "#":		// Comment line
 					case "*":		// Comment line
 						break;
@@ -1094,7 +1130,6 @@ public class Condense extends GeoObject {
 						if (value.equals("ram")) databaseType = DatabaseType.RAM;
 						if (value.equals("file")) databaseType = DatabaseType.FILE;
 						if (value.equals("h2")) databaseType = DatabaseType.H2;
-						if (value.equals("blankdb")) databaseType = DatabaseType.BLANKDB;
 						Tools.statusMessage("Database type: " + databaseType);
 						break;
 					default:
