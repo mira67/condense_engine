@@ -171,8 +171,7 @@ public class DatasetSSMI extends Dataset {
 	 * 
 	 * Read the SSMI data from a file. FileName should include the full path.
 	 */
-	public static SSMIVector[][] readData(String filename, int year, int month,
-			int day, Timestamp time, int rows, int cols) throws Exception {
+	public SSMIVector[][] readData(String filename, int timestampID) throws Exception {
 
 		SSMIVector[][] ssmiVectors = null;
 
@@ -190,7 +189,7 @@ public class DatasetSSMI extends Dataset {
 		// Read the data.
 		try {
 			// Read the data
-			int[][] data = file.read2ByteInts2D(rows, cols);
+			int[][] data = file.read2ByteInts2D(rows(), cols());
 
 			// Filter out missing data points. BTs are encoded by a factor of 10.
 			// data = Tools.discardBadData(data, 1000, 4000);
@@ -199,14 +198,12 @@ public class DatasetSSMI extends Dataset {
 			data = Tools.scaleIntArray2D(data, 0, 350);
 
 			// Create a place to store the data.
-			ssmiVectors = new SSMIVector[rows][cols];
+			ssmiVectors = new SSMIVector[rows()][cols()];
 
 			// Convert from NETcdf bytes to vectorData.
-			for (int r = 0; r < rows; r++) {
-				for (int c = 0; c < cols; c++) {
-					ssmiVectors[r][c] = new SSMIVector(data[r][c], new GriddedLocation(r,c));
-					ssmiVectors[r][c].timestamp = new Timestamp(time.days());
-
+			for (int r = 0; r < rows(); r++) {
+				for (int c = 0; c < cols(); c++) {
+					ssmiVectors[r][c] = new SSMIVector(data[r][c], new GriddedLocation(r,c), timestampID);
 				}
 			}
 		} catch (Exception error) {

@@ -221,12 +221,12 @@ public class DatabaseFileSchema extends Database {
 	 * store a vector by values
 	 * 
 	 */
-	public void storeVector(int data, int row, int col, int time) {
+	public void storeVector(int data, int row, int col, int timeID) {
 		try {
 			vectorsFile.writeInt(data);
 			vectorsFile.writeInt(row);
 			vectorsFile.writeInt(col);
-			vectorsFile.writeDouble(time);
+			vectorsFile.writeInt(timeID);
 			metadata.vectors++;
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseFileSchema", "store", "vector data: error when writing to file: "
@@ -242,7 +242,7 @@ public class DatabaseFileSchema extends Database {
 		try {
 			vectorsFile.writeInt(v.data());
 			vectorsFile.writeInt(v.loc.id);
-			vectorsFile.writeDouble(v.timestamp.id);
+			vectorsFile.writeInt(v.timestampID);
 			metadata.vectors++;
 			
 		} catch (Exception e) {
@@ -351,18 +351,14 @@ public class DatabaseFileSchema extends Database {
 		if (metadata == null) metadata = getMetadata();
 		if (timestamps == null) timestamps = getTimestamps();
 
-		Timestamp startTime = timestamps.get(startIndex);
-		Timestamp endTime = timestamps.get(endIndex);
-
 		try {
 			for (int i = 0; i < metadata.vectors; i++) {
 				int value = vectorsFile.readInt();
 				int row =  vectorsFile.readInt();
 				int col =  vectorsFile.readInt();
-				double time =  vectorsFile.readDouble();
-				if (time >= startTime.days() && time <= endTime.days()) {
-					vectorList.add( new GriddedVector(value, new GriddedLocation(row,col),
-							new Timestamp(time)));
+				int timeID =  vectorsFile.readInt();
+				if (timeID >= startIndex && timeID <= endIndex) {
+					vectorList.add( new GriddedVector(value, new GriddedLocation(row,col), timeID));
 				}
 			}
 		} catch( Exception e ) {

@@ -11,20 +11,20 @@ public class GriddedVector extends GeoObject {
 	// - byte [3]: classification (256 possibilities, 0 - 255)
 	protected int data = NODATA;
 	
-	protected Timestamp timestamp;
+	protected int timestampID;
 	protected GriddedLocation loc;
 
 	protected GriddedVector() {
 	}
 
-	public GriddedVector(GriddedLocation l) {
-		loc = l;
+	public GriddedVector(GriddedLocation location) {
+		loc = location;
 	}
 
-	public GriddedVector(int value, GriddedLocation l, Timestamp t) {
-		loc = l;
+	public GriddedVector(int value, GriddedLocation location, int timeID) {
+		loc = location;
 		data(value);
-		timestamp = t;
+		timestampID = timeID;
 	}
 
 	public int row() {
@@ -92,7 +92,13 @@ public class GriddedVector extends GeoObject {
 	 * Print the vector information.
 	 */
 	public void print() {
-		// TODO
+		System.out.println("value = " + data +
+				" locationID = " + loc.id +
+				" row = " + loc.row() +
+				" col = " + loc.col() +
+				" lat = " + loc.lat() +
+				" lon = " + loc.lon() +
+				" timestampID = " + timestampID );
 	}
 
 	// /public int byteData(int byte) { return data[byte]; }

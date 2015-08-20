@@ -307,14 +307,14 @@ public class Condense extends GeoObject {
 	    										 date.dayOfMonth(), addYearToInputDirectory);
 	    			
     				try {
-	    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename );
+    					// Add the timestamp to the database.
+    					date.id = database.storeTimestamp(date);
+    					
+    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename, date.id );
 
-	    					// Success
-	    					fileCount++;
-	    					
-	    					// Add the timestamp to the database.
-	    		    		database.storeTimestamp(date);
-	    		    		
+    					// Success
+    					fileCount++;
+
     				} catch( Exception e ) {return false;}
 	    			
 	    			break;
@@ -325,15 +325,15 @@ public class Condense extends GeoObject {
 	    								addYearToInputDirectory, frequency, polarization);
 	    			
     				try {
-    					data[d] = (GriddedVector[][]) DatasetSSMI.readData( filename,
-	    							date.year(), date.month(), date.dayOfMonth(), date,
-	    							rows, cols);
+    					// Add the timestamp to the database.
+    					date.id = database.storeTimestamp(date);
+    					
+    					// Read the data
+    					data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, date.id);
 	    					
     					// Success
     					fileCount++;
     					
-    					// Add the timestamp to the database.
-    		    		database.storeTimestamp(date);
     				} catch( Exception e ) {return false;}
     				
 	    			break;
@@ -810,8 +810,10 @@ public class Condense extends GeoObject {
 		Tools.statusMessage("------- End Timestamps");
 		
 		// The time range of images we want to display...
-        Timestamp startTime = timestamps.get( imageStartIndex );
-        Timestamp endTime = timestamps.get( imageEndIndex );
+		// These are NOT the database indexes but rather the nth timestamps
+		// in the arraylist of timestamps.
+        Timestamp startTime = timestamps.get( imageStartIndex-1 );
+        Timestamp endTime = timestamps.get( imageEndIndex-1 );
 
         Tools.statusMessage("");
 		Tools.statusMessage("Create image....  (time index = " + imageStartIndex + " to " + imageEndIndex + ")");
@@ -819,6 +821,11 @@ public class Condense extends GeoObject {
         // Get the pixels for the image
 		ArrayList<GriddedVector> pixList = database.getVectors(imageStartIndex, imageEndIndex);
 		Tools.statusMessage("Pixels: " + pixList.size());
+		
+		// For debugging -- print out the contents of the first 10 vectors
+		for (int j = 0; j < 10; j++) {
+			pixList.get(j).print();
+		}
 		
 		// Make an integer array out of the pixel data
 		int[][] sensorData = createArrayFromVectorList( metadata.rows, metadata.cols, pixList );

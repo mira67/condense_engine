@@ -16,11 +16,8 @@ public class SeaIceVector extends GriddedVector {
 	}
 
 	// Constructor using a supplied value and location.
-	public SeaIceVector( int i, GriddedLocation loc ) {
-		super(loc);
-
-		this.data( i );
-
+	public SeaIceVector( int i, GriddedLocation loc, int timeID ) {
+		super(i, loc, timeID);
 	}
 	
 	public void print() {

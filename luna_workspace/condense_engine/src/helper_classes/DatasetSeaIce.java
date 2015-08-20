@@ -159,7 +159,7 @@ public class DatasetSeaIce extends Dataset {
 	 * 
 	 * Read the sea ice data from a file. FileName should include the full path.
 	 */
-	public SeaIceVector[][] readData(String filename) throws Exception {
+	public SeaIceVector[][] readData(String filename, int timestampID) throws Exception {
 
 		SeaIceVector[][] seaIceVectors = null;
 
@@ -180,10 +180,12 @@ public class DatasetSeaIce extends Dataset {
 
 		// Read the data.
 		try {
-			// Read the timestamp from the NetCDF file.
-			Variable timeVar = ncfile.findVariable("time");
-			Timestamp time = new Timestamp(timeVar.read().getDouble(0), 1601);
-
+			// There is an assumption here that the date/time contained in the NetCDF
+			// file is the same as reflected in the filename. If not, well, the times will
+			// be a total mess -- but that's not our fault.
+			// Variable timeVar = ncfile.findVariable("time");
+			// Timestamp time = new Timestamp(timeVar.read().getDouble(0), 1601);
+			
 			// Read the sea ice data
 			Variable seaice = ncfile.findVariable("goddard_bt_seaice_conc");
 			netcdfData = (ArrayByte.D3) seaice.read();
@@ -200,13 +202,11 @@ public class DatasetSeaIce extends Dataset {
 					// ((float)netcdfData.get(0,r,c) * 2.55), r, c );
 
 					seaIceVectors[r][c] = new SeaIceVector(
-							(int) netcdfData.get(0, r, c), new GriddedLocation(r,c));
-					seaIceVectors[r][c].timestamp = new Timestamp(time.days());
+							(int) netcdfData.get(0, r, c), new GriddedLocation(r,c), timestampID);
 				}
 			}
-		} catch (Exception error) {
-			Tools.warningMessage("DatasetSeaIce::readData: when reading data, " + error);
-			///throw error;
+		} catch (Exception e) {
+			Tools.warningMessage("DatasetSeaIce::readData: when reading data, " + e);
 		}
 
 		try {

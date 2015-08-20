@@ -120,13 +120,13 @@ public class DatabaseRamSchema extends Database {
 	 * 
 	 * Return all the vectors in the database at the specified timestamp.
 	 */
-	public ArrayList<GriddedVector> getVectorsAtTimestamp( Timestamp time ) {
+	public ArrayList<GriddedVector> getVectorsAtTimestamp( int timeID ) {
 		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
 		
 		Iterator<GriddedVector> iterator = vectors.iterator();
         while (iterator.hasNext()) {
             GriddedVector vector = iterator.next();
-            if (vector.timestamp == time) subset.add(vector);
+            if (vector.timestampID == timeID) subset.add(vector);
         }
 		
 		return subset;
@@ -166,7 +166,7 @@ public class DatabaseRamSchema extends Database {
         // If we didn't find anything... Subset will be empty.
         if (t == null || counter > timestamps.size()) return subset;
         
-		subset = getVectorsAtTimestamp( t );
+		subset = getVectorsAtTimestamp( t.id );
 
 		return subset;
 	}	
@@ -210,7 +210,7 @@ public class DatabaseRamSchema extends Database {
             if (t == null ) continue;
             
             // Add any vectors we found to the subset list.
-    		subset.addAll( getVectorsAtTimestamp( t ));
+    		subset.addAll( getVectorsAtTimestamp( t.id ));
 		}
 		return subset;
 	}

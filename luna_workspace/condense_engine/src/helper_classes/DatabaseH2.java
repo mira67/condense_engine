@@ -319,7 +319,7 @@ public class DatabaseH2 extends Database {
 					metadata.vectors + "," +
 					v.data() + "," +
 					v.loc.id + "," +
-					v.timestamp.id + ")");
+					v.timestampID + ")");
 
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2",
@@ -480,18 +480,18 @@ public class DatabaseH2 extends Database {
 	 */
 	public ArrayList<GriddedVector> getVectorsAtTime( int timeID ) {
 
-		// When we create the vectors, we'll need the locations and timestamps.
+		// When we create the vectors, we'll also need the locations and timestamps.
 		locations = getLocations();
 		timestamps = getTimestamps();
 		
+		// An arraylist to store the vectors.
 		ArrayList<GriddedVector> vectors = new ArrayList<GriddedVector>();
 		
-	    ///String query = "SELECT * FROM " + Table.VECTORS.name() + " WHERE TIMESTAMPID = " + timeID;
-	    String query = "SELECT * FROM " + Table.VECTORS.name();
+	    String query = "SELECT * FROM " + Table.VECTORS.name() + " WHERE TIMESTAMPID = " + timeID;
+	    ///String query = "SELECT * FROM " + Table.VECTORS.name();
 	    
 		try {
 			GriddedLocation loc;
-			Timestamp time;
 			GriddedVector vec;
 			
 			Statement statement = conn.createStatement();
@@ -499,10 +499,9 @@ public class DatabaseH2 extends Database {
 
 			while (rs.next()) {
 				loc = getLocation(rs.getInt("LOCATIONID"));
-				time = getTimestamp(rs.getInt("TIMESTAMPID"));
 				
 				// Create the vector from the value, location and timestamp.
-				vec = new GriddedVector(rs.getInt("VALUE"),	loc, time );
+				vec = new GriddedVector(rs.getInt("VALUE"),	loc, timeID );
 				
 				// Add it to the arraylist.
 				vectors.add(vec);

@@ -35,13 +35,8 @@ public class SurfaceVector extends GriddedVector {
 	
 	
 	// Constructor using a supplied classification value
-	public SurfaceVector( int i, GriddedLocation l) {
-	    super(l);
-	    
-		setSurface( i );
-		
-		// By default, all surface vectors have the same time.
-		timestamp = new Timestamp(DatasetSurface.getTimeStatic().days());
+	public SurfaceVector( int i, GriddedLocation loc, int timeID) {
+	    super(i, loc, timeID);
 	}
 	
 	// Various gets and sets

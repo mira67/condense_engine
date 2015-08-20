@@ -15,10 +15,9 @@ public class SSMIVector extends GriddedVector {
 		data = 0;
 	}
 
-	// Constructor using a supplied value and location.
-	public SSMIVector( int i, GriddedLocation loc ) {		
-		super(loc);
-		this.data( i );
+	// Constructor using a supplied value and location, and timestamp ID.
+	public SSMIVector( int i, GriddedLocation loc, int timeID ) {		
+		super(i, loc, timeID);
 	}
 	
 	
