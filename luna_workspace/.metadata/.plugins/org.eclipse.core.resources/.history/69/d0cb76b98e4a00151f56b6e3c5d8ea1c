@@ -1,0 +1,10 @@
+package climatology.nsidc.org;
+
+public class Climatology {
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+
+	}
+
+}

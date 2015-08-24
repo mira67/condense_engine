@@ -7,7 +7,11 @@ package helper_classes;
 
 public class Timespan extends GeoObject {
 	
-	public static enum Increment { WEEK, MONTH, YEAR, SEASONAL }
+	public static enum Increment { WEEK ("week"), MONTH ("month"), YEAR ("year"), SEASONAL ("seasonal");
+    	private final String name;       
+    	private Increment(String s) {name = s;}
+    	public String toString() {return name;}
+	}
 
 	protected Timestamp startTime;	// Beginning of the timespan
 	protected Timestamp endTime;	// End of the timespan.
