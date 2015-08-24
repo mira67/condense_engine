@@ -17,4 +17,10 @@ public class Metadata {
 	
 	// Constructors
 	public Metadata() {}
+	
+	public int timestamps() { return rows; }
+	public int vectors() { return rows; }
+	public int locations() { return rows; }
+	public int rows() { return rows; }
+	public int cols() { return cols; }
 }

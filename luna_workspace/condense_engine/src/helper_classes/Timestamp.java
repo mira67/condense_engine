@@ -192,6 +192,10 @@ public class Timestamp {
 	public int dayOfYear() {
 		return dayOfYear;
 	}
+	
+	public int id() {
+		return id;
+	}
 
 	public Calendar getCalendar() {
 		return (Calendar) cal.clone();
