@@ -16,7 +16,7 @@ public class DatasetSSMI extends Dataset {
 	 * 
 	 * A single file name is required to read the metadata.
 	 */
-	DatasetSSMI(String filename) {
+	public DatasetSSMI(String filename) {
 		metadata = new Metadata();
 		readMetadata(filename);
 

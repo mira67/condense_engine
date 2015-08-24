@@ -22,7 +22,7 @@ public class DatasetSeaIce extends Dataset {
 	 * 
 	 * A single file name is required to read the metadata.
 	 */
-	DatasetSeaIce(String filename) {
+	public DatasetSeaIce(String filename) {
 		// /locs = new ArrayList<GriddedLocation>();
 		metadata = readMetadata(filename);
 		readMetadata(filename);

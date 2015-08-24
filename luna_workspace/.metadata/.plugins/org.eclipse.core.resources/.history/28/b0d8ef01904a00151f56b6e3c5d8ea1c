@@ -1,7 +1,7 @@
 package climatology.nsidc.org;
 
 import helper_classes.*;
-
+import helper_classes.Tools;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -60,10 +60,7 @@ public class Climatology {
     
      // The dataset we're going to read.
     Dataset dataset;
-
-    // Gridded image pixel locations.
-    GriddedLocation locations[][];
-    
+        
     // The mean provides a reference for deciding whether to condense the
     // newest pixels; i.e., are the pixels varying greater than n*sd from
     // the mean? If so, keep the newest ones and update the reference image
@@ -102,28 +99,82 @@ public class Climatology {
 	 * 
 	 * Read the data, make climatology baselines (mean and standard deviation).
 	 */
-	Climatology() {
+	Condense() {
+
+		switch (databaseType) {
+			case RAM:
+				database = new DatabaseRamSchema("", dataType.toString());
+				break;
+			case FILE:
+				database = new DatabaseFileSchema(outputPath, dataType.toString());
+				break;
+			case H2:
+				database = new DatabaseH2(databasePath, databaseName);
+				break;
+		}
+		
+		// Connect to the database.
+		if (!database.connect()) {
+			Tools.errorMessage("Condense", "Condense", "Could not connect to the database.",
+					new Exception("Giving up."));
+		}
+		
+		// For development, clean out any tables and data first.
+		database.clean();
+		
+		// Read surface types and coast lines.
+		if (readSurface) readSurface();
 
 		// Read the data files. The loop continues until all data files have been read.
 		while( readData() ) {
 			
 			// Condense the data and add it to the database.
-			makeBaseline();
+			condenseData();
 			
 		}
 		
+		// Database info for debugging purposes.
+		database.status();
+		
+		// All done. Close the database.
+		database.disconnect();
+		
 		// Warm fuzzy feedback.
 		Tools.statusMessage("Total data files processed = " + fileCount);
+
+		// We should now have a database full of condensed pixels.
+		// Let's generate some images of them...
+		if (generateImages) generateTestImages();
 	}
 	
+	
+	/* readSurface
+	 * 
+	 * Read the surface data.
+	 * 
+	 * Special case: the surface type could potentially be used in a condensation
+	 * algorithm. 
+	 */
+	protected void readSurface() {
+		DatasetSurface datasetSurface = new DatasetSurface();
+		surfaceMetadata = datasetSurface.readMetadata(surfaceFile);
+		Tools.statusMessage("Condense::condense: reading surface pixels");
+	    surfaceVectors = datasetSurface.readData(surfaceFile, surfaceLats, surfaceLons);
+	}
 	
 	/* 
 	 * readData
 	 * 
-	 * Read the dataset files.
+	 * Read the dataset files. Since the different types of data will most likely
+	 * have different formats and file names, this method must tailor itself
+	 * to the type of data being read.
 	 * 
 	 * This method reads data files in 'gulps' of the specified time increment
 	 * (i.e., week, month, or seasonal, etc.).
+	 * 
+	 * The method exits if the time increment overruns the total time span. For example,
+	 * if the user says 'process all data in monthly increments, but stop on May 15th',
+	 * this method will process up to May 15th and return.
 	 * 
 	 * Returns false if the start day for processing is greater than the final day
 	 * (i.e., the ultimate final day as the user specified for processing).
@@ -169,46 +220,38 @@ public class Climatology {
 		// If a date doesn't exist, ignore it and move on.
 		for (int d = 0; d < days; d++) {
 			
+			// Add the timestamp to the database.
+			date.id = database.storeTimestamp(date);
+			
 			try {
 				
 				switch (dataType) {
+					case NONE:
+						break;
 					case SEA_ICE:
 						filename = DatasetSeaIce.getSeaIceFileName(dataPath, date.year(), date.month(),
 	    										 date.dayOfMonth(), addYearToInputDirectory);
     					
-    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename, locations, date.id() );
+    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename, locations, date.id );
 
     					// Success
     					fileCount++;
 
 	    			
     					break;
-    	    			
-  					case SSMI:
-    						filename = DatasetSSMI.getSSMIFileName(dataPath,
-    	    								date.year(), date.month(), date.dayOfMonth(),
-    	    								addYearToInputDirectory, frequency, polarization);
-    	    			
-    						// Read the data
-    						data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, locations, date.id());
-    	    					
-    						// Success
-    						fileCount++;
-       				
-    	    			break;
-    	    			
-   					case AVHRR:
-    						/*filename = DatasetSSMI.getSSMIFileName(dataPath,
-    	    								date.year(), date.month(), date.dayOfMonth(),
-    	    								addYearToInputDirectory, frequency, polarization);
-    	    			
-    						// Read the data
-    						data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, locations, date.id());
-    	    					
-    						// Success
-    						fileCount++;*/
-       				
-    	    			break;
+	    			
+					case SSMI:
+						filename = DatasetSSMI.getSSMIFileName(dataPath,
+	    								date.year(), date.month(), date.dayOfMonth(),
+	    								addYearToInputDirectory, frequency, polarization);
+	    			
+						// Read the data
+						data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, locations, date.id);
+	    					
+						// Success
+						fileCount++;
+   				
+	    			break;
 				}
 			} catch(Exception e) {return false;}
 			
@@ -265,19 +308,11 @@ public class Climatology {
     				
    				getLocations();
     				
-   				break;			
-			    
-   			case AVHRR:
-   				/*filename = DatasetAVHRR.getAVHRRFileName(dataPath, startYear, startMonth,
-   						startDay, addYearToInputDirectory);
+   				break;
+    				
+   			case NONE:
+    			break;
 
-   				dataset = new DatasetAVHRR(filename);
-    				
-   				getMetadata( filename );
-    				
-   				getLocations();
-    				
-   				break;*/			
 		}
 		data = new GriddedVector[maximumDays][rows][cols];	
 	}
@@ -292,20 +327,23 @@ public class Climatology {
 		if (haveMetadata) return;
 		
 		switch (dataType) {
+    		case NONE:
+    			break;
     		case SEA_ICE:
     			metadata = dataset.readMetadata( filename );
     			break;
     		case SSMI:
     			metadata = dataset.readMetadata( filename );
         		break;
-    		case AVHRR:
-    			/*metadata = dataset.readMetadata( filename );*/
-        		break;
 		}
 		
 		rows = dataset.rows();
 		cols = dataset.cols();
 		
+		// We need to store the metadata in the database.
+		Tools.statusMessage("==> Adding metadata to the database.");
+    	database.storeMetadata( metadata );
+    	
     	haveMetadata = true;
     	
 		return;
@@ -324,7 +362,7 @@ public class Climatology {
 					new Exception());
 		}
 		
-		locations = new GriddedLocation[metadata.rows()][metadata.cols()];
+		locations = new GriddedLocation[metadata.rows][metadata.cols];
 		
 		switch (dataType) {
     		case NONE:
