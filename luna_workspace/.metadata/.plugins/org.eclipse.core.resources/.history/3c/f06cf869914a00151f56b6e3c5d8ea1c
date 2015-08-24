@@ -1,22 +1,45 @@
-package climatology.nsidc.org;
+package helper_classes;
 
-import helper_classes.*;
+/* Main program to experiment with algorithms for condensed data sets.
+ */
 
+///import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-public class Climatology {
+import condense_engine.Downsampling;
 
-	// Data types
-	public enum DataType 	{ SEA_ICE ("seaice"), SSMI ("ssmi"), AVHRR ("avhrr");
+public class Condense extends GeoObject {
+
+    /*-------------------------------------------------------------------------
+	// USE THE JAVA RUNTIME ARGUMENT TO SET THE CONFIGURATION PATH+FILE
+	//-----------------------------------------------------------------------*/
+	
+	// File path+filename for the configuration file. Runtime input.
+	static String configFilename;
+
+	/*-------------------------------------------------------------------------
+	// AVAILABLE TYPES OF DATA AND PROCESSING.
+	//-----------------------------------------------------------------------*/
+	
+	public enum DataType 	{ NONE ("none"), SEA_ICE ("seaice"), SSMI ("ssmi");
 	    private final String name;       
 	    private DataType(String s) {name = s;}
 	    public String toString(){return name;}
 	}
 
-	static DataType dataType = DataType.SSMI;
+	public enum Algorithm 	{ NO_CONDENSATION, TEMPORAL_THRESHOLD, MINMAX, SPECIALSAMPLE }
+
+	public enum DatabaseType { RAM, FILE, H2 }
+
+	/*-------------------------------------------------------------------------
+	// DEFAULTS. USE THE CONFIGURATION FILE TO MODIFY THESE VALUES.
+	//-----------------------------------------------------------------------*/
 	
+	static DataType dataType = DataType.SSMI;
 	static Timespan.Increment increment = Timespan.Increment.MONTH;
+	static Algorithm algorithm = Algorithm.SPECIALSAMPLE;
+	static DatabaseType databaseType = DatabaseType.H2;
 	
 	// Start and end dates for the processing.
 	static int startYear = 2013;
@@ -34,36 +57,55 @@ public class Climatology {
 	static int imageStartIndex = 0;
 	static int imageEndIndex = 0;
 	
+	// What level of anomaly threshold do we want for condensing the data?
+	static double threshold = 1.0;  	// Standard deviations
 	static boolean filterBadData = false;	// Filter out bad data points using minvalue and maxvalue?
 	static int minValue = -1000000000;  // Minimum acceptable data value
 	static int maxValue =  1000000000;  // Maximum acceptable data value
 	
 	// Files and paths for i/o
-	static String outputPath = "/Users/glgr9602/Desktop/Condense/climatology/"+dataType.toString()+"/"+increment.toString()+"/";
-	static String dataPath = "/Users/glgr9602/Desktop/Condense/data/"+dataType.toString()+"/";
+	static String outputPath = "/Users/mira67/Documents/IceData/nsidc_0001/";
+	static String dataPath = "/Users/mira67/Documents/IceData/nsidc_0001/south/";
+	static String databaseName;
+	static String databasePath = "jdbc:h2:tcp://localhost/~/";
+	static String surfaceFile = "";
+	static String surfaceLats = "";
+	static String surfaceLons = "";
 
-	static boolean warningMessages = false;		// Receive warning messages?
+	// Flags
+    static boolean readSurface = false;			// Read the surface type data file?
+    static boolean warningMessages = false;		// Receive warning messages?
     static boolean debugMessages = false;		// Receive debug messages?
     static boolean addYearToInputDirectory = true; // The input files may be stored in subdirectories by year
+    static boolean generateImages = false;		// Generate test images
     
     // SSMI data selection
     static String polarization = "v"; 			// Horizontal (h) or vertical (v)
     static int frequency = 19;		 			// Frequency of SSMI data
 
-    // The image data across the specified time span [day][row][col]
+    /*-------------------------------------------------------------------------
+	// INTERNAL GLOBAL DATA, NOT FOR USER TWEAKING
+	//-----------------------------------------------------------------------*/
+	
+	// The image data across the specified time span [day][row][col]
 	GriddedVector data[][][];
 	
 	int days = 0;			// Days processed during one time increment
 	
     boolean haveMetadata = false;
+    
     Metadata metadata;
     
-     // The dataset we're going to read.
-    Dataset dataset;
-
-    // Gridded image pixel locations.
-    GriddedLocation locations[][];
+    // Surface type information.
+    Metadata surfaceMetadata;
+    SurfaceVector surfaceVectors[][];
     
+    // The dataset we're going to read.
+    Dataset dataset;
+        
+    // Our 'database' of objects (in lieu of an actual database app).
+    Database database;
+        
     // The mean provides a reference for deciding whether to condense the
     // newest pixels; i.e., are the pixels varying greater than n*sd from
     // the mean? If so, keep the newest ones and update the reference image
@@ -77,6 +119,9 @@ public class Climatology {
     
     // Number of files successfully read, for sanity checks
     int fileCount = 0;
+    
+    // Gridded image pixel locations.
+    GriddedLocation locations[][];
     	
     /*-------------------------------------------------------------------------
 	// MAIN PROGRAM
@@ -90,40 +135,125 @@ public class Climatology {
 		Tools.setDebug( debugMessages );
 		Tools.setWarnings( warningMessages );
 
-    	new Climatology();
+		// Check environment variables for default paths.
+		if (System.getenv("outputpath")!= null) outputPath = System.getenv("outputpath");
+		if (System.getenv("datapath") !=null) dataPath = System.getenv("datapath");
+		
+		// Read the configuration file. First, check to see if the the config file
+		// has been specified with an environment variable. If not, look for the file
+		// path (with name) as input on the command line, arg[0].
+		String path = System.getenv("configfile");
+		if (path == null) {
+			configFilename = args[0];
+		} else {
+			configFilename = path;
+		}
+		
+		try {		
+			if (!readConfigFile( configFilename )) {
+				Tools.errorMessage("Condense", "main", "Could not read the cofiguration file: " + configFilename,
+						new Exception());
+			}
+		} catch(Exception e) {		
+			System.out.println(e);
+			Tools.message("Error when reading configuration file. Did you specify a full path and name?");
+			Tools.message("Example: \"java Condense C:/users/mydir/configfile.txt\"");
+			Tools.message("or put the path in an enviroment variable called \"configfile\"");
+			Tools.errorMessage("Condense", "main", "", new Exception());
+		}
+		
+		// If a database name is not specified, create a default one.
+		if (databaseName.isEmpty()) databaseName = dataType.toString();
+		
+    	new Condense();
     	
 		long endTime = System.currentTimeMillis();
         endTime = (endTime - startTime) / 1000;
-		Tools.statusMessage("End. Total time to process = " + endTime + " seconds");
+		Tools.statusMessage("Total time to process = " + endTime + " seconds");
+    	Tools.statusMessage("End program");
 	}
 
 	
-	/* Climatology
+	/* Condense
 	 * 
-	 * Read the data, make climatology baselines (mean and standard deviation).
+	 * Condense the data files into a database.
 	 */
-	Climatology() {
+	Condense() {
+
+		switch (databaseType) {
+			case RAM:
+				database = new DatabaseRamSchema("", dataType.toString());
+				break;
+			case FILE:
+				database = new DatabaseFileSchema(outputPath, dataType.toString());
+				break;
+			case H2:
+				database = new DatabaseH2(databasePath, databaseName);
+				break;
+		}
+		
+		// Connect to the database.
+		if (!database.connect()) {
+			Tools.errorMessage("Condense", "Condense", "Could not connect to the database.",
+					new Exception("Giving up."));
+		}
+		
+		// For development, clean out any tables and data first.
+		database.clean();
+		
+		// Read surface types and coast lines.
+		if (readSurface) readSurface();
 
 		// Read the data files. The loop continues until all data files have been read.
 		while( readData() ) {
 			
 			// Condense the data and add it to the database.
-			makeBaseline();
+			condenseData();
 			
 		}
 		
+		// Database info for debugging purposes.
+		database.status();
+		
+		// All done. Close the database.
+		database.disconnect();
+		
 		// Warm fuzzy feedback.
 		Tools.statusMessage("Total data files processed = " + fileCount);
+
+		// We should now have a database full of condensed pixels.
+		// Let's generate some images of them...
+		if (generateImages) generateTestImages();
 	}
 	
+	
+	/* readSurface
+	 * 
+	 * Read the surface data.
+	 * 
+	 * Special case: the surface type could potentially be used in a condensation
+	 * algorithm. 
+	 */
+	protected void readSurface() {
+		DatasetSurface datasetSurface = new DatasetSurface();
+		surfaceMetadata = datasetSurface.readMetadata(surfaceFile);
+		Tools.statusMessage("Condense::condense: reading surface pixels");
+	    surfaceVectors = datasetSurface.readData(surfaceFile, surfaceLats, surfaceLons);
+	}
 	
 	/* 
 	 * readData
 	 * 
-	 * Read the dataset files.
+	 * Read the dataset files. Since the different types of data will most likely
+	 * have different formats and file names, this method must tailor itself
+	 * to the type of data being read.
 	 * 
 	 * This method reads data files in 'gulps' of the specified time increment
 	 * (i.e., week, month, or seasonal, etc.).
+	 * 
+	 * The method exits if the time increment overruns the total time span. For example,
+	 * if the user says 'process all data in monthly increments, but stop on May 15th',
+	 * this method will process up to May 15th and return.
 	 * 
 	 * Returns false if the start day for processing is greater than the final day
 	 * (i.e., the ultimate final day as the user specified for processing).
@@ -169,46 +299,38 @@ public class Climatology {
 		// If a date doesn't exist, ignore it and move on.
 		for (int d = 0; d < days; d++) {
 			
+			// Add the timestamp to the database.
+			date.id = database.storeTimestamp(date);
+			
 			try {
 				
 				switch (dataType) {
+					case NONE:
+						break;
 					case SEA_ICE:
 						filename = DatasetSeaIce.getSeaIceFileName(dataPath, date.year(), date.month(),
 	    										 date.dayOfMonth(), addYearToInputDirectory);
     					
-    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename, locations, date.id() );
+    					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset).readData( filename, locations, date.id );
 
     					// Success
     					fileCount++;
 
 	    			
     					break;
-    	    			
-  					case SSMI:
-    						filename = DatasetSSMI.getSSMIFileName(dataPath,
-    	    								date.year(), date.month(), date.dayOfMonth(),
-    	    								addYearToInputDirectory, frequency, polarization);
-    	    			
-    						// Read the data
-    						data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, locations, date.id());
-    	    					
-    						// Success
-    						fileCount++;
-       				
-    	    			break;
-    	    			
-   					case AVHRR:
-    						/*filename = DatasetSSMI.getSSMIFileName(dataPath,
-    	    								date.year(), date.month(), date.dayOfMonth(),
-    	    								addYearToInputDirectory, frequency, polarization);
-    	    			
-    						// Read the data
-    						data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, locations, date.id());
-    	    					
-    						// Success
-    						fileCount++;*/
-       				
-    	    			break;
+	    			
+					case SSMI:
+						filename = DatasetSSMI.getSSMIFileName(dataPath,
+	    								date.year(), date.month(), date.dayOfMonth(),
+	    								addYearToInputDirectory, frequency, polarization);
+	    			
+						// Read the data
+						data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset).readData( filename, locations, date.id);
+	    					
+						// Success
+						fileCount++;
+   				
+	    			break;
 				}
 			} catch(Exception e) {return false;}
 			
@@ -265,19 +387,11 @@ public class Climatology {
     				
    				getLocations();
     				
-   				break;			
-			    
-   			case AVHRR:
-   				/*filename = DatasetAVHRR.getAVHRRFileName(dataPath, startYear, startMonth,
-   						startDay, addYearToInputDirectory);
+   				break;
+    				
+   			case NONE:
+    			break;
 
-   				dataset = new DatasetAVHRR(filename);
-    				
-   				getMetadata( filename );
-    				
-   				getLocations();
-    				
-   				break;*/			
 		}
 		data = new GriddedVector[maximumDays][rows][cols];	
 	}
@@ -292,20 +406,23 @@ public class Climatology {
 		if (haveMetadata) return;
 		
 		switch (dataType) {
+    		case NONE:
+    			break;
     		case SEA_ICE:
     			metadata = dataset.readMetadata( filename );
     			break;
     		case SSMI:
     			metadata = dataset.readMetadata( filename );
         		break;
-    		case AVHRR:
-    			/*metadata = dataset.readMetadata( filename );*/
-        		break;
 		}
 		
 		rows = dataset.rows();
 		cols = dataset.cols();
 		
+		// We need to store the metadata in the database.
+		Tools.statusMessage("==> Adding metadata to the database.");
+    	database.storeMetadata( metadata );
+    	
     	haveMetadata = true;
     	
 		return;
@@ -324,7 +441,7 @@ public class Climatology {
 					new Exception());
 		}
 		
-		locations = new GriddedLocation[metadata.rows()][metadata.cols()];
+		locations = new GriddedLocation[metadata.rows][metadata.cols];
 		
 		switch (dataType) {
     		case NONE:
@@ -339,9 +456,6 @@ public class Climatology {
     					locations[r][c] = new GriddedLocation(r, c, (double) Tools.randomInt(90), (double) Tools.randomInt(180));
     				}
     			}
-    			break;
-    		case AVHRR:
-    			/*  */
     			break;
 		}
 		
@@ -1032,6 +1146,4 @@ public class Climatology {
 
 		return true;
 	}
-}
-
 }

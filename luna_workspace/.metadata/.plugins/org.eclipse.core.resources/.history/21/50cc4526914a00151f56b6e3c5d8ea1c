@@ -340,9 +340,6 @@ public class Climatology {
     				}
     			}
     			break;
-    		case AVHRR:
-    			/*  */
-    			break;
 		}
 		
 		Tools.statusMessage("==> Adding locations to the database.");

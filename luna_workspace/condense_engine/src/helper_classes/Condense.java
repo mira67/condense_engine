@@ -22,7 +22,7 @@ public class Condense extends GeoObject {
 	// AVAILABLE TYPES OF DATA AND PROCESSING.
 	//-----------------------------------------------------------------------*/
 	
-	public enum DataType 	{ NONE ("none"), SEA_ICE ("seaice"), SSMI ("ssmi");
+	public enum DataType 	{ NONE ("none"), SEA_ICE ("seaice"), SSMI ("ssmi"), AVHRR ("avhrr");
 	    private final String name;       
 	    private DataType(String s) {name = s;}
 	    public String toString(){return name;}
@@ -330,7 +330,10 @@ public class Condense extends GeoObject {
 						// Success
 						fileCount++;
    				
-	    			break;
+						break;
+					case AVHRR:
+						// todo
+						break;
 				}
 			} catch(Exception e) {return false;}
 			
@@ -388,7 +391,11 @@ public class Condense extends GeoObject {
    				getLocations();
     				
    				break;
-    				
+    		
+   			case AVHRR:
+   				// todo
+   				break;
+   				
    			case NONE:
     			break;
 
@@ -414,6 +421,9 @@ public class Condense extends GeoObject {
     		case SSMI:
     			metadata = dataset.readMetadata( filename );
         		break;
+    		case AVHRR:
+    			// todo
+    			break;
 		}
 		
 		rows = dataset.rows();
@@ -456,6 +466,9 @@ public class Condense extends GeoObject {
     					locations[r][c] = new GriddedLocation(r, c, (double) Tools.randomInt(90), (double) Tools.randomInt(180));
     				}
     			}
+    			break;
+    		case AVHRR:
+    			// todo
     			break;
 		}
 		
