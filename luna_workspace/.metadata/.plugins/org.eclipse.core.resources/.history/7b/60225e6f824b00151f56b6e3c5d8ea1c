@@ -16,14 +16,14 @@ public class Climatology extends GeoObject {
 
 	static DataType dataType = DataType.SSMI;
 	
-	static Timespan.Increment increment = Timespan.Increment.MULTIYEARMONTH;
+	static Timespan.Increment increment = Timespan.Increment.MONTH;
 	
 	// Start and end dates for the processing.
 	static int startYear = 2012;
 	static int startMonth = 1;
 	static int startDay = 30;
 
-	static int finalYear = 2013;
+	static int finalYear = 2012;
 	static int finalMonth = 3;
 	static int finalDay = 20;
 

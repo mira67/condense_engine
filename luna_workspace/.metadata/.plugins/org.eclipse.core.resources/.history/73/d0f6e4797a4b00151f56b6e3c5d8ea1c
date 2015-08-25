@@ -16,20 +16,20 @@ public class Climatology extends GeoObject {
 
 	static DataType dataType = DataType.SSMI;
 	
-	static Timespan.Increment increment = Timespan.Increment.MULTIYEARMONTH;
+	static Timespan.Increment increment = Timespan.Increment.MULTIYEARSEASONAL;
 	
 	// Start and end dates for the processing.
 	static int startYear = 2012;
 	static int startMonth = 1;
 	static int startDay = 30;
 
-	static int finalYear = 2013;
-	static int finalMonth = 3;
-	static int finalDay = 20;
+	static int finalYear = 2012;
+	static int finalMonth = 5;
+	static int finalDay = 31;
 
-	static int lastStartYear = 0;
-	static int lastStartMonth = 0;
-	static int lastStartDay = 0;
+	static int initialStartYear = 0;
+	static int initialStartMonth = 0;
+	static int initialStartDay = 0;
 	
 	static int imageStartIndex = 0;
 	static int imageEndIndex = 0;
@@ -138,10 +138,6 @@ public class Climatology extends GeoObject {
 	 */
 	protected boolean readData() {
 
-		lastStartYear = startYear;
-		lastStartMonth = startMonth;
-		lastStartDay = startDay;
-		
 		Timestamp startDate = new Timestamp( startYear, startMonth, startDay);
 		Timestamp finalDate = new Timestamp( finalYear, finalMonth, finalDay);
 
@@ -157,17 +153,15 @@ public class Climatology extends GeoObject {
 		// Convert it to a number of whole days for this time increment. The number of days
 		// may vary depending on the length of the increment (month, year, etc) and
 		// the start date. This is maximum possible days we'll process in any one gulp.
-		// Add one to account for leap-years when processing time increments that may
-		// span multiple years.
-		int maximumDays = timespan.fullDays() + 1;
+		int maximumDays = timespan.fullDays();
 		
-		Tools.message("    Maximum possible days for this increment = " + maximumDays);
+		Tools.message("    MAX DAYS = " + maximumDays);
 		
 		// Find the total number of days we are processing, which may be less than the
 		// time span (for instance, if the user has requested we start on March 15th using
 		// a seasonal timespan of March-April-May, we'll ignore the first 14 days).
 		days = (int) timespan.endTimestamp().days() - (int) startDate.days() + 1;
-		Tools.message("    Days we will process = " + days);
+		Tools.message("    PROCESS DAYS = " + days);
 
 		String filename = "";
 
@@ -222,12 +216,12 @@ public class Climatology extends GeoObject {
        				
     	    			break;
 				}
-			} catch(Exception e) {}
+			} catch(Exception e) {return false;}
 			
 			// Remove bad data
 			data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue, NODATA);
 			
-			Tools.message(date.yearString() + "." + date.monthString() +
+			Tools.statusMessage(date.yearString() + "." + date.monthString() +
 					"." + date.dayOfMonthString() + "  File name: " + filename);
 			
 
@@ -238,19 +232,10 @@ public class Climatology extends GeoObject {
 		Tools.debugMessage("End of loop. Next date: " + date.dateString() + "\n-----");
 		
 		// Update the starting date for the next time span.
-		if (increment == Timespan.Increment.MULTIYEARMONTH ||
-			increment == Timespan.Increment.MULTIYEARSEASONAL ||
-			increment == Timespan.Increment.MULTIYEAR) {
-			// Jump to next year.
-			startYear++;
-			startDay = 1;
-		} else {
-			// Pick up where we left off, day by day.
-			startYear = date.year();
-			startMonth = date.month();
-			startDay = date.dayOfMonth();
-		}
-		
+		startYear = date.year();
+		startMonth = date.month();
+		startDay = date.dayOfMonth();
+				
 		return true;
 	}
 
@@ -375,8 +360,8 @@ public class Climatology extends GeoObject {
 	 */
     protected void makeBaseline() {
     	
-    	Timestamp firstDate = new Timestamp( lastStartYear, lastStartMonth, lastStartDay);
-    	Timestamp lastDate = new Timestamp( lastStartYear, lastStartMonth, (lastStartDay + days) - 1);
+    	Timestamp firstDate = new Timestamp( startYear, startMonth, startDay);
+    	Timestamp lastDate = new Timestamp( startYear, startMonth, (startDay + days) - 1);
     	Timestamp.dateSeparator("");
     	
     	Tools.statusMessage("Climatology: " + firstDate.dateString() +
@@ -388,7 +373,7 @@ public class Climatology extends GeoObject {
 		String filename = outputPath + climatologyPrefix + dataType.toString() + "_" +
 				increment.toString() + "_" + firstDate.dateString() + ".bin";
 		
-		Tools.statusMessage("    output filename = " + filename);
+		Tools.statusMessage("filename = " + filename);
 		///DataFile file = new DataFile();
     }
 	
