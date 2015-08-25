@@ -91,11 +91,14 @@ public class Timespan extends GeoObject {
 	
 		switch(increment) {
 			case DAY:
-				// Default. Do nothing.
+				endYear = startYear;
+				endMonth = startMonth;
+				endDay = startDay;
 				break;
 				
 			case WEEK:
-				
+				endYear = startYear;
+				endMonth = startMonth;
 				// Add 6 to encompass a whole week.
 				// Warning! Doesn't start or end on any particular day of the week.
 				endDay = startDay + 6;
@@ -103,16 +106,20 @@ public class Timespan extends GeoObject {
 				break;
 				
 			case MONTH:
+			case MULTIYEARMONTH:
+                startDay = 1;
 
-				startDay = 1;				
+				if (i == Increment.MONTH) endYear = startYear;
+				endMonth = startMonth;				
 				endDay = Timestamp.daysInMonth(endMonth, endYear);
 
 				break;
-				
+
 			case SEASONAL:
 			case MULTIYEARSEASONAL:
 
 				startDay = 1;
+				if (i == Increment.SEASONAL) endYear = startYear;
 
 				// December-January-February (90 or 91 days, depending on leap years)
 				if (startMonth == 12 || startMonth == 1 || startMonth == 2) {
@@ -153,43 +160,17 @@ public class Timespan extends GeoObject {
 				break;
 				
 			case YEAR:
-				
-				// Use a full year, Jan 1 to Dec 31, starting in the start year.
-				
-				startYear = startTime.year();
-				startMonth = 1;
-				startDay = 1;
-				endMonth = 12;
-				endDay = 31;
-				
-				break;
-
 			case MULTIYEAR:
 				
-				// Multiple years. Use a full years, Jan 1 to Dec 31.
+				// Use a full years, Jan 1 to Dec 31, starting in the start year.
 				
 				startYear = startTime.year();
 				startMonth = 1;
 				startDay = 1;
-				endYear = endTime.year();
+
+				if (i == Increment.YEAR) endYear = startYear;
 				endMonth = 12;
 				endDay = 31;
-				
-				break;
-				
-			case MULTIYEARMONTH:
-				
-				// All years, by month  (e.g., every January). Uses the start month
-				// as the designated month.
-				startYear = startTime.year();
-                startMonth = startTime.month();
-                startDay = 1;
-                
-				endYear = endTime.year();
-				// Sanity check.
-				if (endTime.month() < startMonth) endYear = endYear - 1;
-				endMonth = startMonth;
-				endDay = Timestamp.daysInMonth(endMonth, endYear);
 				
 				break;
 				
@@ -208,47 +189,8 @@ public class Timespan extends GeoObject {
 	public Timestamp startTimestamp() { return startTime; }
 	
 	public void endTimestamp(Timestamp t) { endTime = t; }
-	public Timestamp endTimestamp() { return endTime; }
-	
-	// Total number of elapsed days.
-	public double days() {
+	public Timestamp endTimestamp() { return endTime; }	
 
-		double days = 0;
-		
-		switch (increment) {
-			case DAY:
-			case WEEK:
-			case MONTH:
-			case YEAR:
-			case SEASONAL:
-			case MULTIYEAR:
-				days = endTime.days() - startTime.days();
-				break;
-				
-			case MULTIYEARMONTH:
-				for (int y = startTime.year(); y <= endTime.year(); y++) {
-					days += Timestamp.daysInMonth(startTime.month(), y); 
-				}
-				break;
-				
-			case MULTIYEARSEASONAL:
-				// Iterate over the years.
-				for (int y = startTime.year(); y <= endTime.year(); y++) {
-					
-					// Iterate over the seasonal time span, counting the days.
-					for (int m = startTime.month(); m <= endTime.month(); m++) {
-						days += Timestamp.daysInMonth(m, y);
-					}
-				}
-				break;
-
-			default:
-				break;
-		}
-		
-		return days;
-	}
-	
 	/*
 	 * fullDays
 	 * 
@@ -275,13 +217,19 @@ public class Timespan extends GeoObject {
 				break;
 				
 			case MULTIYEARSEASONAL:
-				// Iterate over the years.
+				// Iterate over the seasonal time span, counting the days.
 				for (int y = startTime.year(); y <= endTime.year(); y++) {
+					if (startTime.month() == 3) days = days + 92;  // MAM
+					if (startTime.month() == 6) days = days + 92;  // JJA
+					if (startTime.month() == 9) days = days + 91;  // SON
 					
-					// Iterate over the seasonal time span, counting the days.
-					for (int m = startTime.month(); m <= endTime.month(); m++) {
-						days += Timestamp.daysInMonth(m, y);
+					// DJF is a special case because it spans the year change. Also
+					// could have a leap February.
+					if (startTime.month() == 12) {
+						if (y == endTime.year()) break;
+						days = days + 62 + Timestamp.daysInMonth(2, y+1);
 					}
+
 				}
 				break;
 
