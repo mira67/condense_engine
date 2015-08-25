@@ -357,21 +357,11 @@ public class Climatology extends GeoObject {
 	 */
     protected void makeBaseline() {
     	
-    	Timestamp firstDate = new Timestamp( startYear, startMonth, startDay);
-    	Timestamp lastDate = new Timestamp( startYear, startMonth, (startDay + days) - 1);
-    	Timestamp.dateSeparator("");
-    	
-    	Tools.statusMessage("Climatology: " + firstDate.dateString() +
-    			" for " + days + " days (until " + lastDate.dateString() + ")");
-    	
 		accumulateStats();
 
 		// Write the baseline data to output files.
-		String filename = outputPath + climatologyPrefix + dataType.toString() + "_" +
-				increment.toString() + "_" + firstDate.dateString() + ".bin";
-		
-		Tools.statusMessage("filename = " + filename);
-		///DataFile file = new DataFile();
+		String filename = outputPath + climatologyPrefix + dataType.toString()
+		DataFile file = new DataFile();
     }
 	
 

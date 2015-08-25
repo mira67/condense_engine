@@ -7,7 +7,14 @@ package helper_classes;
 
 public class Timespan extends GeoObject {
 	
-	public static enum Increment { WEEK ("week"), MONTH ("month"), YEAR ("year"), SEASONAL ("seasonal");
+	public static enum Increment {
+			WEEK ("week"),
+			MONTH ("month"),
+			YEAR ("year"),
+			SEASONAL ("seasonal"),
+			MULTIYEAR ("multiyear"),
+			MULTIYEARMONTH ("multiyear-month"),
+			MULTIYEARSEASONAL ("multiyear-seasonal");
     	private final String name;       
     	private Increment(String s) {name = s;}
     	public String toString() {return name;}
@@ -121,13 +128,50 @@ public class Timespan extends GeoObject {
 				endDay = 31;
 				
 				break;
+
+			case MULTIYEAR:
+				
+				// Multiple years. Use a full years, Jan 1 to Dec 31.
+				
+				startYear = startTime.year();
+				startMonth = 1;
+				startDay = 1;
+				endYear = endTime.year();
+				endMonth = 12;
+				endDay = 31;
+				
+				break;
+				
+			case MULTIYEARMONTH:
+				
+				// All years, by month  (e.g., every January). Uses the start month
+				// as the designated month.
+                int month = startTime.month();
+				startYear = startTime.year();
+
+				endYear = endTime.year();
+				if (endTime.month() < month) endYear = endYear - 1;
+				if (endYear < startYear) {
+					endTime = startTime;
+					return;
+				}
+				
+				// Loop through all years
+				for (int y = startYear; y <= endYear; y++) {
+					
+				}
+				startDay = 1;				
+				endDay = Timestamp.daysInMonth(endMonth, endYear);
+
+				break;
+				
+
+			case MULTIYEARSEASONAL:
+
 		}
 		
 		startTime = new Timestamp( startYear, startMonth, startDay );
 		endTime = new Timestamp( endYear, endMonth, endDay );
-		
-		Tools.debugMessage("TIMESPAN: " + startTime.dateString() + " to " +
-							endTime.dateString());
 	}
 
 	

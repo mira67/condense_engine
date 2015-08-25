@@ -35,13 +35,12 @@ public class Climatology extends GeoObject {
 	static int imageEndIndex = 0;
 	
 	static boolean filterBadData = false;	// Filter out bad data points using minvalue and maxvalue?
-	static final int minValue = -1000000000;  // Minimum acceptable data value
-	static final int maxValue =  1000000000;  // Maximum acceptable data value
+	static int minValue = -1000000000;  // Minimum acceptable data value
+	static int maxValue =  1000000000;  // Maximum acceptable data value
 	
 	// Files and paths for i/o
-	static final String outputPath = "/Users/glgr9602/Desktop/Condensate/climatology/"+dataType.toString()+"/"+increment.toString()+"/";
-	static final String dataPath = "/Users/glgr9602/Desktop/Condensate/data/"+dataType.toString()+"/daily/";
-	static final String climatologyPrefix = "climate_";
+	static String outputPath = "/Users/glgr9602/Desktop/Condensate/climatology/"+dataType.toString()+"/"+increment.toString()+"/";
+	static String dataPath = "/Users/glgr9602/Desktop/Condensate/data/"+dataType.toString()+"/daily/";
 
 	static boolean warningMessages = false;		// Receive warning messages?
     static boolean debugMessages = false;		// Receive debug messages?
@@ -91,9 +90,9 @@ public class Climatology extends GeoObject {
 		Tools.setDebug( debugMessages );
 		Tools.setWarnings( warningMessages );
 
-		Tools.statusMessage("Process " + dataType.toString() + " data from " +
-				startYear + "." + startMonth + "." + startDay + " to " +
-				finalYear + "." + finalMonth + "." + finalDay + 
+		Tools.statusMessage("Process: " + dataType.toString() + " data from:");
+		Tools.statusMessage("    " + startYear + "." + startMonth + "." + startDay +
+				" to " + finalYear + "." + finalMonth + "." + finalDay + 
 				" in increments of " + increment.toString() + "s.");
 
     	new Climatology();
@@ -160,6 +159,9 @@ public class Climatology extends GeoObject {
 		// Total days we're processing.
 		days = timespan.fullDays();
 
+		Tools.debugMessage("maximum days = " + maximumDays);
+		Tools.debugMessage("actual days = " + days);
+
 		String filename = "";
 
 		// Have we opened the dataset?
@@ -216,7 +218,7 @@ public class Climatology extends GeoObject {
 			} catch(Exception e) {return false;}
 			
 			// Remove bad data
-			data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue, NODATA);
+			///data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue, NODATA);
 			
 			Tools.statusMessage(date.yearString() + "." + date.monthString() +
 					"." + date.dayOfMonthString() + "  File name: " + filename);
@@ -357,21 +359,40 @@ public class Climatology extends GeoObject {
 	 */
     protected void makeBaseline() {
     	
-    	Timestamp firstDate = new Timestamp( startYear, startMonth, startDay);
-    	Timestamp lastDate = new Timestamp( startYear, startMonth, (startDay + days) - 1);
-    	Timestamp.dateSeparator("");
-    	
-    	Tools.statusMessage("Climatology: " + firstDate.dateString() +
-    			" for " + days + " days (until " + lastDate.dateString() + ")");
-    	
 		accumulateStats();
 
-		// Write the baseline data to output files.
-		String filename = outputPath + climatologyPrefix + dataType.toString() + "_" +
-				increment.toString() + "_" + firstDate.dateString() + ".bin";
-		
-		Tools.statusMessage("filename = " + filename);
-		///DataFile file = new DataFile();
+		// Add data to the database only if it exceeds the specified standard deviation threshold.
+		for (int d = 0; d < days; d++) {	
+			
+			// Any data on this day? If not, skip it.
+			if (data[d] == null) continue; 
+
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
+					
+					// Any data at this location?
+					if (data[d][r][c] != null) { 
+						
+						// Ignore NaNs and other bad data
+						if (Math.abs(data[d][r][c].data()) < Math.abs(NODATA) ) {
+						
+							// Does the data exceed the threshold (mean+sd*threshold)? If so,
+							// store it in the database.
+							/*if (data[d][r][c].data() > (mean[r][c] + sd[r][c]*threshold) ||
+								data[d][r][c].data() < (mean[r][c] - sd[r][c]*threshold) ) {
+
+								// Attach the location ID to this vector.
+								data[d][r][c].location = locations[r][c];
+								// Store the vector.
+								database.storeVector( data[d][r][c] );		
+							*/
+						}
+					}
+				}
+			}
+		}
+
+		//todo
     }
 	
 
@@ -383,10 +404,7 @@ public class Climatology extends GeoObject {
 	protected void accumulateStats() {
 		
 		// If we haven't read any files yet, no data to condense.
-		if (!haveMetadata) {
-			Tools.warningMessage("Climatology::accumulateStats: no metadata");
-			return;
-		}
+		if (!haveMetadata) return;
 		
 		// Generate the reference image. This will be the mean value and
 		// standard deviation for the time interval (week, month, season,
@@ -458,7 +476,8 @@ public class Climatology extends GeoObject {
 		// Degrees of freedom. Minus one for unbiased standard deviation.
 		double df = days - 1;
 		
-		// Odd case... If we're only processing one day, make sure df is not zero.
+		// Odd case... If we're only processing one day, make sure df
+		// is not zero.
 		if (days <= 1) df = 1;
 		
 		for (int r = 0; r < rows; r++) {

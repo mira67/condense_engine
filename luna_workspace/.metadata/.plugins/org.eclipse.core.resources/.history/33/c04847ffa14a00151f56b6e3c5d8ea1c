@@ -359,10 +359,8 @@ public class Climatology extends GeoObject {
     	
     	Timestamp firstDate = new Timestamp( startYear, startMonth, startDay);
     	Timestamp lastDate = new Timestamp( startYear, startMonth, (startDay + days) - 1);
-    	Timestamp.dateSeparator("");
-    	
     	Tools.statusMessage("Climatology: " + firstDate.dateString() +
-    			" for " + days + " days (until " + lastDate.dateString() + ")");
+    			" for " + days + " days (until " + lastDate.dateString());
     	
 		accumulateStats();
 

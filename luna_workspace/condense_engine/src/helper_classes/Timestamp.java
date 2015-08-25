@@ -34,7 +34,7 @@ public class Timestamp {
 
 	protected int id = -1;	// Database table unique primary key. -1 means not in the database.
 	
-	protected String dateSeparator = ".";
+	protected static String dateSeparator = ".";
 
 	/*---------------------------------------------------------------------------
 	// Constructors
@@ -160,6 +160,8 @@ public class Timestamp {
 	}
 
 	// Various gets and sets.
+	
+	public static void dateSeparator(String s) { dateSeparator = s; }
 
 	public double days() {
 		return days;
