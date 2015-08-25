@@ -269,7 +269,7 @@ public class Condense extends GeoObject {
 		if (startDate.days() > finalDate.days()) return false;
 		
 		// Timespan is the total time to process in each incremental 'gulp'.
-		Timespan timespan = new Timespan(startDate, increment);
+		Timespan timespan = new Timespan(startDate, startDate, increment);
 		
 		// Convert it to a number of whole days for this time increment. The number of days
 		// may vary depending on the length of the increment (month, year, etc) and

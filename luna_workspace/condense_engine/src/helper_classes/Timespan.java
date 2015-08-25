@@ -8,6 +8,7 @@ package helper_classes;
 public class Timespan extends GeoObject {
 	
 	public static enum Increment {
+			DAY ("day"),
 			WEEK ("week"),
 			MONTH ("month"),
 			YEAR ("year"),
@@ -22,7 +23,10 @@ public class Timespan extends GeoObject {
 
 	protected Timestamp startTime;	// Beginning of the timespan
 	protected Timestamp endTime;	// End of the timespan.
-
+	
+	// Default time increment
+    protected Increment increment = Increment.DAY;
+    
 	/*---------------------------------------------------------------------------
 	// Constructors
 	//-------------------------------------------------------------------------*/
@@ -56,20 +60,40 @@ public class Timespan extends GeoObject {
 	
 	/* Timespan
 	 * 
-	 * Constructor using a starting timestamp and an increment. 
+	 * Constructor using a starting and ending timestamps, and an increment.
+	 * If the start and end are the same, the time span will be a single increment. 
 	 */
-	public Timespan(Timestamp begin, Increment i) {
+	public Timespan(Timestamp start, Timestamp end, Increment i) {
 		
-		startTime = begin;
+		startTime = start;
+		endTime = end;
 		
-		int startYear = begin.year();
-		int startMonth = begin.month();
-		int startDay = begin.dayOfMonth();
-		int endYear = startYear;
-		int endMonth = startMonth;
-		int endDay = startDay;
+		setIncrement(i);
+	}
+	
+	/* setIncrement
+	 * 
+	 * Find the start and end dates based on the selected increment. Requires
+	 * that the start and end timestamps be set already.
+	 */
+	public void setIncrement(Increment i) {
+	
+		increment = i;
 		
-		switch(i) {
+		int startYear = startTime.year();
+		int startMonth = startTime.month();
+		int startDay = startTime.dayOfMonth();
+
+		// Defaults
+		int endYear = endTime.year();
+		int endMonth = endTime.month();
+		int endDay = endTime.dayOfMonth();
+	
+		switch(increment) {
+			case DAY:
+				// Default. Do nothing.
+				break;
+				
 			case WEEK:
 				
 				// Add 6 to encompass a whole week.
@@ -86,34 +110,45 @@ public class Timespan extends GeoObject {
 				break;
 				
 			case SEASONAL:
+			case MULTIYEARSEASONAL:
 
 				startDay = 1;
-				endYear = startYear;
 
-				if (startMonth == 12 || startMonth == 1 || startMonth == 2) {	// DJF
+				// December-January-February (90 or 91 days, depending on leap years)
+				if (startMonth == 12 || startMonth == 1 || startMonth == 2) {
+
+					// An exception if starting in Jan or Feb. User is stupid. Set the start year back to Dec.
+					if (startMonth != 12) startYear = startYear - 1;
+					
 					startMonth = 12;
 					endMonth = 2;
-					endYear = startYear + 1;
+
+					// Special case for single-season increment time spans
+					if (i == Increment.SEASONAL) endYear = startYear + 1;
+
 					endDay = Timestamp.daysInMonth(2, endYear);
 				}
 				
-				if (startMonth == 3 || startMonth == 4 || startMonth == 5) {	// MAM
+				// March-April-May (92 days)
+				if (startMonth == 3 || startMonth == 4 || startMonth == 5) {
 					startMonth = 3;
 					endMonth = 5;
 					endDay = 31;
 				}
 
-				if (startMonth == 6 || startMonth == 7 || startMonth == 8) {	// JJA
+				// June-July-August (92 days)
+				if (startMonth == 6 || startMonth == 7 || startMonth == 8) {
 					startMonth = 6;
 					endMonth = 8;
 					endDay = 31;
 				}
 
+				// September-October-November (91 days)
 				if (startMonth == 9 || startMonth == 10 || startMonth == 11) {	// SON
 					startMonth = 9;
 					endMonth = 11;
 					endDay = 30;
-				}
+				}	
 				
 				break;
 				
@@ -146,28 +181,20 @@ public class Timespan extends GeoObject {
 				
 				// All years, by month  (e.g., every January). Uses the start month
 				// as the designated month.
-                int month = startTime.month();
 				startYear = startTime.year();
-
+                startMonth = startTime.month();
+                startDay = 1;
+                
 				endYear = endTime.year();
-				if (endTime.month() < month) endYear = endYear - 1;
-				if (endYear < startYear) {
-					endTime = startTime;
-					return;
-				}
-				
-				// Loop through all years
-				for (int y = startYear; y <= endYear; y++) {
-					
-				}
-				startDay = 1;				
+				// Sanity check.
+				if (endTime.month() < startMonth) endYear = endYear - 1;
+				endMonth = startMonth;
 				endDay = Timestamp.daysInMonth(endMonth, endYear);
-
+				
 				break;
 				
-
-			case MULTIYEARSEASONAL:
-
+			default:
+				break;
 		}
 		
 		startTime = new Timestamp( startYear, startMonth, startDay );
@@ -184,8 +211,86 @@ public class Timespan extends GeoObject {
 	public Timestamp endTimestamp() { return endTime; }
 	
 	// Total number of elapsed days.
-	public double days() {return (endTime.days() - startTime.days());}
-	public int fullDays() {return ((int) endTime.days() - (int) startTime.days()) + 1;}
+	public double days() {
+
+		double days = 0;
+		
+		switch (increment) {
+			case DAY:
+			case WEEK:
+			case MONTH:
+			case YEAR:
+			case SEASONAL:
+			case MULTIYEAR:
+				days = endTime.days() - startTime.days();
+				break;
+				
+			case MULTIYEARMONTH:
+				for (int y = startTime.year(); y <= endTime.year(); y++) {
+					days += Timestamp.daysInMonth(startTime.month(), y); 
+				}
+				break;
+				
+			case MULTIYEARSEASONAL:
+				// Iterate over the years.
+				for (int y = startTime.year(); y <= endTime.year(); y++) {
+					
+					// Iterate over the seasonal time span, counting the days.
+					for (int m = startTime.month(); m <= endTime.month(); m++) {
+						days += Timestamp.daysInMonth(m, y);
+					}
+				}
+				break;
+
+			default:
+				break;
+		}
+		
+		return days;
+	}
+	
+	/*
+	 * fullDays
+	 * 
+	 * Return the integer number of whole days in the time span.
+	 */
+	public int fullDays() {
+
+		int days = 0;
+		
+		switch (increment) {
+			case DAY:
+			case WEEK:
+			case MONTH:
+			case YEAR:
+			case SEASONAL:
+			case MULTIYEAR:
+				days = ((int) endTime.days() - (int) startTime.days()) + 1;
+				break;
+				
+			case MULTIYEARMONTH:
+				for (int y = startTime.year(); y <= endTime.year(); y++) {
+					days += Timestamp.daysInMonth(startTime.month(), y); 
+				}
+				break;
+				
+			case MULTIYEARSEASONAL:
+				// Iterate over the years.
+				for (int y = startTime.year(); y <= endTime.year(); y++) {
+					
+					// Iterate over the seasonal time span, counting the days.
+					for (int m = startTime.month(); m <= endTime.month(); m++) {
+						days += Timestamp.daysInMonth(m, y);
+					}
+				}
+				break;
+
+			default:
+				break;
+		}
+		
+		return days;
+	}
 
 	
 	// Print methods.

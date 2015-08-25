@@ -20,7 +20,7 @@ public class Climatology extends GeoObject {
 	
 	// Start and end dates for the processing.
 	static int startYear = 2009;
-	static int startMonth = 3;
+	static int startMonth = 9;
 	static int startDay = 11;
 
 	static int finalYear = 2011;

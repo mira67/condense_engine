@@ -19,12 +19,12 @@ public class Climatology extends GeoObject {
 	static Timespan.Increment increment = Timespan.Increment.SEASONAL;
 	
 	// Start and end dates for the processing.
-	static int startYear = 2009;
-	static int startMonth = 3;
-	static int startDay = 11;
+	static int startYear = 2011;
+	static int startMonth = 1;
+	static int startDay = 7;
 
 	static int finalYear = 2011;
-	static int finalMonth = 9;
+	static int finalMonth = 6;
 	static int finalDay = 31;
 
 	static int initialStartYear = 0;
@@ -145,7 +145,7 @@ public class Climatology extends GeoObject {
 		if (startDate.days() > finalDate.days()) return false;
 		
 		// Timespan is the total time to process in each incremental 'gulp'.
-		Timespan timespan = new Timespan(startDate, startDate, increment);
+		Timespan timespan = new Timespan(startDate, increment);
 		
 		// Convert it to a number of whole days for this time increment. The number of days
 		// may vary depending on the length of the increment (month, year, etc) and

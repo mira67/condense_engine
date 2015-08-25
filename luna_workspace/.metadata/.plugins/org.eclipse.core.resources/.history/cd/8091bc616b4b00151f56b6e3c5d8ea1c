@@ -19,11 +19,11 @@ public class Climatology extends GeoObject {
 	static Timespan.Increment increment = Timespan.Increment.SEASONAL;
 	
 	// Start and end dates for the processing.
-	static int startYear = 2009;
+	static int startYear = 2012;
 	static int startMonth = 3;
-	static int startDay = 11;
+	static int startDay = 1;
 
-	static int finalYear = 2011;
+	static int finalYear = 2012;
 	static int finalMonth = 9;
 	static int finalDay = 31;
 
