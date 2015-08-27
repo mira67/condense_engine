@@ -118,6 +118,24 @@ public class GeoLocation extends Location {
 	}
 
 
+	/*
+	 * findLocation
+	 * 
+	 * Search for an index in an array of gridded locations. Warning: returns
+	 * null if it doesn't find it.
+	 */
+	public static GriddedLocation findLocation(GriddedLocation[][] locs,
+			int index) {
+		for (int r = 0; r < locs.length; r++) {
+			for (int c = 0; c < locs[0].length; c++) {
+				if (locs[r][c].id == index)
+					return locs[r][c];
+			}
+		}
+
+		return null;
+	}
+
 	public void print(){
 		System.out.print(lat() + " / " + lon());
   	}

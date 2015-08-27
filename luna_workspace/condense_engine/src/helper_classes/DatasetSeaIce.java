@@ -64,10 +64,8 @@ public class DatasetSeaIce extends Dataset {
 		if (matches.length > 0)
 			return matches[0].getPath();
 
-		// Nothing. Return a default name, which will fail to open.
-		String filename = path + "file_not_found_" + date + ".nc";
-
-		return filename;
+		// Nothing.
+		return null;
 	}
 
 	/*

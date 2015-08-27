@@ -40,9 +40,12 @@ public class DatasetSSMI extends Dataset {
 		// Strings for building the file name.
 		String yearString = String.valueOf(year);
 		String monthString = String.valueOf(month);
+		
 		if (month < 10)
 			monthString = "0" + String.valueOf(month);
+		
 		String dayString = String.valueOf(day);
+		
 		if (day < 10)
 			dayString = "0" + String.valueOf(day);
 
@@ -65,10 +68,8 @@ public class DatasetSSMI extends Dataset {
 				return matches[0].getPath();
 		}
 
-		// Nothing. Return a default name, which will fail to open.
-		String filename = path + "file_not_found_" + date + ".bin";
-
-		return filename;
+		// Nothing. 
+		return null;
 	}
 
 	/*
@@ -97,7 +98,9 @@ public class DatasetSSMI extends Dataset {
 			file.close();
 			Tools.debugMessage("DatasetSSMI::readMetadata: file length = " + length);
 		} catch(Exception e) {
-			Tools.errorMessage("DatasetSSMI", "readMetadata", "Unable to open file: " + filename, e);
+			Tools.message("**** The first date specified must have a file, to read the metadata.");
+			Tools.errorMessage("DatasetSSMI", "readMetadata", "Trying to get metadata from " +
+		                       "the first file:\n" + filename + "\n but unable to open it", e);
 		}
 		
 		// Southern hemisphere,	85.5 and 91.7 GHz, 839296 Bytes
@@ -170,6 +173,7 @@ public class DatasetSSMI extends Dataset {
 	 * readData
 	 * 
 	 * Read the SSMI data from a file. FileName should include the full path.
+	 * Returns null if it doesn't find the file.
 	 */
 	public SSMIVector[][] readData(String filename, GriddedLocation[][] locs, int timestampID) throws Exception {
 
@@ -207,7 +211,6 @@ public class DatasetSSMI extends Dataset {
 				}
 			}
 		} catch (Exception error) {
-			System.out.println("reading data error");
 			Tools.warningMessage("DatasetSSMI::readData: when reading data, "
 					+ error);
 

@@ -2,22 +2,24 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="maximumDays" key="selection"/>
+		<item value="getLoc" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="maximumDays"/>
-			<item value="initialStartYear"/>
-			<item value="timestampID"/>
-			<item value="rows"/>
-			<item value="year"/>
-			<item value="time"/>
-			<item value="id"/>
-			<item value="storeTime"/>
+			<item value="getLoc"/>
+			<item value="filename"/>
+			<item value="condenseData"/>
+			<item value="storeVectorArray"/>
+			<item value="locations"/>
+			<item value="reading data error"/>
+			<item value="adding Loca"/>
+			<item value="addingLoca"/>
 		</list>
 		<list key="replacehistory">
+			<item value="startDate"/>
+			<item value="endDate"/>
 			<item value="table.name"/>
 			<item value="Table"/>
 			<item value="Tools.warningMessage"/>

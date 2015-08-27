@@ -180,13 +180,14 @@ public class DatabaseH2 extends Database {
      */
 	public void storeMetadata( Metadata m ) {
 		
+		if (m == null) return;
+		
 		// If we've already stored it, update the metadata instead of making 
 		// a new table entry.
 		if (metadataStored) {
 			updateMetadata(m);
 			return;
 		}
-		
 
 		// New database entry. First, make a copy of the metadata.
 		metadata = m;
@@ -221,6 +222,8 @@ public class DatabaseH2 extends Database {
      */
 	public void updateMetadata( Metadata m ) {
 
+		if (m == null) return;
+		
 		// Make sure the database is open for writing.		
 		if (status == Status.CONNECTED) {
 			
@@ -250,6 +253,9 @@ public class DatabaseH2 extends Database {
 	 *  for this location.
 	 */
 	public int storeLocation(GriddedLocation loc) {
+
+		if (loc == null) return 0;
+		
 		try {
 			// Increment the number of locations stored.
 	        metadata.locations++;
@@ -280,7 +286,9 @@ public class DatabaseH2 extends Database {
 	 *  for this time.
 	 */
 	public int storeTimestamp(Timestamp t) {
-        
+
+		if (t == null) return 0;
+		
 		// Increment the number of timestamps stored. Use it as the ID.
 		metadata.timestamps++;
 
@@ -308,6 +316,8 @@ public class DatabaseH2 extends Database {
 	 */
 	public void storeVector(GriddedVector v) {
 
+		if (v == null) return;
+		
 		// Increment the number of vectors stored, and use that as the ID.
 		metadata.vectors++;
 		
@@ -337,8 +347,27 @@ public class DatabaseH2 extends Database {
 	
 	public Metadata getMetadata() {
 		
-		// Make sure what's in the database is up-to-date too.
-		updateMetadata(metadata);
+		if (metadata == null) metadata = new Metadata();
+		
+		String query = "SELECT * FROM " + Table.METADATA.name() +	" WHERE ID = 1";
+
+		try {
+			Statement statement = conn.createStatement();
+			ResultSet rs = statement.executeQuery(query);
+		    
+			if (rs.next()) {
+				metadata = new Metadata(
+					rs.getInt("ROWS"),
+					rs.getInt("COLS"),
+					rs.getInt("TIMESTAMPS"),
+					rs.getInt("LOCATIONS"),
+					rs.getInt("VECTORS"));
+			}
+			rs.close();
+			statement.close();
+		} catch(SQLException e) {
+			Tools.errorMessage("DatabaseH2", "getMetadata", "query failed", e);
+		}
 		
 		return metadata;
 	}
@@ -535,6 +564,8 @@ public class DatabaseH2 extends Database {
 	public void status() {
 		updateMetadata(metadata);
 		
+		if (metadata == null) getMetadata();
+		
 		Tools.statusMessage("  ========================================");
 		Tools.statusMessage("  Database name = " + dbName + "  Status: "
 				+ status.toString());
@@ -546,112 +577,3 @@ public class DatabaseH2 extends Database {
 	}
 }
 
-
-	
-
-
-/*
- * checkTables
- * 
- * Check to see if the tables already exist. If not, create a new one (if
- * the flag is set to true).
- *
-public void checkTables(Boolean createIfDoesNotExist) throws Exception {
-
-	// Iterate through the tables that should be in the database.
-	for (Table table : Table.values()) {
-
-		// Ask the database for the table.
-		results = conn.getMetaData()
-				.getTables(null, null, table.name, null);
-
-		boolean exists = false;
-
-		// Does the table exist?
-		try {
-			// Look through the returned information for the table name.
-			while (results.next()) {
-				if (results.getString("TABLE_NAME") == table.name) {
-
-					// Yes, found it.
-					exists = true;
-					Tools.debugMessage("checkTables: found table "
-							+ table.name);
-					break;
-				}
-			}
-
-			results.close();
-
-		} catch (SQLException e) {
-			Tools.errorMessage("DatabaseH2", "checkTables",
-					"When looking for a table: " + table.name, e);
-			throw (e);
-		}
-
-		// If the table doesn't exist, create it.
-		/*if (!exists && createIfDoesNotExist) {
-			if (!createTable(table)) {
-				Tools.errorMessage("DatabaseH2", "checkTables",
-						"Failed to create table: " + table.name,
-						new Exception("Giving up."));
-			}
-			exists = true;
-		}
-
-		// One way or the other, the table should be in there now. If not,
-		// we've got problems.
-		if (!exists) {
-			Tools.errorMessage("DatabaseH2", "checkTables",
-					"Could not find and/or create " + "table: "
-							+ table.name, new Exception("Giving up."));
-		}
-	}
-}*/
-
-
-
-/*
- * createTable
- * 
- * Create a new table in the database if it doesn't already exist. Returns
- * true on success.
- */
-/*protected boolean createTable(Table table) {
-	try {
-		Tools.debugMessage("Creating table: " + table.name);
-		sqlCreate = conn.createStatement();
-		sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + table.name
-				+ table.columnNames());
-	///			+ "(id INT primary key, row SMALLINT, col SMALLINT)");
-	///	sqlStmt_map = conn.prepareStatement("INSERT INTO " + table.name
-	///			+ "(id,row, col) " + "values " + "(?,?,?)");
-	} catch (SQLException e) {
-		Tools.warningMessage("Could not create table: " + table.name);
-		Tools.warningMessage("Exception: " + e);
-		return false;
-	}
-
-	return true;
-}*/
-
-/*
- * /If table does not exist, create a new table and pre-defined SQL for table entries recording
- */
-/*
-// check map table
-String tbN = "LOCMAP_S";
-if (!checkTable(tbN)) {
-	//write to location
-	createMap();
-}
-*/
-
-/* 	
-	//test sql statement - row record
-sqlStmt_tb = conn.prepareStatement(
-		"INSERT INTO " + tbName +
-		"(date, locID, bt) " + 
-		"values " + 
-		"(?,?,?)");
-*/

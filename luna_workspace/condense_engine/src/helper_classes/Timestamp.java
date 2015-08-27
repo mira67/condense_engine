@@ -142,6 +142,14 @@ public class Timestamp {
 	}
 
 	/*
+	 * clone a Timestamp
+	 * 
+	 */
+	public Timestamp(Timestamp t) {
+		this(t.days());
+	}
+
+	/*
 	 * updateLocalVariables
 	 * 
 	 * Use the calendar value to update local variables.
@@ -458,7 +466,9 @@ public class Timestamp {
 	 * How many days in a month? User must supply month and year.
 	 */
 	public static int daysInMonth(int m, int y) {
-		if (m == 9 || m == 4 || m == 6 || m == 10)
+		
+		// 30 days in April, June, September, November
+		if (m == 4 || m == 6 || m == 9 || m == 11)
 			return 30;
 
 		// February, you bad boy.

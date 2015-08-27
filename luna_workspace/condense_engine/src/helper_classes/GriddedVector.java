@@ -1,5 +1,8 @@
 package helper_classes;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 /* GriddedVector
  * 
  * Vector for storing sensor data, with time and a grid location.
@@ -114,6 +117,30 @@ public class GriddedVector extends GeoObject {
 					array[r][c].data(noData);
 			}
 
+		}
+
+		return array;
+	}
+
+	/*
+	 * createArrayFromVectorList
+	 * 
+	 * Given an array-list of vectors, create an integer array containing only
+	 * the vectors' scalar data values at each row/col location.
+	 */
+	public static int[][] createArrayFromVectorList(int rows, int cols,
+			ArrayList<GriddedVector> list) {
+		int[][] array = new int[rows][cols];
+
+		Iterator<GriddedVector> i = list.iterator();
+		while (i.hasNext()) {
+			GriddedVector v = i.next();
+
+			if (v.data() != NODATA) {
+				if (v.row() < rows && v.col() < cols) {
+					array[v.row()][v.col()] = v.data();
+				}
+			}
 		}
 
 		return array;

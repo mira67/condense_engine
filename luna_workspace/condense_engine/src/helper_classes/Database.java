@@ -1,10 +1,14 @@
 package helper_classes;
 
-///todo
-///import java.sql.Date;
 import java.util.ArrayList;
-///import java.util.Iterator;
 
+/*
+ * Database
+ * 
+ * An abstract class to encapsulate database classes. Promotes
+ * standardization of the database interface, no matter what
+ * kind of database we end up using.
+ */
 public abstract class Database extends GeoObject {
 	
 	/*
@@ -92,8 +96,6 @@ public abstract class Database extends GeoObject {
 	 */
 	public void storeVectorArray(GriddedVector[][] v, GriddedLocation[][] locations) {
 		
-		Tools.statusMessage("==> Adding vectors to the database.");
-		
 		for (int r = 0; r < v.length; r++) {
 			for (int c = 0; c < v[0].length; c++) {
 				
@@ -102,7 +104,7 @@ public abstract class Database extends GeoObject {
 				// when it was added to the database.
 				v[r][c].location = locations[r][c];
 				
-				storeVector(v[r][c]);
+				storeVector(v[r][c]);					
 			}
 		}
 	}
