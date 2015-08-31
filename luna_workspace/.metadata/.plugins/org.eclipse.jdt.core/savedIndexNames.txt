@@ -9,7 +9,6 @@ INDEX VERSION 1.127+C:\Users\glgr9602\Desktop\condense\GitHub\condense_engine\lu
 1248407149.index
 2775202610.index
 1114700198.index
-3941978147.index
 2330857962.index
 349556966.index
 1106408436.index
@@ -18,8 +17,8 @@ INDEX VERSION 1.127+C:\Users\glgr9602\Desktop\condense\GitHub\condense_engine\lu
 3184717171.index
 1035666882.index
 3793391456.index
-3867579341.index
 1734686879.index
+3867579341.index
 1543766311.index
 3112351143.index
 3544518797.index

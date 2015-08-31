@@ -55,23 +55,12 @@ public class Climatology extends GeoObject {
 	static final int maxValue = 1000000000; // Maximum acceptable data value
 
 	// Files and paths for i/o
-	
-	//...WINDOWS
-	static final String outputPath = "/Users/glgr9602/Desktop/condense/climatology/" +
-			dataType.toString() + "/" + increment.toString() + "/";
-	static final String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
-			dataType.toString() + "/daily/";
-	
-	// ...LINUX
-	/*
-	static final String outputPath = "/home/glgr9602/condense/climatology/" +
-	/
-			dataType.toString() + "/" + increment.toString() + "/";
-	static final String dataPath = "/home/glgr9602/condense/data/" +
-			dataType.toString() + "/daily/";
+	static final String outputPath = "/Users/glgr9602/Desktop/condense/climatology/"
+			+ dataType.toString() + "/" + increment.toString() + "/";
+	static final String dataPath = "/Users/glgr9602/Desktop/condense/data/"
+			+ dataType.toString() + "/daily/";
 	static final String climatologyPrefix = "climate_";
-	*/
-	
+
 	static boolean warningMessages = false; // Receive warning messages?
 	static boolean debugMessages = false; // Receive debug messages?
 	static boolean addYearToInputDirectory = true; // The input files may be
