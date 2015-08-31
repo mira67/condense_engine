@@ -353,10 +353,23 @@ public class Condense extends GeoObject {
 		// NODATA);
 
 		// Found data. Add the timestamp to the database.
-		if (data != null && addDataToDatabase) date.id = database.storeTimestamp(date);
+		if (data != null && addDataToDatabase) {
+			date.id = database.storeTimestamp(date);
 
-		Tools.statusMessage(date.yearString() + "." + date.monthString() + "."
-				+ date.dayOfMonthString() + "  File name: " + filename);
+			Tools.statusMessage(date.yearString() + "." + date.monthString() + "."
+					+ date.dayOfMonthString() + "  File name: " + filename);
+
+			// Update the vector data with the timestamp ID
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
+					data[r][c].timestampID = date.id;
+				}
+			}
+		} else {
+			Tools.statusMessage(date.yearString() + "." + date.monthString() + "."
+					+ date.dayOfMonthString() + "  No file");
+		}
+		
 	}
 
 	/*
@@ -523,18 +536,16 @@ public class Condense extends GeoObject {
 		// Database status for debugging purposes.
 		database.status();
 
-		// Pixels between imageStartIndex and imageEndIndex will
-		// be used to make an image.
-		if (imageStartIndex > metadata.timestamps
-				|| imageEndIndex > metadata.timestamps) {
-
+		// Pixels at imageStartIndex will be used to make an image.
+		if (imageStartIndex > metadata.timestamps) {
 			Tools.errorMessage("Condense", "generateTestImages",
-					"timestamps are out of range", new Exception());
+					"timestamp is out of range", new Exception());
 		}
 
 		// Get the list of timestamps in the database.
 		ArrayList<Timestamp> timestamps = database.getTimestamps();
 
+		/*
 		// For debugging purposes: print out all the timestamps.
 		Tools.statusMessage("------- Timestamps");
 		Iterator<Timestamp> i = timestamps.iterator();
@@ -544,20 +555,16 @@ public class Condense extends GeoObject {
 			Tools.message("");
 		}
 		Tools.statusMessage("------- End Timestamps");
+		*/
+		
+		Tools.statusMessage( "Create image at timestamp ID = " + imageStartIndex );
 
-		// The time range of images we want to display...
-		// These are NOT the database indexes but rather the nth timestamps
-		// in the arraylist of timestamps.
-		Timestamp startTime = timestamps.get(imageStartIndex - 1);
-		Timestamp endTime = timestamps.get(imageEndIndex - 1);
+		// Get the timestamp for the requested start index. Subtract 1 because
+		// ListArrays (timestamps) index from 0.
+		Timestamp startTime = timestamps.get(imageStartIndex-1);
 
-		Tools.statusMessage("");
-		Tools.statusMessage("Create image....  (time index = "
-				+ imageStartIndex + " to " + imageEndIndex + ")");
-
-		// Get the pixels for the image
-		ArrayList<GriddedVector> pixList = database.getVectors(imageStartIndex,
-				imageEndIndex);
+		// Get the pixels that have that ID in their timestamp
+		ArrayList<GriddedVector> pixList = database.getVectorsAtTime( startTime.id());
 		Tools.statusMessage("Pixels: " + pixList.size());
 
 		// Make an integer array out of the pixel data
@@ -606,8 +613,7 @@ public class Condense extends GeoObject {
 		// /myImage.printLayerNames();
 
 		// Display the image.
-		myImage.display("Time (day): " + startTime.dateString() + " - "
-				+ endTime.dateString() + "  " + algorithm + " " + threshold,
+		myImage.display("Time (day): " + startTime.dateString() + "  " + algorithm + " " + threshold,
 				metadata.rows, metadata.cols);
 
 		// Grayscale image
@@ -615,8 +621,7 @@ public class Condense extends GeoObject {
 		colors.grayScale();
 
 		// Display the image.
-		myImage.display("Time (day): " + startTime.dateString() + " - "
-				+ endTime.dateString() + "  " + algorithm + " " + threshold,
+		myImage.display("Time (day): " + startTime.dateString() + "  " + algorithm + " " + threshold,
 				metadata.rows, metadata.cols);
 
 		// Create an output file name for the image.

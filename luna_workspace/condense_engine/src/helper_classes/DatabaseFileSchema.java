@@ -383,6 +383,39 @@ public class DatabaseFileSchema extends Database {
 		return vectorList;
 	}
 
+	/*
+	 * getVectorsAtTime
+	 * 
+	 * Retrieve all the vectors at a specific timestamp.
+	 */
+	public ArrayList<GriddedVector> getVectorsAtTime(int ID) {
+		
+		ArrayList<GriddedVector> vectorList = new ArrayList<GriddedVector>(); 
+		
+		if (metadata == null) metadata = getMetadata();
+		if (timestamps == null) timestamps = getTimestamps();
+
+		try {
+			for (int i = 0; i < metadata.vectors; i++) {
+				int value = vectorsFile.readInt();
+				int locID =  vectorsFile.readInt();
+				int timeID =  vectorsFile.readInt();
+				
+				GriddedLocation loc = getLocation( locID );
+				
+				if (timeID == ID) {
+					vectorList.add( new GriddedVector(value, loc, timeID));
+				}
+			}
+		} catch( Exception e ) {
+			Tools.warningMessage("DatabaseFileSchema::getVectorsAtTime: while reading vector file.");
+			Tools.warningMessage("Exception: " + e);
+			return vectorList;
+		}
+
+		return vectorList;
+	}
+
 	public void status() {
 
 		Tools.statusMessage("Database name = " + dbName + "  Status: "

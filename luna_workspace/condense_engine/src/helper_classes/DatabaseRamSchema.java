@@ -133,11 +133,11 @@ public class DatabaseRamSchema extends Database {
 	}	
 
 	
-	/* getVectorsAtTimeIndex
+	/* getVectorsAtTime
 	 * 
-	 * Return all the vectors in the database at the specified time index.
+	 * Return all the vectors in the database at the specified timestamp ID
 	 */
-	public ArrayList<GriddedVector> getVectorsAtTimeIndex( int index ) {
+	public ArrayList<GriddedVector> getVectorsAtTime( int index ) {
 
 		ArrayList<GriddedVector> subset = new ArrayList<GriddedVector>();
 		

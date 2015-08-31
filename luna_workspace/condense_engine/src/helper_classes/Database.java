@@ -71,7 +71,8 @@ public abstract class Database extends GeoObject {
 	
 	public abstract ArrayList<GriddedLocation> getLocations();
 	public abstract ArrayList<Timestamp> getTimestamps();
-	public abstract ArrayList<GriddedVector> getVectors(int startIndex, int endIndex);
+	public abstract ArrayList<GriddedVector> getVectors(int startTimestampID, int endTimestampID);
+	public abstract ArrayList<GriddedVector> getVectorsAtTime(int startTimestampID);
 
 	/*
 	 *  storeLocationArray

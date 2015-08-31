@@ -345,6 +345,10 @@ public class DatabaseH2 extends Database {
 	// RETRIEVAL METHODS
 	//
 	
+	/* getMetadata
+	 *
+	 * Retrieve the metadata from the database
+	 */
 	public Metadata getMetadata() {
 		
 		if (metadata == null) metadata = new Metadata();
