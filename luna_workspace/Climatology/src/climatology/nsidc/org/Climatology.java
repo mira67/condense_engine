@@ -2,7 +2,7 @@ package climatology.nsidc.org;
 
 import helper_classes.*;
 
-/* climatology
+/* Climatology
  * 
  * Generate baseline climatology data files.
  * 
@@ -29,7 +29,7 @@ public class Climatology extends GeoObject {
 
 	static DataType dataType = DataType.SSMI;
 
-	static Timespan.Increment increment = Timespan.Increment.MULTIYEARDEC;
+	static Timespan.Increment increment = Timespan.Increment.MULTIYEARJAN;
 
 	// Start and end dates for the processing.
 	// A data file for the start date *must* exist because that will be used
@@ -55,9 +55,9 @@ public class Climatology extends GeoObject {
 	static final int maxValue = 1000000000; // Maximum acceptable data value
 
 	// Files and paths for i/o
-	static final String outputPath = "/Users/glgr9602/Desktop/Condensate/climatology/"
+	static final String outputPath = "/Users/glgr9602/Desktop/condense/climatology/"
 			+ dataType.toString() + "/" + increment.toString() + "/";
-	static final String dataPath = "/Users/glgr9602/Desktop/Condensate/data/"
+	static final String dataPath = "/Users/glgr9602/Desktop/condense/data/"
 			+ dataType.toString() + "/daily/";
 	static final String climatologyPrefix = "climate_";
 

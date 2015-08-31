@@ -2,7 +2,7 @@ package climatology.nsidc.org;
 
 import helper_classes.*;
 
-/* climatology
+/* Climatology
  * 
  * Generate baseline climatology data files.
  * 
@@ -29,7 +29,7 @@ public class Climatology extends GeoObject {
 
 	static DataType dataType = DataType.SSMI;
 
-	static Timespan.Increment increment = Timespan.Increment.MULTIYEARMAY;
+	static Timespan.Increment increment = Timespan.Increment.MULTIYEARDEC;
 
 	// Start and end dates for the processing.
 	// A data file for the start date *must* exist because that will be used
@@ -38,9 +38,9 @@ public class Climatology extends GeoObject {
 	static int startMonth = 1;
 	static int startDay = 30;
 
-	static int finalYear = 2015;
-	static int finalMonth = 2;
-	static int finalDay = 1;
+	static int finalYear = 2013;
+	static int finalMonth = 12;
+	static int finalDay = 30;
 
 	static int lastStartYear = 0;
 	static int lastStartMonth = 0;
@@ -55,9 +55,9 @@ public class Climatology extends GeoObject {
 	static final int maxValue = 1000000000; // Maximum acceptable data value
 
 	// Files and paths for i/o
-	static final String outputPath = "/Users/glgr9602/Desktop/Condensate/climatology/"
+	static final String outputPath = "/Users/glgr9602/Desktop/Condense/climatology/"
 			+ dataType.toString() + "/" + increment.toString() + "/";
-	static final String dataPath = "/Users/glgr9602/Desktop/Condensate/data/"
+	static final String dataPath = "/Users/glgr9602/Desktop/Condense/data/"
 			+ dataType.toString() + "/daily/";
 	static final String climatologyPrefix = "climate_";
 
@@ -194,13 +194,14 @@ public class Climatology extends GeoObject {
 	 */
 	protected boolean readData() {
 
-		// Keep track of date info for file naming purposes
+		// Keep track of when we started.
 		lastStartYear = startYear;
 		lastStartMonth = startMonth;
 		lastStartDay = startDay;
 
 		Timestamp startDate = new Timestamp(startYear, startMonth, startDay);
 		Timestamp finalDate = new Timestamp(finalYear, finalMonth, finalDay);
+		Timestamp.dateSeparator("");
 
 		// Are we already done?
 		if (startDate.days() > finalDate.days())
@@ -289,28 +290,31 @@ public class Climatology extends GeoObject {
 			Tools.message(date.yearString() + "." + date.monthString() + "."
 					+ date.dayOfMonthString() + "  File name: " + filename);
 
+			// Keep track of the date we just processed.
+			Timestamp oldDay = date;
+
 			// Increment the day, skipping over days that are not part
 			// of the increment selection.
 			date = timespan.nextDay(date);
 			
-			if (date == null) return false;
-		}
-
-		
-		// Update the starting date for the next time increment.
-				if (increment == Timespan.Increment.DAY
-				|| increment == Timespan.Increment.MONTH
-				|| increment == Timespan.Increment.WEEK
-				|| increment == Timespan.Increment.SEASONAL
-				|| increment == Timespan.Increment.YEAR) {
-			// Pick up where we left off, day by day.
-			startYear = date.year();
-			startMonth = date.month();
-			startDay = date.dayOfMonth();
-		} else {
-			// Jump to next year.
-			startYear++;
-			startDay = 1;
+			// Are there more dates to process in this timespan?
+			if (date == null) {
+				// If this is a multiyear climatology, we've done it all. Quit.
+				if (increment.isMultiyear()) {
+					return false;
+				}
+				
+				// Not a multiyear climatology. Month-by-Month, e.g.. Keep going.
+				else {
+					// This timespan is done, but there may be more timespans to process.
+					// Pick up where we left off...
+					date = oldDay;
+					date.incrementOneDay();
+					startYear = date.year();
+					startMonth = date.month();
+					startDay = date.dayOfMonth();
+				}
+			}
 		}
 		
 		return true;
@@ -412,7 +416,6 @@ public class Climatology extends GeoObject {
 				lastStartDay);
 		Timestamp lastDate = new Timestamp(lastStartYear, lastStartMonth,
 				(lastStartDay + days) - 1);
-		Timestamp.dateSeparator("");
 
 		Tools.statusMessage("Climatology: " + firstDate.dateString() + " for "
 				+ days + " days (until " + lastDate.dateString() + ")");
