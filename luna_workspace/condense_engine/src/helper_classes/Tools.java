@@ -389,8 +389,9 @@ public class Tools extends GeoObject {
 	 * Just print a message. No way to turn it off.
 	 */
 	public static void message(String message) {
-		System.out.flush();
 		System.out.println(message);
+		System.out.flush();
+
 	}
 
 	public static void setWarnings(boolean flag) {
@@ -407,9 +408,9 @@ public class Tools extends GeoObject {
 	 * Standardized format for printing debug messages, selectable on/off.
 	 */
 	public static void debugMessage(String message) {
-		System.out.flush();
 		if (debug)
 			System.out.println(message);
+		System.out.flush();
 	}
 
 	public static void setDebug(boolean flag) {
@@ -426,9 +427,9 @@ public class Tools extends GeoObject {
 	 * Standardized format for printing status messages, selectable on/off.
 	 */
 	public static void statusMessage(String message) {
-		System.out.flush();
 		if (status)
 			System.out.println(message);
+		System.out.flush();
 	}
 
 	public static void setStatus(boolean flag) {

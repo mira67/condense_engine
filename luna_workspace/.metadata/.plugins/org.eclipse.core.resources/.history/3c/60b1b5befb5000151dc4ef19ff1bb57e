@@ -29,7 +29,7 @@ public class Climatology extends GeoObject {
 
 	static DataType dataType = DataType.SSMI;
 
-	static Timespan.Increment increment = Timespan.Increment.JAN;
+	static Timespan.Increment increment = Timespan.Increment.MAM;
 
 	// Start and end dates for the processing.
 	// A data file for the start date *must* exist because that will be used
@@ -50,7 +50,6 @@ public class Climatology extends GeoObject {
 	Timestamp startDate;
 	Timestamp finalDate;
 	Timespan totalTimespan;
-	int totalDays = 0;
 	
 	// This is the date we are processing.
 	Timestamp date;
@@ -185,14 +184,14 @@ public class Climatology extends GeoObject {
 			
 			readData( timespan );
 			
-			// Store the data for later statistical calculations.
-			accumulateData( data );
+			// Acts as both an accumulator and the final stats calculator.
+			calculateStats();
 
 			// Advance the date to next year.
 			date = new Timestamp(timespan.startTimestamp().year()+1, 1, 1);
 		}
 
-		// Calculate the stats and write them to files
+		// Write the stats to files
 		makeStatsFiles(totalTimespan);
 		
 		// Warm fuzzy feedback.
@@ -256,10 +255,7 @@ public class Climatology extends GeoObject {
 
 		// The number of days we're going to process in this increment.
 		int days = timespan.days();
-		
-		// Keep track of how many days, in total, we've processed.
-		totalDays += days;
-		
+
 		// Starting date for processing
 		date = timespan.startTimestamp();
 
@@ -393,55 +389,7 @@ public class Climatology extends GeoObject {
 
 		return;
 	}
-	
-	/* accumulateData
-	 * 
-	 * Store the data.
-	 */
-	protected void accumulateData( GriddedVector[][][] input) {
-		
-		// Number of days in the data array
-		int days = input.length;
-		
-		// First time through? Initialize things.
-		if (accumulator == null) {
-			accumulator = new double[rows][cols];
-			population = new int[rows][cols];
 
-			// Zero-out the array.
-			
-			for (int d = 0; d < days; d++) {
-				for (int r = 0; r < rows; r++) {
-					for (int c = 0; c < cols; c++) {
-						accumulator[r][c] = 0;
-						population[r][c] = 0;
-					}
-				}
-			}
-		}
-
-		// Accumulate the sum of all data values at each location.
-		for (int d = 0; d < days; d++) {
-
-			// Missing data for a day? Skip it.
-			if (input[d] == null)
-				continue;
-
-			for (int r = 0; r < rows; r++) {
-				for (int c = 0; c < cols; c++) {
-
-					// Data at this location/date?
-					if (input[d][r][c] != null) {
-						if (input[d][r][c].data() != NODATA) {
-							accumulator[r][c] += input[d][r][c].data();
-							population[r][c]++;
-						}
-					}
-				}
-			}
-		}
-	}
-	
 	/*
 	 * makeStatsFiles
 	 * 
@@ -449,21 +397,17 @@ public class Climatology extends GeoObject {
 	 */
 	protected void makeStatsFiles(Timespan t) {
 
-		// Find the statistics
-		calculateStats();
-		
-		// Use the dates to make file names
 		Timestamp firstDate = t.startTimestamp();
 		Timestamp lastDate = t.endTimestamp();
+		int days = t.days();
 		
-		Tools.statusMessage("\nClimatology: " + firstDate.dateString() + " to " +
-				lastDate.dateString() + " in increments of " + increment.toString() +
-				" (total days = " + totalDays + ")");
+		Tools.statusMessage("Climatology: " + firstDate.dateString() + " for "
+				+ days + " days (until " + lastDate.dateString() + ")");
 
 		String filename = "no name";
 		Timestamp.dateSeparator("");
 
-		// Write the baseline data to output files
+		// Write the baseline data to output files.
 		try {
 			// Mean baseline climatology file
 			filename = outputPath + climatologyPrefix + dataType.toString()
@@ -496,34 +440,114 @@ public class Climatology extends GeoObject {
 
 		Timestamp.dateSeparator(".");
 	}
+	
+	/* accumulateData
+	 * 
+	 * Store the data.
+	 */
+	protected void accumulateData( GriddedVector[][][] input) {
+		
+		// Number of days in the data array
+		int days = input.length;
+		
+		// First time through? Initialize things.
+		if (accumulator == null) {
+			accumulator = new double[rows][cols];
+			population = new int[rows][cols];
 
+			// Zero-out the array.
+			
+			for (int d = 0; d < days; d++) {
+				for (int r = 0; r < rows; r++) {
+					for (int c = 0; c < cols; c++) {
+						accumulator[r][c] = 0;
+						population[r][c] = 0;
+				}
+			}
+		}
+
+		// Accumulate the sum of all data values at each location.
+		for (int d = 0; d < days; d++) {
+
+			// Missing data for a day? Skip it.
+			if (input[d] == null)
+				continue;
+
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
+
+					// Data at this location/date?
+					if (input[d][r][c] != null) {
+						if (input[d][r][c].data() != NODATA) {
+							accumulator[r][c] += input[d][r][c].data();
+							population[r][c]++;
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	/* calculateStats
 	 * 
 	 * Find statistics for the data.
 	 */
 	protected void calculateStats() {
 		
+		// If we haven't read any files yet, no data to condense.
+		if (!haveMetadata) {
+			Tools.warningMessage("Climatology::calculateStats: no metadata");
+			return;
+		}
+
+		// Number of days in the data array
+		int days = data.length;
+		
 		// First time through? Initialize things.
 		if (mean == null) {
 			mean = new double[rows][cols];
 			sd = new double[rows][cols];
+			population = new int[rows][cols];
 
 			// Zero-out the stats arrays.
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < cols; c++) {
 					mean[r][c] = 0;
 					sd[r][c] = 0;
+					population[r][c] = 0;
 				}
 			}
 		}
 
-		// Find the mean value at each location.
+		// Accumulate the sum of all data values at each location.
+		for (int d = 0; d < days; d++) {
+
+			// Missing data for a day? Skip it.
+			if (data[d] == null)
+				continue;
+
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
+
+					// Data at this location/date?
+					if (data[d][r][c] != null) {
+						if (data[d][r][c].data() != NODATA) {
+							mean[r][c] += data[d][r][c].data();
+							population[r][c]++;
+						}
+					}
+
+				}
+			}
+		}
+
+		// Next, find the mean value at each location.
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
 
 				// Avoid divide by zero if there isn't any data.
 				if (population[r][c] > 0) {
-					mean[r][c] = accumulator[r][c] / population[r][c];
+					mean[r][c] /= population[r][c];
 				} else {
 					// No data? Indicate it.
 					if (population[r][c] <= 0)
@@ -533,17 +557,26 @@ public class Climatology extends GeoObject {
 		}
 
 		// Find the standard deviation for the sample population.
-		for (int r = 0; r < rows; r++) {
-			for (int c = 0; c < cols; c++) {
-				if (population[r][c] > 0)
-						sd[r][c] += Math.pow(accumulator[r][c] - mean[r][c], 2);
+		for (int d = 0; d < days; d++) {
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
+					if (data[d] != null)
+						if (data[d][r][c] != null)
+							sd[r][c] += Math.pow(data[d][r][c].data()
+									- mean[r][c], 2);
+				}
 			}
 		}
 
 		// SD calculation continued...
 		// Degrees of freedom. Minus one for unbiased standard deviation.
-		double df = totalDays - 1;
-		
+		double df = days - 1;
+
+		// Odd case... If we're only processing one day, make sure df is not
+		// zero.
+		if (days <= 1)
+			df = 1;
+
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
 				sd[r][c] = Math.sqrt(sd[r][c] / df);

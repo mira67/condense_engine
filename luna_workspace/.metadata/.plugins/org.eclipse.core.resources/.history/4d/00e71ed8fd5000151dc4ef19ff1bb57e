@@ -29,7 +29,7 @@ public class Climatology extends GeoObject {
 
 	static DataType dataType = DataType.SSMI;
 
-	static Timespan.Increment increment = Timespan.Increment.JAN;
+	static Timespan.Increment increment = Timespan.Increment.MAM;
 
 	// Start and end dates for the processing.
 	// A data file for the start date *must* exist because that will be used
@@ -455,10 +455,10 @@ public class Climatology extends GeoObject {
 		// Use the dates to make file names
 		Timestamp firstDate = t.startTimestamp();
 		Timestamp lastDate = t.endTimestamp();
+		int days = t.days();
 		
-		Tools.statusMessage("\nClimatology: " + firstDate.dateString() + " to " +
-				lastDate.dateString() + " in increments of " + increment.toString() +
-				" (total days = " + totalDays + ")");
+		Tools.statusMessage("Climatology: " + firstDate.dateString() + " for "
+				+ days + " days (until " + lastDate.dateString() + ")");
 
 		String filename = "no name";
 		Timestamp.dateSeparator("");
@@ -549,5 +549,15 @@ public class Climatology extends GeoObject {
 				sd[r][c] = Math.sqrt(sd[r][c] / df);
 			}
 		}
+
+		Tools.message("Total days processed = " + totalDays);
+		Tools.message("Total days processed = " + totalDays);
+		Tools.message("Total days processed = " + totalDays);
+		Tools.message("Total days processed = " + totalDays);
+		Tools.message("Total days processed = " + totalDays);
+		Tools.message("Total days processed = " + totalDays);
+		Tools.message("Total days processed = " + totalDays);
+		Tools.message("Total days processed = " + totalDays);
+		Tools.message("Total days processed = " + totalDays);
 	}
 }
