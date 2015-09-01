@@ -2,7 +2,7 @@ package climatology.nsidc.org;
 
 import helper_classes.*;
 
-/* climatology
+/* Climatology
  * 
  * Generate baseline climatology data files.
  * 
@@ -29,7 +29,7 @@ public class Climatology extends GeoObject {
 
 	static DataType dataType = DataType.SSMI;
 
-	static Timespan.Increment increment = Timespan.Increment.MULTIYEARDEC;
+	static Timespan.Increment increment = Timespan.Increment.JJA;
 
 	// Start and end dates for the processing.
 	// A data file for the start date *must* exist because that will be used
@@ -38,9 +38,9 @@ public class Climatology extends GeoObject {
 	static int startMonth = 1;
 	static int startDay = 30;
 
-	static int finalYear = 2015;
-	static int finalMonth = 2;
-	static int finalDay = 1;
+	static int finalYear = 2013;
+	static int finalMonth = 12;
+	static int finalDay = 30;
 
 	static int lastStartYear = 0;
 	static int lastStartMonth = 0;
@@ -49,18 +49,38 @@ public class Climatology extends GeoObject {
 	static int imageStartIndex = 0;
 	static int imageEndIndex = 0;
 
-	static boolean filterBadData = false; // Filter out bad data points using
-											// minvalue and maxvalue?
-	static final int minValue = -1000000000; // Minimum acceptable data value
-	static final int maxValue = 1000000000; // Maximum acceptable data value
+	// The entire timespan we'll process
+	Timestamp startDate;
+	Timestamp finalDate;
+	Timespan totalTimespan;
+	
+	// This is the date we are processing.
+	Timestamp date;
+	
+	static boolean filterBadData = false; 	// Filter out bad data points
+	
+	static final int minValue = -1000000000;	// Minimum acceptable data value
+	static final int maxValue = 1000000000;		// Maximum acceptable data value
 
 	// Files and paths for i/o
-	static final String outputPath = "/Users/glgr9602/Desktop/Condensate/climatology/"
-			+ dataType.toString() + "/" + increment.toString() + "/";
-	static final String dataPath = "/Users/glgr9602/Desktop/Condensate/data/"
-			+ dataType.toString() + "/daily/";
-	static final String climatologyPrefix = "climate_";
+	
+	//...WINDOWS
+	static final String outputPath = "/Users/glgr9602/Desktop/condense/climatology/" +
+			dataType.toString() + "/" + increment.toString() + "/";
+	static final String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
+			dataType.toString() + "/daily/";
+	
+	// ...LINUX
+	/*
+	static final String outputPath = "/home/glgr9602/condense/climatology/" +
+	/
+			dataType.toString() + "/" + increment.toString() + "/";
+	static final String dataPath = "/home/glgr9602/condense/data/" +
+			dataType.toString() + "/daily/";
+	*/
 
+	static final String climatologyPrefix = "climate_";
+	
 	static boolean warningMessages = false; // Receive warning messages?
 	static boolean debugMessages = false; // Receive debug messages?
 	static boolean addYearToInputDirectory = true; // The input files may be
@@ -82,15 +102,15 @@ public class Climatology extends GeoObject {
 	// The dataset we're going to read.
 	Dataset dataset;
 
-	// Gridded image pixel locations.
+	// Gridded pixel locations.
 	GriddedLocation locations[][];
 
 	// The mean provides a reference for deciding whether to condense the
 	// newest pixels; i.e., are the pixels varying greater than n*sd from
 	// the mean? If so, keep the newest ones and update the reference image
 	// with the new pixel values.
-	double[][] mean = null; // Mean: [row][col]
-	double[][] sd = null; // Standard deviation: [row][col]
+	double[][] mean = null;	// Mean: [row][col]
+	double[][] sd = null;	// Standard deviation: [row][col]
 	int population[][] = null;
 
 	int rows = 316;
@@ -130,13 +150,38 @@ public class Climatology extends GeoObject {
 	 */
 	Climatology() {
 
-		// Read the data files. The loop continues until all data files have
-		// been read.
-		while (readData()) {
+		// What's the total time span we're going to process?
+		Timestamp.dateSeparator(".");
+		startDate = new Timestamp(startYear, startMonth, startDay);
+		finalDate = new Timestamp(finalYear, finalMonth, finalDay);
+		totalTimespan = new Timespan(startDate, finalDate, increment);
+		
+		// What is our first date to process? Note that, depending on the
+		// choice of increment, the first processing day may not be on the 
+		// first day specified (date != startDate). Ask the timespan for the
+		// logical first date to process.
+		date = totalTimespan.startTimestamp();
 
-			// Condense the data and add it to the database.
-			makeBaseline();
+		Tools.message("  Specified time span: "
+				+ startDate.dateString() + " to "
+				+ finalDate.dateString());
 
+		Tools.message("  Calculated time span: "
+				+ totalTimespan.startTimestamp().dateString() + " to "
+				+ totalTimespan.endTimestamp().dateString());
+		
+		// Read the data files. Iterate by year.
+		for (int y = startDate.year(); y <= finalDate.year(); y++) {
+			
+			Timespan timespan = new Timespan(date, finalDate, increment);
+			
+			if (date != null) {	
+				readData( timespan );
+
+				// Condense the data and add it to the database.
+				//makeBaseline();
+			
+			}
 		}
 
 		// Warm fuzzy feedback.
@@ -183,139 +228,78 @@ public class Climatology extends GeoObject {
 	 * 
 	 * Read the dataset files.
 	 * 
-	 * This method reads data files in 'gulps' of the specified time increment
-	 * (i.e., week, month, or seasonal, etc.).
-	 * 
-	 * Returns false if the start day for processing is greater than the final
-	 * day (i.e., the ultimate final day as the user specified for processing).
+	 * This method reads data files for the entire specified timespan.
 	 * 
 	 * Doesn't care if a file is missing. Assumes the data isn't available and
 	 * plows ahead.
 	 */
-	protected boolean readData() {
-
-		// Keep track of date info for file naming purposes
-		lastStartYear = startYear;
-		lastStartMonth = startMonth;
-		lastStartDay = startDay;
-
-		Timestamp startDate = new Timestamp(startYear, startMonth, startDay);
-		Timestamp finalDate = new Timestamp(finalYear, finalMonth, finalDay);
-
-		// Are we already done?
-		if (startDate.days() > finalDate.days())
-			return false;
-
-		// Timespan is the total time to process in each incremental 'gulp'.
-		Timespan timespan = new Timespan(startDate, finalDate, increment);
-
-		// Have we exceeded the time stamp increment?
-		if (startDate.days() > timespan.endTimestamp().days())
-			return false;
-
-		// Convert it to a number of whole days for this time increment. The
-		// number of days may vary depending on the length of the increment
-		// (month, year, etc) and the start date. This is maximum possible
-		// days we'll process in any one gulp.
-		int days = timespan.fullDays();
-
-		// Have the time increment exceeded the final date? If so, bail out. 
-		if (days == 0) return false;
-		
-		Tools.message("\n  Time span: "
-				+ timespan.startTimestamp().dateString() + " to "
-				+ timespan.endTimestamp().dateString());
-
-		Tools.message("    Maximum possible days for this increment = " + days);
+	protected void readData(Timespan timespan) {
 
 		String filename = "";
 
-		// Have we opened the dataset?
-		if (data == null)
-			openDataset(days);
+		// Loop through the days, reading the data file for each day.
+		while( date != null) {
 
-		// The initial date of the files we are reading.
-		Timestamp date = timespan.startTimestamp();
+			// The number of days we're going to process in this increment.
+			int days = timespan.days();
+			Tools.message("    This increment days = " + days);
 
-		// Loop through the number of days, reading the data file for each day.
-		// If a date doesn't exist, ignore it and move on.
-		for (int d = 0; d < days; d++) {
-			
-			if (date.days() > timespan.endTimestamp().days())
-				return false;
+			// Have we opened the dataset?
+			if (data == null)
+				openDataset(days);
 
-			try {
+			for (int d = 0; d < days; d++) {
 
-				switch (dataType) {
-				case SEA_ICE:
-					filename = DatasetSeaIce.getSeaIceFileName(dataPath,
-							date.year(), date.month(), date.dayOfMonth(),
-							addYearToInputDirectory);
+				// If a file doesn't exist, ignore it and move on.
+				try {
 
-					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset)
-							.readData(filename, locations, date.id());
+					switch (dataType) {
+					case SEA_ICE:
+						filename = DatasetSeaIce.getFileName(dataPath,
+								date.year(), date.month(), date.dayOfMonth(),
+								addYearToInputDirectory);
 
-					// Success
-					fileCount++;
+						data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset)
+								.readData(filename, locations, date.id());
 
-					break;
+						// Success
+						fileCount++;
 
-				case SSMI:
-					filename = DatasetSSMI.getSSMIFileName(dataPath,
-							date.year(), date.month(), date.dayOfMonth(),
-							addYearToInputDirectory, frequency, polarization);
+						break;
 
-					// Read the data
-					data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset)
-							.readData(filename, locations, date.id());
+					case SSMI:
+						filename = DatasetSSMI.getFileName(dataPath,
+								date.year(), date.month(), date.dayOfMonth(),
+								addYearToInputDirectory, frequency, polarization);
 
-					// Success
-					fileCount++;
+						// Read the data
+						data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset)
+								.readData(filename, locations, date.id());
 
-					break;
+						// Success
+						fileCount++;
 
-				case AVHRR:
-					/*TODO */
+						break;
 
-					break;
+					case AVHRR:
+						// TODO
+						break;
+					}
+				} catch (Exception e) {
+					// No file. Do nothing.
 				}
-			} catch (Exception e) {
+
+				Tools.message(date.yearString() + "." + date.monthString() + "."
+						+ date.dayOfMonthString() + "  File name: " + filename);
+
+				// Next day.
+				date = timespan.nextDay(date);
+		
 			}
-
-			// Remove bad data
-			data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue,
-					NODATA);
-
-			Tools.message(date.yearString() + "." + date.monthString() + "."
-					+ date.dayOfMonthString() + "  File name: " + filename);
-
-			// Increment the day, skipping over days that are not part
-			// of the increment selection.
-			date = timespan.nextDay(date);
-			
-			if (date == null) return false;
+				
 		}
-
-		
-		// Update the starting date for the next time increment.
-				if (increment == Timespan.Increment.DAY
-				|| increment == Timespan.Increment.MONTH
-				|| increment == Timespan.Increment.WEEK
-				|| increment == Timespan.Increment.SEASONAL
-				|| increment == Timespan.Increment.YEAR) {
-			// Pick up where we left off, day by day.
-			startYear = date.year();
-			startMonth = date.month();
-			startDay = date.dayOfMonth();
-		} else {
-			// Jump to next year.
-			startYear++;
-			startDay = 1;
-		}
-		
-		return true;
 	}
-
+		
 	/*
 	 * openDataset
 	 * 
@@ -330,7 +314,7 @@ public class Climatology extends GeoObject {
 		switch (dataType) {
 
 		case SEA_ICE:
-			filename = DatasetSeaIce.getSeaIceFileName(dataPath, startYear,
+			filename = DatasetSeaIce.getFileName(dataPath, startYear,
 					startMonth, startDay, addYearToInputDirectory);
 			dataset = new DatasetSeaIce(filename);
 
@@ -341,7 +325,7 @@ public class Climatology extends GeoObject {
 			break;
 
 		case SSMI:
-			filename = DatasetSSMI.getSSMIFileName(dataPath, startYear,
+			filename = DatasetSSMI.getFileName(dataPath, startYear,
 					startMonth, startDay, addYearToInputDirectory, frequency,
 					polarization);
 
@@ -367,7 +351,10 @@ public class Climatology extends GeoObject {
 
 			break;
 		}
-		data = new GriddedVector[maximumDays][rows][cols];
+		
+		// Make the data array. Add 1 for possible leap year when
+		// processing multiple years.
+		data = new GriddedVector[maximumDays+1][rows][cols];
 	}
 
 	/*
@@ -380,18 +367,7 @@ public class Climatology extends GeoObject {
 		if (haveMetadata)
 			return;
 
-		switch (dataType) {
-		case SEA_ICE:
-			metadata = dataset.readMetadata(filename);
-			break;
-		case SSMI:
-			metadata = dataset.readMetadata(filename);
-			break;
-		case AVHRR:
-			/* TODO
-			 * metadata = dataset.readMetadata( filename ); */
-			break;
-		}
+		metadata = dataset.readMetadata(filename);
 
 		rows = dataset.rows();
 		cols = dataset.cols();
@@ -412,19 +388,47 @@ public class Climatology extends GeoObject {
 				lastStartDay);
 		Timestamp lastDate = new Timestamp(lastStartYear, lastStartMonth,
 				(lastStartDay + days) - 1);
-		Timestamp.dateSeparator("");
 
 		Tools.statusMessage("Climatology: " + firstDate.dateString() + " for "
 				+ days + " days (until " + lastDate.dateString() + ")");
 
 		accumulateStats();
+		
+		String filename = "no name";
+		Timestamp.dateSeparator("");
 
 		// Write the baseline data to output files.
-		String filename = outputPath + climatologyPrefix + dataType.toString()
-				+ "_" + increment.toString() + "_" + firstDate.dateString()
-				+ ".bin";
+		try {
+			// Mean baseline climatology file
+			filename = outputPath + climatologyPrefix + dataType.toString()
+					+ "-" + increment.toString() + "-mean-" + firstDate.dateString()
+					+ ".bin";
 
-		Tools.statusMessage("    output filename = " + filename);
+			Tools.statusMessage("    mean output filename = " + filename);
+			
+			DataFile file = new DataFile();
+			file.create( filename );
+			file.writeDouble2d(mean);
+			file.close();
+			
+			// Standard deviation climatology file
+			filename = outputPath + climatologyPrefix + dataType.toString()
+					+ "-" + increment.toString() + "-sd-" + firstDate.dateString()
+					+ ".bin";
+
+			Tools.statusMessage("    sd output filename = " + filename);
+			
+			file = new DataFile();
+			file.create( filename );
+			file.writeDouble2d(sd);
+			file.close();
+		}
+		catch(Exception e) {
+			Tools.warningMessage("Could not open output baseline data file: " +
+					filename);
+		}
+
+		Timestamp.dateSeparator(".");
 	}
 
 	/*
@@ -433,7 +437,7 @@ public class Climatology extends GeoObject {
 	 * Find statistics for the data over the temporal increment.
 	 */
 	protected void accumulateStats() {
-
+		
 		// If we haven't read any files yet, no data to condense.
 		if (!haveMetadata) {
 			Tools.warningMessage("Climatology::accumulateStats: no metadata");

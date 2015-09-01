@@ -30,11 +30,11 @@ public class DatasetSeaIce extends Dataset {
 	}
 
 	/*
-	 * getSeaIceFileName
+	 * getFileName
 	 * 
 	 * Generate the file name for a daily sea ice file.
 	 */
-	public static String getSeaIceFileName(String path, int year, int month,
+	public static String getFileName(String path, int year, int month,
 			int day, boolean addYearToInputDirectory) {
 
 		if (addYearToInputDirectory) {

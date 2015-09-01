@@ -46,7 +46,7 @@ public class Condense extends GeoObject {
 	//-----------------------------------------------------------------------*/
 
 	static DataType dataType = DataType.SSMI;
-	static Timespan.Increment increment = Timespan.Increment.MONTH;
+	static Timespan.Increment increment = Timespan.Increment.DAY;
 	static Algorithm algorithm = Algorithm.NO_CONDENSATION;
 	static DatabaseType databaseType = DatabaseType.H2;
 
@@ -235,7 +235,7 @@ public class Condense extends GeoObject {
 			Timespan timespan = new Timespan(startDate, finalDate, increment);
 
 			// Quit if there are no days to process.
-			if (timespan.fullDays() == 0)
+			if (timespan.days() == 0)
 				return;
 
 			Timestamp date = startDate;
@@ -311,7 +311,7 @@ public class Condense extends GeoObject {
 					break;
 
 				case SEA_ICE:
-					filename = DatasetSeaIce.getSeaIceFileName(dataPath,
+					filename = DatasetSeaIce.getFileName(dataPath,
 							date.year(), date.month(), date.dayOfMonth(),
 							addYearToInputDirectory);
 
@@ -326,7 +326,7 @@ public class Condense extends GeoObject {
 					break;
 
 				case SSMI:
-					filename = DatasetSSMI.getSSMIFileName(dataPath, date.year(),
+					filename = DatasetSSMI.getFileName(dataPath, date.year(),
 							date.month(), date.dayOfMonth(),
 							addYearToInputDirectory, frequency, polarization);
 
@@ -384,14 +384,14 @@ public class Condense extends GeoObject {
 		switch (dataType) {
 
 		case SEA_ICE:
-			filename = DatasetSeaIce.getSeaIceFileName(dataPath, startYear,
+			filename = DatasetSeaIce.getFileName(dataPath, startYear,
 					startMonth, startDay, addYearToInputDirectory);
 			dataset = new DatasetSeaIce(filename);
 			getMetadata(filename);
 			break;
 
 		case SSMI:
-			filename = DatasetSSMI.getSSMIFileName(dataPath, startYear,
+			filename = DatasetSSMI.getFileName(dataPath, startYear,
 					startMonth, startDay, addYearToInputDirectory, frequency,
 					polarization);
 
@@ -423,19 +423,7 @@ public class Condense extends GeoObject {
 		if (haveMetadata)
 			return;
 
-		switch (dataType) {
-			case NONE:
-				break;
-			case SEA_ICE:
-				metadata = dataset.readMetadata(filename);
-				break;
-			case SSMI:
-				metadata = dataset.readMetadata(filename);
-				break;
-			case AVHRR:
-				// todo
-				break;
-		}
+		metadata = dataset.readMetadata(filename);
 
 		rows = dataset.rows();
 		cols = dataset.cols();
@@ -752,44 +740,40 @@ public class Condense extends GeoObject {
 				case "timeincrement":
 					if (value.equals("week"))
 						increment = Timespan.Increment.WEEK;
-					if (value.equals("month"))
-						increment = Timespan.Increment.MONTH;
+					if (value.equals("jan"))
+						increment = Timespan.Increment.JAN;
+					if (value.equals("feb"))
+						increment = Timespan.Increment.FEB;
+					if (value.equals("mar"))
+						increment = Timespan.Increment.MAR;
+					if (value.equals("apr"))
+						increment = Timespan.Increment.APR;
+					if (value.equals("may"))
+						increment = Timespan.Increment.MAY;
+					if (value.equals("jun"))
+						increment = Timespan.Increment.JUN;
+					if (value.equals("jul"))
+						increment = Timespan.Increment.JUL;
+					if (value.equals("aug"))
+						increment = Timespan.Increment.AUG;
+					if (value.equals("sep"))
+						increment = Timespan.Increment.SEP;
+					if (value.equals("oct"))
+						increment = Timespan.Increment.OCT;
+					if (value.equals("nov"))
+						increment = Timespan.Increment.NOV;
+					if (value.equals("dec"))
+						increment = Timespan.Increment.DEC;
 					if (value.equals("year"))
 						increment = Timespan.Increment.YEAR;
-					if (value.equals("seasonal"))
-						increment = Timespan.Increment.SEASONAL;
-					if (value.equals("multiyearjan"))
-						increment = Timespan.Increment.MULTIYEARJAN;
-					if (value.equals("multiyearfeb"))
-						increment = Timespan.Increment.MULTIYEARFEB;
-					if (value.equals("multiyearmar"))
-						increment = Timespan.Increment.MULTIYEARMAR;
-					if (value.equals("multiyearapr"))
-						increment = Timespan.Increment.MULTIYEARAPR;
-					if (value.equals("multiyearmay"))
-						increment = Timespan.Increment.MULTIYEARMAY;
-					if (value.equals("multiyearjun"))
-						increment = Timespan.Increment.MULTIYEARJUN;
-					if (value.equals("multiyearjul"))
-						increment = Timespan.Increment.MULTIYEARJUL;
-					if (value.equals("multiyearaug"))
-						increment = Timespan.Increment.MULTIYEARAUG;
-					if (value.equals("multiyearsep"))
-						increment = Timespan.Increment.MULTIYEARSEP;
-					if (value.equals("multiyearoct"))
-						increment = Timespan.Increment.MULTIYEAROCT;
-					if (value.equals("multiyearnov"))
-						increment = Timespan.Increment.MULTIYEARNOV;
-					if (value.equals("multiyeardec"))
-						increment = Timespan.Increment.MULTIYEARDEC;
-					if (value.equals("multiyeardjf"))
-						increment = Timespan.Increment.MULTIYEARDJF;
-					if (value.equals("multiyearmam"))
-						increment = Timespan.Increment.MULTIYEARMAM;
-					if (value.equals("multiyearjja"))
-						increment = Timespan.Increment.MULTIYEARJJA;
-					if (value.equals("multiyearson"))
-						increment = Timespan.Increment.MULTIYEARSON;
+					if (value.equals("djf"))
+						increment = Timespan.Increment.DJF;
+					if (value.equals("mam"))
+						increment = Timespan.Increment.MAM;
+					if (value.equals("jja"))
+						increment = Timespan.Increment.JJA;
+					if (value.equals("son"))
+						increment = Timespan.Increment.SON;
 					Tools.statusMessage("Time Increment = " + increment);
 					break;
 				case "algorithm":

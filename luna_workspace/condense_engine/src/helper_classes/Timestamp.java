@@ -155,16 +155,14 @@ public class Timestamp {
 	 * Use the calendar value to update local variables.
 	 */
 	protected void updateLocalVariables() {
-		month = cal.get(Calendar.MONTH); // Month is indexed 0-11 in the
-											// calendar class.
+		month = cal.get(Calendar.MONTH); // Month is indexed 0-11 
 		dayOfMonth = cal.get(Calendar.DATE);
 		year = cal.get(Calendar.YEAR);
 		hour = cal.get(Calendar.HOUR_OF_DAY);
 		minute = cal.get(Calendar.MINUTE);
 		dayOfYear = cal.get(Calendar.DAY_OF_YEAR);
 		days = Timestamp.getDays(cal);
-		days = ((int) days * 100000) / 100000; // Get rid of calendar
-												// millisecond residuals. yuck
+		days = Math.floor(days); // Get rid of msec residuals
 	}
 
 	// Various gets and sets.
@@ -253,13 +251,18 @@ public class Timestamp {
 		return yearString() + monthString() + dayOfMonthString();
 	}
 
-	public void incrementOneDay() {
+	public void incrementDay() {
 		cal.add(Calendar.DATE, 1);
 		updateLocalVariables();
 	}
 
 	public void incrementDays(int d) {
 		cal.add(Calendar.DATE, d);
+		updateLocalVariables();
+	}
+
+	public void incrementYear() {
+		cal.add(Calendar.YEAR, 1);
 		updateLocalVariables();
 	}
 

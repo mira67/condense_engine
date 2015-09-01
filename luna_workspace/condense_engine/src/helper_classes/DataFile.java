@@ -30,8 +30,6 @@ public class DataFile extends GeoObject {
 		try {
 			open();
 		} catch (Exception e) {
-			Tools.warningMessage(" DataFile::DataFile exiting on exception: "
-					+ e);
 			throw (e);
 		}
 	}
@@ -49,16 +47,9 @@ public class DataFile extends GeoObject {
 			dataInputStream = new DataInputStream(new FileInputStream(file));
 
 		} catch (FileNotFoundException noFile) {
-			Tools.warningMessage(" DataFile::open: file not found: " + noFile);
 			throw (noFile);
-		} catch (Exception e) {
-			Tools.warningMessage(" DataFile::open: Abnormal exception caught: "
-					+ e);
-			Tools.warningMessage(" Re-check your file name and path: "
-					+ filename);
-			throw (e);
 		}
-
+		
 		fileIsReadable = true;
 	}
 
@@ -67,7 +58,7 @@ public class DataFile extends GeoObject {
 	 * 
 	 * Create a file for writing.
 	 */
-	protected void create(String filename) throws Exception {
+	public void create(String filename) throws Exception {
 		fileIsReadable = false;
 		fileIsWritable = false;
 
@@ -76,8 +67,6 @@ public class DataFile extends GeoObject {
 			file = new File(filename);
 			dataOutputStream = new DataOutputStream(new FileOutputStream(file));
 		} catch (Exception e) {
-			Tools.warningMessage(" DataFile::create: Abnormal exception caught: "
-					+ e);
 			throw (e);
 		}
 
@@ -435,6 +424,34 @@ public class DataFile extends GeoObject {
 			// Write the data
 			for (int i = 0; i < data.length; i++) {
 				dataOutputStream.writeDouble(data[i]);
+			}
+		} catch (Exception up) {
+			Tools.warningMessage(" DataFile::writeDoubles: error on write - "
+					+ up);
+			throw (up);
+		}
+	}
+
+	/*
+	 * writeDouble2d
+	 * 
+	 * Write double array to the file.
+	 */
+	public void writeDouble2d(double[][] data) throws Exception {
+
+		if (!fileIsWritable) {
+			Tools.warningMessage("DataFile::writeDoubles: " + filename
+					+ " is not open for writing.");
+			throw (new Exception("Cannot write to file, not open for writing"));
+		}
+
+		Tools.debugMessage("    DataFile::writeDoubles: writing file: "
+				+ filename);
+
+		try {
+			// Write the data
+			for (int i = 0; i < data.length; i++) {
+				writeDoubles( data[i] );
 			}
 		} catch (Exception up) {
 			Tools.warningMessage(" DataFile::writeDoubles: error on write - "

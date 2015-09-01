@@ -25,11 +25,11 @@ public class DatasetSSMI extends Dataset {
 	}
 
 	/*
-	 * getSSMIFileName
+	 * getFileName
 	 * 
 	 * Generate the file name for a daily SSMI file.
 	 */
-	public static String getSSMIFileName(String path, int year, int month,
+	public static String getFileName(String path, int year, int month,
 			int day, boolean addYearToInputDirectory, int frequency,
 			String polarization) {
 

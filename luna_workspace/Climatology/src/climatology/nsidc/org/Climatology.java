@@ -29,7 +29,7 @@ public class Climatology extends GeoObject {
 
 	static DataType dataType = DataType.SSMI;
 
-	static Timespan.Increment increment = Timespan.Increment.MULTIYEARJAN;
+	static Timespan.Increment increment = Timespan.Increment.MAM;
 
 	// Start and end dates for the processing.
 	// A data file for the start date *must* exist because that will be used
@@ -39,26 +39,31 @@ public class Climatology extends GeoObject {
 	static int startDay = 30;
 
 	static int finalYear = 2013;
-	static int finalMonth = 12;
+	static int finalMonth = 10;
 	static int finalDay = 30;
 
 	static int lastStartYear = 0;
 	static int lastStartMonth = 0;
 	static int lastStartDay = 0;
 
-	static int imageStartIndex = 0;
-	static int imageEndIndex = 0;
-
-	static boolean filterBadData = false; // Filter out bad data points using
-											// minvalue and maxvalue?
-	static final int minValue = -1000000000; // Minimum acceptable data value
-	static final int maxValue = 1000000000; // Maximum acceptable data value
+	// The entire timespan we'll process
+	Timestamp startDate;
+	Timestamp finalDate;
+	Timespan totalTimespan;
+	
+	// This is the date we are processing.
+	Timestamp date;
+	
+	static boolean filterBadData = false; 	// Filter out bad data points
+	
+	static final int minValue = -1000000000;	// Minimum acceptable data value
+	static final int maxValue = 1000000000;		// Maximum acceptable data value
 
 	// Files and paths for i/o
 	
 	//...WINDOWS
 	static final String outputPath = "/Users/glgr9602/Desktop/condense/climatology/" +
-			dataType.toString() + "/" + increment.toString() + "/";
+			dataType.toString() + "/";
 	static final String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
 			dataType.toString() + "/daily/";
 	
@@ -69,10 +74,11 @@ public class Climatology extends GeoObject {
 			dataType.toString() + "/" + increment.toString() + "/";
 	static final String dataPath = "/home/glgr9602/condense/data/" +
 			dataType.toString() + "/daily/";
-	static final String climatologyPrefix = "climate_";
 	*/
+
+	static final String climatologyPrefix = "climate-";
 	
-	static boolean warningMessages = false; // Receive warning messages?
+	static boolean warningMessages = true; // Receive warning messages?
 	static boolean debugMessages = false; // Receive debug messages?
 	static boolean addYearToInputDirectory = true; // The input files may be
 													// stored in subdirectories
@@ -85,23 +91,21 @@ public class Climatology extends GeoObject {
 	// The image data across the specified time span [day][row][col]
 	GriddedVector data[][][];
 
-	int days = 0; // Days processed during one time increment
-
 	boolean haveMetadata = false;
 	Metadata metadata;
 
 	// The dataset we're going to read.
 	Dataset dataset;
 
-	// Gridded image pixel locations.
+	// Gridded pixel locations.
 	GriddedLocation locations[][];
 
 	// The mean provides a reference for deciding whether to condense the
 	// newest pixels; i.e., are the pixels varying greater than n*sd from
 	// the mean? If so, keep the newest ones and update the reference image
 	// with the new pixel values.
-	double[][] mean = null; // Mean: [row][col]
-	double[][] sd = null; // Standard deviation: [row][col]
+	double[][] mean = null;	// Mean: [row][col]
+	double[][] sd = null;	// Standard deviation: [row][col]
 	int population[][] = null;
 
 	int rows = 316;
@@ -141,15 +145,52 @@ public class Climatology extends GeoObject {
 	 */
 	Climatology() {
 
-		// Read the data files. The loop continues until all data files have
-		// been read.
-		while (readData()) {
+		// What's the total time span we're going to process?
+		Timestamp.dateSeparator(".");
+		startDate = new Timestamp(startYear, startMonth, startDay);
+		finalDate = new Timestamp(finalYear, finalMonth, finalDay);
+		totalTimespan = new Timespan(startDate, finalDate, Timespan.Increment.NONE);
+		
+		// What is our first date to process? Note that, depending on the
+		// choice of increment, the first processing day may not be on the 
+		// first day specified (date != startDate). Ask the timespan for the
+		// logical first date to process.
+		date = totalTimespan.startTimestamp();
 
-			// Condense the data and add it to the database.
-			makeBaseline();
+		Tools.message("  Specified time span: "
+				+ startDate.dateString() + " to "
+				+ finalDate.dateString());
 
+		// Have we opened the dataset?
+		if (data == null)
+			openDataset(increment.maxDays());
+		
+		// Read the data files. Iterate by year.
+		for (int y = startDate.year(); y <= finalDate.year(); y++) {
+			
+			Timespan timespan = new Timespan(date, finalDate, increment);
+
+			// Timespan may have adjusted itself to comply with the increment.
+			// If it exceeded the end date, break.
+			if (timespan.startTimestamp().days() > finalDate.days()) break;
+			
+			Tools.message("    Increment time span: " +
+					timespan.startTimestamp().dateString() + " to " +
+					timespan.endTimestamp().dateString() + "  days = " +
+					timespan.days());
+			
+			readData( timespan );
+			
+			// Acts as both an accumulator and the final stats calculator.
+			calculateStats();
+
+			// Advance the date to next year.
+			date = new Timestamp(timespan.startTimestamp().year()+1, 1, 1);
 		}
 
+		// Write the stats to files
+		makeStatsFiles(totalTimespan);
+		
 		// Warm fuzzy feedback.
 		Tools.statusMessage("Total data files processed = " + fileCount);
 	}
@@ -188,80 +229,47 @@ public class Climatology extends GeoObject {
 		
 		return;
 	}
-	
+
 	/*
 	 * readData
 	 * 
 	 * Read the dataset files.
 	 * 
-	 * This method reads data files in 'gulps' of the specified time increment
-	 * (i.e., week, month, or seasonal, etc.).
-	 * 
-	 * Returns false if the start day for processing is greater than the final
-	 * day (i.e., the ultimate final day as the user specified for processing).
+	 * This method reads data files for the entire specified timespan.
 	 * 
 	 * Doesn't care if a file is missing. Assumes the data isn't available and
 	 * plows ahead.
 	 */
-	protected boolean readData() {
+	protected void readData(Timespan timespan) {
 
-		// Keep track of when we started.
-		lastStartYear = startYear;
-		lastStartMonth = startMonth;
-		lastStartDay = startDay;
-
-		Timestamp startDate = new Timestamp(startYear, startMonth, startDay);
-		Timestamp finalDate = new Timestamp(finalYear, finalMonth, finalDay);
-		Timestamp.dateSeparator("");
-
-		// Are we already done?
-		if (startDate.days() > finalDate.days())
-			return false;
-
-		// Timespan is the total time to process in each incremental 'gulp'.
-		Timespan timespan = new Timespan(startDate, finalDate, increment);
-
-		// Have we exceeded the time stamp increment?
-		if (startDate.days() > timespan.endTimestamp().days())
-			return false;
-
-		// Convert it to a number of whole days for this time increment. The
-		// number of days may vary depending on the length of the increment
-		// (month, year, etc) and the start date. This is maximum possible
-		// days we'll process in any one gulp.
-		int days = timespan.fullDays();
-
-		// Have the time increment exceeded the final date? If so, bail out. 
-		if (days == 0) return false;
-		
-		Tools.message("\n  Time span: "
-				+ timespan.startTimestamp().dateString() + " to "
-				+ timespan.endTimestamp().dateString());
-
-		Tools.message("    Maximum possible days for this increment = " + days);
+		// Have we opened the dataset?
+		if (data == null) {
+			Tools.errorMessage("Climatology", "readData", "dataset not open",
+					null);
+		}
 
 		String filename = "";
 
-		// Have we opened the dataset?
-		if (data == null)
-			openDataset(days);
+		// The number of days we're going to process in this increment.
+		int days = timespan.days();
 
-		// The initial date of the files we are reading.
-		Timestamp date = timespan.startTimestamp();
+		// Starting date for processing
+		date = timespan.startTimestamp();
 
-		// Loop through the number of days, reading the data file for each day.
-		// If a date doesn't exist, ignore it and move on.
+		// Loop through the days, reading the data file for each day.
 		for (int d = 0; d < days; d++) {
+
+			if (date == null) {
+				Tools.warningMessage("Unexpected NULL date in Climatology::readData");
+				return;
+			}
 			
-			if (date.days() > timespan.endTimestamp().days())
-				return false;
-
+			// If a file doesn't exist, ignore it and move on.
 			try {
-
 				switch (dataType) {
 				case SEA_ICE:
-					filename = DatasetSeaIce.getSeaIceFileName(dataPath,
-							date.year(), date.month(), date.dayOfMonth(),
+					filename = DatasetSeaIce.getFileName(dataPath, date.year(),
+							date.month(), date.dayOfMonth(),
 							addYearToInputDirectory);
 
 					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset)
@@ -273,8 +281,8 @@ public class Climatology extends GeoObject {
 					break;
 
 				case SSMI:
-					filename = DatasetSSMI.getSSMIFileName(dataPath,
-							date.year(), date.month(), date.dayOfMonth(),
+					filename = DatasetSSMI.getFileName(dataPath, date.year(),
+							date.month(), date.dayOfMonth(),
 							addYearToInputDirectory, frequency, polarization);
 
 					// Read the data
@@ -287,50 +295,21 @@ public class Climatology extends GeoObject {
 					break;
 
 				case AVHRR:
-					/*TODO */
-
+					// TODO
 					break;
 				}
 			} catch (Exception e) {
+				// No file. Do nothing.
 			}
-
-			// Remove bad data
-			data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue,
-					NODATA);
 
 			Tools.message(date.yearString() + "." + date.monthString() + "."
 					+ date.dayOfMonthString() + "  File name: " + filename);
 
-			// Keep track of the date we just processed.
-			Timestamp oldDay = date;
-
-			// Increment the day, skipping over days that are not part
-			// of the increment selection.
+			// Next day.
 			date = timespan.nextDay(date);
-			
-			// Are there more dates to process in this timespan?
-			if (date == null) {
-				// If this is a multiyear climatology, we've done it all. Quit.
-				if (increment.isMultiyear()) {
-					return false;
-				}
-				
-				// Not a multiyear climatology. Month-by-Month, e.g.. Keep going.
-				else {
-					// This timespan is done, but there may be more timespans to process.
-					// Pick up where we left off...
-					date = oldDay;
-					date.incrementOneDay();
-					startYear = date.year();
-					startMonth = date.month();
-					startDay = date.dayOfMonth();
-				}
-			}
 		}
-		
-		return true;
 	}
-
+		
 	/*
 	 * openDataset
 	 * 
@@ -345,7 +324,7 @@ public class Climatology extends GeoObject {
 		switch (dataType) {
 
 		case SEA_ICE:
-			filename = DatasetSeaIce.getSeaIceFileName(dataPath, startYear,
+			filename = DatasetSeaIce.getFileName(dataPath, startYear,
 					startMonth, startDay, addYearToInputDirectory);
 			dataset = new DatasetSeaIce(filename);
 
@@ -356,7 +335,7 @@ public class Climatology extends GeoObject {
 			break;
 
 		case SSMI:
-			filename = DatasetSSMI.getSSMIFileName(dataPath, startYear,
+			filename = DatasetSSMI.getFileName(dataPath, startYear,
 					startMonth, startDay, addYearToInputDirectory, frequency,
 					polarization);
 
@@ -382,7 +361,10 @@ public class Climatology extends GeoObject {
 
 			break;
 		}
-		data = new GriddedVector[maximumDays][rows][cols];
+		
+		// Make the data array. Add 1 for possible leap year when
+		// processing multiple years.
+		data = new GriddedVector[maximumDays+1][rows][cols];
 	}
 
 	/*
@@ -395,18 +377,7 @@ public class Climatology extends GeoObject {
 		if (haveMetadata)
 			return;
 
-		switch (dataType) {
-		case SEA_ICE:
-			metadata = dataset.readMetadata(filename);
-			break;
-		case SSMI:
-			metadata = dataset.readMetadata(filename);
-			break;
-		case AVHRR:
-			/* TODO
-			 * metadata = dataset.readMetadata( filename ); */
-			break;
-		}
+		metadata = dataset.readMetadata(filename);
 
 		rows = dataset.rows();
 		cols = dataset.cols();
@@ -417,65 +388,88 @@ public class Climatology extends GeoObject {
 	}
 
 	/*
-	 * makeBaseline
+	 * makeStatsFiles
 	 * 
 	 * Create a climatology baseline using the most recent data time span.
 	 */
-	protected void makeBaseline() {
+	protected void makeStatsFiles(Timespan t) {
 
-		Timestamp firstDate = new Timestamp(lastStartYear, lastStartMonth,
-				lastStartDay);
-		Timestamp lastDate = new Timestamp(lastStartYear, lastStartMonth,
-				(lastStartDay + days) - 1);
-
+		Timestamp firstDate = t.startTimestamp();
+		Timestamp lastDate = t.endTimestamp();
+		int days = t.days();
+		
 		Tools.statusMessage("Climatology: " + firstDate.dateString() + " for "
 				+ days + " days (until " + lastDate.dateString() + ")");
 
-		accumulateStats();
+		String filename = "no name";
+		Timestamp.dateSeparator("");
 
 		// Write the baseline data to output files.
-		String filename = outputPath + climatologyPrefix + dataType.toString()
-				+ "_" + increment.toString() + "_" + firstDate.dateString()
-				+ ".bin";
+		try {
+			// Mean baseline climatology file
+			filename = outputPath + climatologyPrefix + dataType.toString()
+					+ "-" + increment.toString() + "-mean-" + firstDate.dateString()
+					+ ".bin";
 
-		Tools.statusMessage("    output filename = " + filename);
+			Tools.statusMessage("    mean output filename = " + filename);
+			
+			DataFile file = new DataFile();
+			file.create(filename);
+			file.writeDouble2d(mean);
+			file.close();
+			
+			// Standard deviation climatology file
+			filename = outputPath + climatologyPrefix + dataType.toString()
+					+ "-" + increment.toString() + "-sd-" + firstDate.dateString()
+					+ ".bin";
+
+			Tools.statusMessage("    sd output filename = " + filename);
+			
+			file = new DataFile();
+			file.create( filename );
+			file.writeDouble2d(sd);
+			file.close();
+		}
+		catch(Exception e) {
+			Tools.warningMessage("Could not open output baseline data file: " +
+					filename);
+		}
+
+		Timestamp.dateSeparator(".");
 	}
-
-	/*
-	 * accumulateStats
+	
+	/* calculateStats
 	 * 
-	 * Find statistics for the data over the temporal increment.
+	 * Find statistics for the data. Also acts as an accumulator.
 	 */
-	protected void accumulateStats() {
-
+	protected void calculateStats() {
+		
 		// If we haven't read any files yet, no data to condense.
 		if (!haveMetadata) {
-			Tools.warningMessage("Climatology::accumulateStats: no metadata");
+			Tools.warningMessage("Climatology::calculateStats: no metadata");
 			return;
 		}
 
-		// Generate the reference image. This will be the mean value and
-		// standard deviation for the time interval (week, month, season,
-		// etc.). mean[0][][] will contain the mean, [1] will be
-		// the standard deviation at each [row][col] location.
-
-		if (mean == null)
+		// Number of days in the data array
+		int days = data.length;
+		
+		// First time through? Initialize things.
+		if (mean == null) {
 			mean = new double[rows][cols];
-		if (sd == null)
 			sd = new double[rows][cols];
-		if (population == null)
 			population = new int[rows][cols];
 
-		// Zero-out the reference image for this time span.
-		for (int r = 0; r < rows; r++) {
-			for (int c = 0; c < cols; c++) {
-				mean[r][c] = 0;
-				sd[r][c] = 0;
-				population[r][c] = 0;
+			// Zero-out the stats arrays.
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
+					mean[r][c] = 0;
+					sd[r][c] = 0;
+					population[r][c] = 0;
+				}
 			}
 		}
 
-		// First, accumulate the sum of all data values at each location.
+		// Accumulate the sum of all data values at each location.
 		for (int d = 0; d < days; d++) {
 
 			// Missing data for a day? Skip it.
