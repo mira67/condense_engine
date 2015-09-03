@@ -27,5 +27,6 @@
 <fullyQualifiedTypeName name="java.io.IOException"/>
 <fullyQualifiedTypeName name="org.jfree.chart.ChartUtilities"/>
 <fullyQualifiedTypeName name="helper_classes.Tools"/>
+<fullyQualifiedTypeName name="helper_classes.Timestamp"/>
 <fullyQualifiedTypeName name="helper_classes.Timespan.Increment"/>
 </qualifiedTypeNameHistroy>

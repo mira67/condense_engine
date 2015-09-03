@@ -266,8 +266,6 @@ public class Climatology extends GeoObject {
 		// Loop through the days, reading the data file for each day.
 		for (int d = 0; d < days; d++) {
 
-			data[d] = null;
-			
 			if (date == null) {
 				Tools.warningMessage("Unexpected NULL date in Climatology::readData");
 				return;
@@ -407,6 +405,7 @@ public class Climatology extends GeoObject {
 		
 		// First time through? Initialize things.
 		if (accumulator == null) {
+			Tools.message("      initialize accumulator and population");
 
 			accumulator = new double[rows][cols];
 			population = new int[rows][cols];
@@ -417,6 +416,11 @@ public class Climatology extends GeoObject {
 				for (int c = 0; c < cols; c++) {
 					accumulator[r][c] = 0;
 					population[r][c] = 0;
+
+					if (r > 12 && r < 15 && c > 12 && c < 15) {
+						Tools.message("      init r,c = " + r + "," + c + "  population = " +
+								population[r][c]); 
+					}
 				}
 			}
 		}
@@ -441,6 +445,8 @@ public class Climatology extends GeoObject {
 								Tools.message("      d = " + d + "  r,c = " + r + "," + c + "  population = " +
 										population[r][c]); 
 							}
+
+
 						}
 					}
 				}
