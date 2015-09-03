@@ -13,14 +13,14 @@ import helper_classes.*;
 
 public class Climatology extends GeoObject {
 
-	static Timespan.Increment increment = Timespan.Increment.MAM;
+	static Timespan.Increment increment = Timespan.Increment.DJF;
 
 	// Start and end dates for the processing.
 	// A data file for the start date *must* exist because that will be used
 	// to generate the metadata.
-	static int startYear = 2011;
+	static int startYear = 2012;
 	static int startMonth = 1;
-	static int startDay = 1;
+	static int startDay = 30;
 
 	static int finalYear = 2014;
 	static int finalMonth = 1;
@@ -112,8 +112,10 @@ public class Climatology extends GeoObject {
 	// ...LINUX
 	/*
 	static final String outputPath = "/home/glgr9602/condense/climatology/" +
+	/
 			dataType.toString() + "/" + increment.toString() + "/";
-	static final String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";
+	static final String dataPath = "/home/glgr9602/condense/data/" +
+			dataType.toString() + "/daily/";
 	*/
 
 	/*-------------------------------------------------------------------------
@@ -437,7 +439,7 @@ public class Climatology extends GeoObject {
 
 							if (r > 12 && r < 15 && c > 12 && c < 15) {
 								Tools.message("      d = " + d + "  r,c = " + r + "," + c + "  population = " +
-										population[r][c] + "  data = " + input[d][r][c].data()); 
+										population[r][c]); 
 							}
 						}
 					}
@@ -545,12 +547,11 @@ public class Climatology extends GeoObject {
 		}
 
 		// SD calculation continued...
+		// Degrees of freedom. Minus one for unbiased standard deviation.
+		double df = totalDays - 1;
 		
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
-				// Degrees of freedom. Number of samples minus one for unbiased SD.
-				double df = population[r][c] - 1;
-
 				sd[r][c] = Math.sqrt(sd[r][c] / df);
 				
 				if (r > 12 && r < 15 && c > 12 && c < 15) {

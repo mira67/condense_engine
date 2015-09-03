@@ -437,7 +437,7 @@ public class Climatology extends GeoObject {
 
 							if (r > 12 && r < 15 && c > 12 && c < 15) {
 								Tools.message("      d = " + d + "  r,c = " + r + "," + c + "  population = " +
-										population[r][c] + "  data = " + input[d][r][c].data()); 
+										population[r][c]); 
 							}
 						}
 					}
@@ -545,12 +545,11 @@ public class Climatology extends GeoObject {
 		}
 
 		// SD calculation continued...
+		// Degrees of freedom. Minus one for unbiased standard deviation.
+		double df = totalDays - 1;
 		
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
-				// Degrees of freedom. Number of samples minus one for unbiased SD.
-				double df = population[r][c] - 1;
-
 				sd[r][c] = Math.sqrt(sd[r][c] / df);
 				
 				if (r > 12 && r < 15 && c > 12 && c < 15) {
