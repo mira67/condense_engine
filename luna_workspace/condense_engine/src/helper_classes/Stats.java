@@ -80,33 +80,25 @@ public class Stats {
 	}
 
 	/*
-	 * meanNoBadData
+	 * meanNoBadData2d
 	 * 
-	 * Compute the average at each location of a 3-D array of integer values,
-	 * returning a 2-D array of doubles. Don't include bad data.
-	 * 
-	 * Intended for arrays like: stuff[day][row][col], and will return an
-	 * array of means across all days at each row,col location.
+	 * Compute the average at each location of a 2-D array of double values,
+	 * returning a 2-D array of doubles. Don't include bad data. Assumes the
+	 * 'values' have been summed up, and that population is the total number
+	 * of samples.
 	 */
-	static public double[][] meanNoBadData(int[][][] values, int bad) {
+	static public double[][] meanNoBadData2d( double[][] values, int[][] population,
+			int badData) {
 
-		double sum;
-		double count;
-		double out[][] = new double[values[0].length][values[0][0].length];
+		double out[][] = new double[values.length][values[0].length];
 
-		for (int r = 0; r < values[0].length; r++) {
-			for (int c = 0; c < values[0][0].length; c++) {
-
-				sum = 0;
-				count = 0;
-
-				for (int d = 0; d < values.length; d++) {
-					if (values[d][r][c] != bad) {
-						sum += (double) values[d][r][c];
-						count++;
-					}
+		for (int r = 0; r < values.length; r++) {
+			for (int c = 0; c < values[0].length; c++) {
+				if (population[r][c] > 0 && values[r][c] != badData) {
+					out[r][c] = values[r][c] / (double) population[r][c];
+				} else {
+					out[r][c] = (double) badData;
 				}
-				out[r][c] = sum / count;
 			}
 		}
 
@@ -189,8 +181,8 @@ public class Stats {
 	 * 
 	 * See note above about bias and degrees of freedom.
 	 */
-	static public float standardDeviationNoBadData(int[] values, float mean,
-			int bad, float bias) {
+	static public double standardDeviationNoBadData(int[] values, double mean,
+			int bad, double bias) {
 
 		float sumOfSquares = 0.0f;
 		float count = 0f;
@@ -203,6 +195,33 @@ public class Stats {
 		}
 
 		return (float) Math.sqrt(sumOfSquares / ((float) count - bias));
+	}
+
+	/*
+	 * standardDeviationNoBadData2d
+	 * 
+	 * Compute the SD at each location of a 2-D array of double values,
+	 * where the doubles are the sums of the differences squared.
+	 */
+	static public double[][] standardDeviationNoBadData2d(double[][] values,
+			int population[][], double bad, double bias) {
+		
+		double out[][] = new double[values.length][values[0].length];
+
+		for (int r = 0; r < values.length; r++) {
+			for (int c = 0; c < values[0].length; c++) {
+
+				if (values[r][c] != bad && (population[r][c] - bias) > 0.0) {
+					out[r][c] = Math.sqrt( values[r][c] / (population[r][c] - bias));					
+				}
+				else {
+					out[r][c] = bad;
+				}
+				
+			}
+		}
+
+		return out;
 	}
 
 	/*

@@ -331,7 +331,7 @@ public class Climatology extends GeoObject {
 			}
 
 			Tools.message(date.yearString() + "." + date.monthString() + "."
-						+ date.dayOfMonthString() + "  File name: " + filename);
+					+ date.dayOfMonthString() + "  File name: " + filename);
 
 			// Next day.
 			date = timespan.nextDay(date);

@@ -145,4 +145,30 @@ public class GriddedVector extends GeoObject {
 
 		return array;
 	}
+
+	/*
+	 * createIntArrayFromVectorArray3d
+	 * 
+	 * Given a 3-D array of vectors, create an integer array containing only
+	 * the vectors' scalar data values at each date/row/col location.
+	 */
+	public static int[][][] createIntArrayFromVectorArray3d(
+			GriddedVector[][][] vectors) {
+
+		int dates = vectors.length;
+		int rows = vectors[0].length;
+		int cols = vectors[0][0].length;
+		
+		int[][][] array = new int[dates][rows][cols];
+
+		for (int i = 0; i < dates; i++) {
+			for (int j = 0; j < rows; j++) {
+				for (int k = 0; k < cols; k++) {
+					array[i][j][k] = vectors[i][j][k].data();
+				}
+			}
+		}
+
+		return array;
+	}
 }

@@ -152,6 +152,12 @@ public class Climatology extends GeoObject {
 		startDate = new Timestamp(startYear, startMonth, startDay);
 		finalDate = new Timestamp(finalYear, finalMonth, finalDay);
 		totalTimespan = new Timespan(startDate, finalDate, Timespan.Increment.NONE);
+		
+		// What is our first date to process? Note that, depending on the
+		// choice of increment, the first processing day may not be on the 
+		// first day specified (date != startDate). Ask the timespan for the
+		// logical first date to process.
+		date = totalTimespan.startTimestamp();
 
 		Tools.message("  Specified time span: "
 				+ startDate.dateString() + " to "
@@ -167,12 +173,6 @@ public class Climatology extends GeoObject {
 		for (int pass = 1; pass < 3; pass++) {
 
 			Tools.message("PASS = " + pass);
-			
-			// What is our first date to process? Note that, depending on the
-			// choice of increment, the first processing day may not be on the 
-			// first day specified (date != startDate). Ask the timespan for the
-			// logical first date to process.
-			date = totalTimespan.startTimestamp();
 			
 			// Read the data files. Iterate by year.
 			for (int y = startDate.year(); y <= finalDate.year(); y++) {
@@ -208,7 +208,7 @@ public class Climatology extends GeoObject {
 				accumulator = null;
 			}
 			
-			if (pass == 2) sd = Stats.standardDeviationNoBadData2d(accumulator, population, NODATA, 1);
+			if (pass == 2) sd = Stats.standardDeviationNoBadData2d(accumulator, 1);
 		}
 		
 		// Write out the stats to files
@@ -331,7 +331,7 @@ public class Climatology extends GeoObject {
 			}
 
 			Tools.message(date.yearString() + "." + date.monthString() + "."
-						+ date.dayOfMonthString() + "  File name: " + filename);
+					+ date.dayOfMonthString() + "  File name: " + filename);
 
 			// Next day.
 			date = timespan.nextDay(date);

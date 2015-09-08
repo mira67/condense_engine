@@ -152,6 +152,12 @@ public class Climatology extends GeoObject {
 		startDate = new Timestamp(startYear, startMonth, startDay);
 		finalDate = new Timestamp(finalYear, finalMonth, finalDay);
 		totalTimespan = new Timespan(startDate, finalDate, Timespan.Increment.NONE);
+		
+		// What is our first date to process? Note that, depending on the
+		// choice of increment, the first processing day may not be on the 
+		// first day specified (date != startDate). Ask the timespan for the
+		// logical first date to process.
+		date = totalTimespan.startTimestamp();
 
 		Tools.message("  Specified time span: "
 				+ startDate.dateString() + " to "
@@ -164,15 +170,9 @@ public class Climatology extends GeoObject {
 		
 		// Two passes. First to calculate the mean, the second to
 		// find the standard deviation (which requires the mean).
-		for (int pass = 1; pass < 3; pass++) {
+		for (int pass = 1; pass <= 2; pass++) {
 
 			Tools.message("PASS = " + pass);
-			
-			// What is our first date to process? Note that, depending on the
-			// choice of increment, the first processing day may not be on the 
-			// first day specified (date != startDate). Ask the timespan for the
-			// logical first date to process.
-			date = totalTimespan.startTimestamp();
 			
 			// Read the data files. Iterate by year.
 			for (int y = startDate.year(); y <= finalDate.year(); y++) {
@@ -191,7 +191,7 @@ public class Climatology extends GeoObject {
 				readData( timespan );
 				
 				// Store the data for later statistical calculations.
-				accumulateData( data, (pass == 2) );
+				accumulateData( data );
 
 				// Advance the date to next year.
 				date = new Timestamp(timespan.startTimestamp().year()+1, 1, 1);
@@ -201,14 +201,11 @@ public class Climatology extends GeoObject {
 			// time through, standard deviation.
 			Tools.message("CALCULATING STATS");
 			
-			if (pass == 1) {
-				mean = Stats.meanNoBadData2d(accumulator, population, NODATA);
-				
-				// Zero-out the data accumulator
-				accumulator = null;
-			}
+			if (pass == 1) mean = Stats.mean2d(accumulator, population);
 			
-			if (pass == 2) sd = Stats.standardDeviationNoBadData2d(accumulator, population, NODATA, 1);
+			
+			if (pass == 2) sd = Stats.standardDeviationNoBadData3d(
+					GriddedVector.createIntArrayFromVectorArray3d(data), mean, NODATA, 1);
 		}
 		
 		// Write out the stats to files
@@ -331,7 +328,7 @@ public class Climatology extends GeoObject {
 			}
 
 			Tools.message(date.yearString() + "." + date.monthString() + "."
-						+ date.dayOfMonthString() + "  File name: " + filename);
+					+ date.dayOfMonthString() + "  File name: " + filename);
 
 			// Next day.
 			date = timespan.nextDay(date);
@@ -417,10 +414,9 @@ public class Climatology extends GeoObject {
 	
 	/* accumulateData
 	 * 
-	 * Store the data. sdFlag says just accumulate the sums of the data (false)
-	 * or squares of the difference of the data compared to the mean (true).
+	 * Store the data.
 	 */
-	protected void accumulateData( GriddedVector[][][] input, boolean sdFlag) {
+	protected void accumulateData( GriddedVector[][][] input) {
 		
 		// Number of days in the data array
 		int days = input.length;
@@ -441,7 +437,7 @@ public class Climatology extends GeoObject {
 			}
 		}
 
-		// Cycle through all days at each location.
+		// Accumulate the sum of all data values at each location.
 		for (int d = 0; d < days; d++) {
 
 			// Missing data for a day? Skip it.
@@ -454,24 +450,12 @@ public class Climatology extends GeoObject {
 					// Data at this location/date?
 					if (input[d][r][c] != null) {
 						if (input[d][r][c].data() != NODATA) {
-							
-							// For accumulating data sums:
-							if (!sdFlag) {
-								accumulator[r][c] += input[d][r][c].data();
-								population[r][c]++;
-							}
+							accumulator[r][c] += input[d][r][c].data();
+							population[r][c]++;
 
-							// For accumulating data differences squared (useful for standard
-							// deviation calculation):
-							if (sdFlag) {
-								accumulator[r][c] += Math.pow(input[d][r][c].data() - mean[r][c], 2);
-								population[r][c]++;
-
-								if (r == 12 && c == 15) {
-									Tools.message("      d = " + d + "  r,c = " + r + "," + c + "  population = " +
-										population[r][c] + "  data = " + input[d][r][c].data() +
-										"  mean = " + mean[r][c] + "  sd = " + Math.sqrt(accumulator[r][c]/(population[r][c] - 1.0)));
-								}
+							if (r > 12 && r < 15 && c > 12 && c < 15) {
+								Tools.message("      d = " + d + "  r,c = " + r + "," + c + "  population = " +
+										population[r][c] + "  data = " + input[d][r][c].data()); 
 							}
 						}
 					}
@@ -530,5 +514,66 @@ public class Climatology extends GeoObject {
 		}
 
 		Timestamp.dateSeparator(".");
+	}
+
+	/* calculateStats
+	 * 
+	 * Find statistics for the data.
+	 */
+	protected void calculateStats() {
+		
+		// First time through? Initialize things.
+		if (mean == null) {
+			mean = new double[rows][cols];
+			sd = new double[rows][cols];
+
+			// Zero-out the stats arrays.
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
+					mean[r][c] = 0;
+					sd[r][c] = 0;
+				}
+			}
+		}
+
+		// Find the mean value at each location.
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+
+				// Avoid divide by zero if there isn't any data.
+				if (population[r][c] > 0) {
+					mean[r][c] = accumulator[r][c] / population[r][c];
+				} else {
+					// No data? Indicate it.
+					if (population[r][c] <= 0)
+						mean[r][c] = NODATA;
+				}
+			}
+		}
+
+		// Find the standard deviation for the sample population.
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				if (population[r][c] > 0)
+						sd[r][c] += Math.pow(accumulator[r][c] - mean[r][c], 2);
+			}
+		}
+
+		// SD calculation continued...
+		
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				// Degrees of freedom. Number of samples minus one for unbiased SD.
+				double df = population[r][c] - 1;
+
+				sd[r][c] = Math.sqrt(sd[r][c] / df);
+				
+				if (r > 12 && r < 15 && c > 12 && c < 15) {
+					Tools.message("      r,c = " + r + "," + c + "  n = " +
+							population[r][c] + "  u = " + mean[r][c] + "  sd = " + sd[r][c]); 
+				}
+					
+			}
+		}
 	}
 }

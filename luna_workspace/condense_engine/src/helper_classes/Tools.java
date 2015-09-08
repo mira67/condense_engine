@@ -393,6 +393,16 @@ public class Tools extends GeoObject {
 		System.out.flush();
 
 	}
+	
+	/* messageNoRTLF
+	 * 
+	 * Just print a message. No return-linefeed, and no way to turn it off.
+	 */
+	public static void messageNoRTLF(String message) {
+		System.out.print(message);
+		System.out.flush();
+
+	}
 
 	public static void setWarnings(boolean flag) {
 		warnings = flag;
