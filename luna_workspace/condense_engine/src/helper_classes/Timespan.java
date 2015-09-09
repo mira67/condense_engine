@@ -24,10 +24,10 @@ public class Timespan extends GeoObject {
 		NOV ("nov", 11, 30),
 		DEC ("dec", 12, 31),
 		YEAR ("year", 1, 366),
-		DJF ("seasonal-DJF", 12, 91),	// Dec-Jan-Feb
-		MAM ("seasonal-MAM", 3, 92),	// Mar-Apr-May
-		JJA ("seasonal-JJA", 6, 92),	// Jun-Jul-Aug
-		SON ("seasonal-SON", 9, 92);	// Sep-Oct-Nov
+		DJF ("djf", 12, 91),// Dec-Jan-Feb
+		MAM ("mam", 3, 92),	// Mar-Apr-May
+		JJA ("jja", 6, 92),	// Jun-Jul-Aug
+		SON ("son", 9, 92);	// Sep-Oct-Nov
     	
 		private final String name;
     	private final int startMonth;
@@ -36,9 +36,41 @@ public class Timespan extends GeoObject {
     		name = s;
     		startMonth = month;
     		days = maxDays;}
-    	public String toString() {return name;}
     	public int startMonth() {return startMonth;}
     	public int maxDays() {return days;}
+
+    	/* getType
+    	 * 
+    	 * Given the name of one of the increments, return an increment
+    	 * of that type.
+    	 */
+    	public static Increment getType( String name ) {
+    		
+    		name = name.toUpperCase();
+    		name = name.substring(0,3);
+    	
+    		if (name.compareTo(Increment.JAN.name()) == 0) return Increment.JAN;
+    		if (name.compareTo(Increment.FEB.name()) == 0) return Increment.FEB;
+    		if (name.compareTo(Increment.MAR.name()) == 0) return Increment.MAR;
+    		if (name.compareTo(Increment.APR.name()) == 0) return Increment.APR;
+    		if (name.compareTo(Increment.MAY.name()) == 0) return Increment.MAY;
+    		if (name.compareTo(Increment.JUN.name()) == 0) return Increment.JUN;
+    		if (name.compareTo(Increment.JUL.name()) == 0) return Increment.JUL;
+    		if (name.compareTo(Increment.AUG.name()) == 0) return Increment.AUG;
+    		if (name.compareTo(Increment.SEP.name()) == 0) return Increment.SEP;
+    		if (name.compareTo(Increment.OCT.name()) == 0) return Increment.OCT;
+    		if (name.compareTo(Increment.NOV.name()) == 0) return Increment.NOV;
+    		if (name.compareTo(Increment.DEC.name()) == 0) return Increment.DEC;
+    		if (name.compareTo(Increment.DJF.name()) == 0) return Increment.DJF;
+    		if (name.compareTo(Increment.MAM.name()) == 0) return Increment.MAM;
+    		if (name.compareTo(Increment.JJA.name()) == 0) return Increment.JJA;
+    		if (name.compareTo(Increment.SON.name()) == 0) return Increment.SON;
+    		if (name.compareTo(Increment.DAY.name()) == 0) return Increment.DAY;
+    		if (name.compareTo(Increment.WEEK.name()) == 0) return Increment.WEEK;
+    		if (name.compareTo(Increment.YEAR.name()) == 0) return Increment.YEAR;
+
+    		return Increment.NONE;
+    	}
 	}
 
 	protected Timestamp startDate;	// Beginning of the timespan
@@ -305,5 +337,4 @@ public class Timespan extends GeoObject {
 		endDate.print();
 		Tools.message("Increment: " + increment.name());
 	}
-
 }

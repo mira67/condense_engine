@@ -25,4 +25,19 @@ public abstract class Dataset extends GeoObject {
 
 	public abstract Metadata readMetadata( String filename );
 	public abstract ArrayList<GriddedLocation> locationsAsArrayList();
+	
+	// Data types
+	public enum DataType {
+		SEA_ICE("seaice"), SSMI("ssmi"), AVHRR("avhrr");
+		private final String name;
+
+		private DataType(String s) {
+			name = s;
+		}
+
+		public String toString() {
+			return name;
+		}
+	}
+
 }

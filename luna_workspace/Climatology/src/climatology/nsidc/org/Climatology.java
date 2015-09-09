@@ -13,22 +13,18 @@ import helper_classes.*;
 
 public class Climatology extends GeoObject {
 
-	static Timespan.Increment increment = Timespan.Increment.MAM;
+	Timespan.Increment increment;
 
 	// Start and end dates for the processing.
 	// A data file for the start date *must* exist because that will be used
 	// to generate the metadata.
-	static int startYear = 2011;
-	static int startMonth = 1;
-	static int startDay = 1;
+	int startYear;
+	int startMonth;
+	int startDay;
 
-	static int finalYear = 2014;
-	static int finalMonth = 1;
-	static int finalDay = 30;
-
-	static int lastStartYear = 0;
-	static int lastStartMonth = 0;
-	static int lastStartDay = 0;
+	int finalYear;
+	int finalMonth;
+	int finalDay;
 
 	// The entire timespan we'll process
 	Timestamp startDate;
@@ -39,7 +35,7 @@ public class Climatology extends GeoObject {
 	// This is the date we are processing.
 	Timestamp date;
 	
-	static boolean filterBadData = false; 	// Filter out bad data points
+	static boolean filterBadData = true; 	// Filter out bad data points
 	
 	static final int minValue = -1000000000;	// Minimum acceptable data value
 	static final int maxValue = 1000000000;		// Maximum acceptable data value
@@ -53,8 +49,8 @@ public class Climatology extends GeoObject {
 													// by year
 
 	// SSMI data selection
-	static String polarization = "v"; // Horizontal (h) or vertical (v)
-	static int frequency = 22; // Frequency of SSMI data
+	String frequency = ""; // Frequency of SSMI data
+	String polarization = ""; // SSMI polarization, h or v
 
 	// The image data across the specified time increment [day][row][col]
 	GriddedVector data[][][];
@@ -79,94 +75,72 @@ public class Climatology extends GeoObject {
 	double[][] mean = null;	// Mean: [row][col]
 	double[][] sd = null;	// Standard deviation: [row][col]
 
-	int rows = 316;
-	int cols = 332;
+	int rows = 0;
+	int cols = 0;
 
 	// Number of files successfully read, for sanity checks
 	int fileCount = 0;
 
-	// Data types
-	public enum DataType {
-		SEA_ICE("seaice"), SSMI("ssmi"), AVHRR("avhrr");
-		private final String name;
-
-		private DataType(String s) {
-			name = s;
-		}
-
-		public String toString() {
-			return name;
-		}
-	}
-
-	static DataType dataType = DataType.SSMI;
+	static Dataset.DataType dataType;
 
 	// Files and paths for i/o
+	String outputPath;
+	String dataPath;
 	
-	//...WINDOWS
-	static final String outputPath = "/Users/glgr9602/Desktop/condense/climatology/" +
-			dataType.toString() + "/";
-	static final String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
-			dataType.toString() + "/daily/";
-	
-	// ...LINUX
-	/*
-	static final String outputPath = "/home/glgr9602/condense/climatology/" +
-			dataType.toString() + "/" + increment.toString() + "/";
-	static final String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";
-	*/
-
-	/*-------------------------------------------------------------------------
-	// MAIN PROGRAM
-	//-----------------------------------------------------------------------*/
-
-	public static void main(String[] args) {
-
-		long startTime = System.currentTimeMillis();
-
-		// Control what messages we see.
-		Tools.setDebug(debugMessages);
-		Tools.setWarnings(warningMessages);
-
-		Tools.statusMessage("Process " + dataType.toString() + " data from "
-				+ startYear + "." + startMonth + "." + startDay + " to "
-				+ finalYear + "." + finalMonth + "." + finalDay
-				+ " in increments of " + increment.toString());
-
-		new Climatology();
-
-		long endTime = System.currentTimeMillis();
-		endTime = (endTime - startTime) / 1000;
-		Tools.statusMessage("Total time to process = " + endTime + " seconds");
-	}
-
 	/*
 	 * Climatology
 	 * 
 	 * Read the data, make climatology baselines (mean and standard deviation).
 	 */
-	Climatology() {
+	public Climatology(
+			Dataset.DataType type,
+			int startY, int startM, int startD,
+			int finalY, int finalM, int finalD,
+			Timespan.Increment inc,
+			String dataP, String outputP,
+			String suffix1, String suffix2) {
+		
+		dataType = type;
+		
+		startYear = startY;
+		startMonth = startM;
+		startDay = startD;
+		
+		finalYear = finalY;
+		finalMonth = finalM;
+		finalDay = finalD;
+		
+		increment = inc;
 
+		dataPath = dataP;
+		outputPath = outputP;
+		
+		frequency = suffix1;
+		polarization = suffix2;
+	}
+	
+	/* run
+	 * 
+	 * Generate the climatology.
+	 */
+	public boolean run() {
+		
 		// What's the total time span we're going to process?
 		Timestamp.dateSeparator(".");
 		startDate = new Timestamp(startYear, startMonth, startDay);
 		finalDate = new Timestamp(finalYear, finalMonth, finalDay);
 		totalTimespan = new Timespan(startDate, finalDate, Timespan.Increment.NONE);
 
-		Tools.message("  Specified time span: "
-				+ startDate.dateString() + " to "
-				+ finalDate.dateString());
-
 		// Have we opened the dataset?
-		if (data == null)
-			openDataset(increment.maxDays());
-		
-		
+		if (data == null) {
+			// If it fails to open, return false.
+			if (!openDataset(increment.maxDays())) return false;		
+		}
 		// Two passes. First to calculate the mean, the second to
 		// find the standard deviation (which requires the mean).
 		for (int pass = 1; pass < 3; pass++) {
 
-			Tools.message("PASS = " + pass);
+			Tools.message("  PASS " + pass);
 			
 			// What is our first date to process? Note that, depending on the
 			// choice of increment, the first processing day may not be on the 
@@ -199,7 +173,7 @@ public class Climatology extends GeoObject {
 
 			// Calculated the statistics. First time through, the mean; second
 			// time through, standard deviation.
-			Tools.message("CALCULATING STATS");
+			Tools.message("  CALCULATING STATS");
 			
 			if (pass == 1) {
 				mean = Stats.meanNoBadData2d(accumulator, population, NODATA);
@@ -215,7 +189,9 @@ public class Climatology extends GeoObject {
 		makeStatsFiles(totalTimespan);
 		
 		// Warm fuzzy feedback.
-		Tools.statusMessage("Total data files processed = " + fileCount);
+		Tools.statusMessage("  Total data files processed = " + fileCount);
+		
+		return true;
 	}
 
 	
@@ -317,6 +293,13 @@ public class Climatology extends GeoObject {
 					data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset)
 							.readData(filename, locations, date.id());
 
+					// Get rid of any unrealistic data points. For SSMI data
+					// (brightness temperatures in degrees K) anything less than
+					// 10 or greater than 400 is clearly bogus.
+					if (filterBadData) {						
+						data[d] = GriddedVector.filterBadData(data[d], 10, 400, NODATA);
+					}
+					
 					// Success
 					fileCount++;
 
@@ -330,7 +313,7 @@ public class Climatology extends GeoObject {
 				// No file. Do nothing.
 			}
 
-			Tools.message(date.yearString() + "." + date.monthString() + "."
+			Tools.message("    " + date.yearString() + "." + date.monthString() + "."
 						+ date.dayOfMonthString() + "  File name: " + filename);
 
 			// Next day.
@@ -345,7 +328,7 @@ public class Climatology extends GeoObject {
 	 * of space allocated for the data is determined by the maximum days value,
 	 * which is the time increment used for reading sequential files.
 	 */
-	protected void openDataset(int maximumDays) {
+	protected boolean openDataset(int maximumDays) {
 
 		String filename = "";
 
@@ -356,7 +339,7 @@ public class Climatology extends GeoObject {
 					startMonth, startDay, addYearToInputDirectory);
 			dataset = new DatasetSeaIce(filename);
 
-			getMetadata(filename);
+			if (!getMetadata(filename)) return false;
 
 			getLocations();
 			
@@ -366,10 +349,10 @@ public class Climatology extends GeoObject {
 			filename = DatasetSSMI.getFileName(dataPath, startYear,
 					startMonth, startDay, addYearToInputDirectory, frequency,
 					polarization);
-
+			
 			dataset = new DatasetSSMI(filename);
 
-			getMetadata(filename);
+			if (!getMetadata(filename)) return false;
 
 			getLocations();
 			
@@ -393,6 +376,8 @@ public class Climatology extends GeoObject {
 		// Make the data array. Add 1 for possible leap year when
 		// processing multiple years.
 		data = new GriddedVector[maximumDays+1][rows][cols];
+		
+		return true;
 	}
 
 	/*
@@ -400,19 +385,21 @@ public class Climatology extends GeoObject {
 	 * 
 	 * Got the metadata? If not, go get it from the supplied file.
 	 */
-	protected void getMetadata(String filename) {
+	protected boolean getMetadata(String filename) {
 
 		if (haveMetadata)
-			return;
+			return true;
 
 		metadata = dataset.readMetadata(filename);
+
+		if (metadata == null) return false;
 
 		rows = dataset.rows();
 		cols = dataset.cols();
 
 		haveMetadata = true;
 
-		return;
+		return true;
 	}
 	
 	/* accumulateData
@@ -467,11 +454,11 @@ public class Climatology extends GeoObject {
 								accumulator[r][c] += Math.pow(input[d][r][c].data() - mean[r][c], 2);
 								population[r][c]++;
 
-								if (r == 12 && c == 15) {
+								/*if (r == 12 && c == 15) {
 									Tools.message("      d = " + d + "  r,c = " + r + "," + c + "  population = " +
 										population[r][c] + "  data = " + input[d][r][c].data() +
 										"  mean = " + mean[r][c] + "  sd = " + Math.sqrt(accumulator[r][c]/(population[r][c] - 1.0)));
-								}
+								}*/
 							}
 						}
 					}
@@ -491,19 +478,21 @@ public class Climatology extends GeoObject {
 		Timestamp firstDate = t.startTimestamp();
 		Timestamp lastDate = t.endTimestamp();
 		
-		Tools.statusMessage("\nClimatology: " + firstDate.dateString() + " to " +
+		Tools.statusMessage("  Climatology: " + firstDate.dateString() + " to " +
 				lastDate.dateString() + " in increments of " + increment.toString() +
 				" (total days = " + totalDays + ")");
 
 		String filename = "no name";
 		Timestamp.dateSeparator("");
 
+		String incName = increment.toString().toLowerCase();
+		
 		// Write the baseline data to output files
 		try {
 			// Mean baseline climatology file
-			filename = outputPath + climatologyPrefix + dataType.toString()
-					+ "-" + increment.toString() + "-mean-" + firstDate.dateString()
-					+ ".bin";
+			filename = outputPath + climatologyPrefix + dataType.toString() + 
+					frequency + polarization +
+					"-mean-" + incName + "-" + firstDate.dateString() + ".bin";
 
 			Tools.statusMessage("    mean output filename = " + filename);
 			
@@ -513,9 +502,9 @@ public class Climatology extends GeoObject {
 			file.close();
 			
 			// Standard deviation climatology file
-			filename = outputPath + climatologyPrefix + dataType.toString()
-					+ "-" + increment.toString() + "-sd-" + firstDate.dateString()
-					+ ".bin";
+			filename = outputPath + climatologyPrefix + dataType.toString() +
+					frequency + polarization +
+					"-sd-" + incName + "-" + firstDate.dateString() + ".bin";
 
 			Tools.statusMessage("    sd output filename = " + filename);
 			
@@ -530,5 +519,13 @@ public class Climatology extends GeoObject {
 		}
 
 		Timestamp.dateSeparator(".");
+		
+		// Warm-fuzzy check...
+		int r = 50;
+		int c = 50;
+		Tools.message("Rows,cols = " + rows + "," + cols); 
+		Tools.message("Population at " + r + "," + c + " = " + population[r][c]); 
+		Tools.message("Mean at " + r + "," + c + " = " + mean[r][c]); 
+		Tools.message("Standard deviation at " + r + "," + c + " = " + sd[r][c]); 
 	}
 }

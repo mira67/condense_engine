@@ -96,8 +96,8 @@ public class Condense extends GeoObject {
 	static boolean generateImages = false; // Generate test images
 
 	// SSMI data selection
-	static String polarization = "v"; // Horizontal (h) or vertical (v)
-	static int frequency = 19; // Frequency of SSMI data
+	static String suffix1 = ""; 	// Frequency of SSMI data
+	static String suffix2 = ""; 	// SSMI Polarizataion: (h) or (v)
 
 	/*-------------------------------------------------------------------------
 	// INTERNAL GLOBAL DATA, NOT FOR USER TWEAKING
@@ -328,7 +328,7 @@ public class Condense extends GeoObject {
 				case SSMI:
 					filename = DatasetSSMI.getFileName(dataPath, date.year(),
 							date.month(), date.dayOfMonth(),
-							addYearToInputDirectory, frequency, polarization);
+							addYearToInputDirectory, suffix1, suffix2);
 
 					if (filename == null) break;
 				
@@ -392,8 +392,8 @@ public class Condense extends GeoObject {
 
 		case SSMI:
 			filename = DatasetSSMI.getFileName(dataPath, startYear,
-					startMonth, startDay, addYearToInputDirectory, frequency,
-					polarization);
+					startMonth, startDay, addYearToInputDirectory, suffix1,
+					suffix2);
 
 			dataset = new DatasetSSMI(filename);
 
@@ -852,12 +852,12 @@ public class Condense extends GeoObject {
 							+ surfaceLons);
 					break;
 				case "polarization":
-					polarization = value;
-					Tools.statusMessage("Polarization = " + polarization);
+					suffix2 = value;
+					Tools.statusMessage("Polarization = " + suffix2);
 					break;
 				case "frequency":
-					frequency = Integer.valueOf(value);
-					Tools.statusMessage("Frequency = " + frequency);
+					suffix1 = value;
+					Tools.statusMessage("Frequency = " + suffix1);
 					break;
 				case "readsurface":
 					readSurface = Boolean.valueOf(value);

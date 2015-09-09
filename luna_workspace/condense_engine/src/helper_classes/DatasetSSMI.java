@@ -30,7 +30,7 @@ public class DatasetSSMI extends Dataset {
 	 * Generate the file name for a daily SSMI file.
 	 */
 	public static String getFileName(String path, int year, int month,
-			int day, boolean addYearToInputDirectory, int frequency,
+			int day, boolean addYearToInputDirectory, String frequency,
 			String polarization) {
 
 		if (addYearToInputDirectory) {
@@ -51,7 +51,7 @@ public class DatasetSSMI extends Dataset {
 
 		final String date = yearString + monthString + dayString;
 
-		final String channel = String.valueOf(frequency) + polarization;
+		final String channel = frequency + polarization;
 
 		// Search for this date in the directory of file names.
 		File dir = new File(path);
@@ -96,11 +96,10 @@ public class DatasetSSMI extends Dataset {
 			DataFile file = new DataFile(filename);
 			length = file.length();
 			file.close();
-			Tools.debugMessage("DatasetSSMI::readMetadata: file length = " + length);
 		} catch(Exception e) {
-			Tools.message("**** The first date specified must have a file, to read the metadata.");
-			Tools.errorMessage("DatasetSSMI", "readMetadata", "Trying to get metadata from " +
-		                       "the first file:\n" + filename + "\n but unable to open it", e);
+			Tools.warningMessage("DatasetSSMI::readMetadata: could not get metadata from " +
+		                       "the file: " + filename + " -- Unable to open it.");
+			return null;
 		}
 		
 		// Southern hemisphere,	85.5 and 91.7 GHz, 839296 Bytes
@@ -131,8 +130,7 @@ public class DatasetSSMI extends Dataset {
 			return metadata;
 		}
 
-		Tools.errorMessage("DatasetSSMI", "readMetadata", "Unable to determine data dimensions: " + filename,
-				new Exception());
+		Tools.warningMessage("DatasetSSMI::readMetadata: Unable to determine data dimensions: " + filename);
 		
 		return metadata;		
 	}
