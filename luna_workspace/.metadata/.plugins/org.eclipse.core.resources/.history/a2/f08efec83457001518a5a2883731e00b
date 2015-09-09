@@ -91,12 +91,11 @@ public class Climate extends GeoObject {
 	    procs = Runtime.getRuntime().availableProcessors(); 
 	    System.out.println("Available processors = " + procs);
 	    
-	    // Max out at 8, 4 for PCs. Avoid meltdowns.
-	    if (procs >= 8) procs = 8;
-	    if (procs < 8) procs = 4;
+	    // Use one less than the max.
+	    procs--;
 
-	    // Create an array to hold parallel threads.
-	    //ParallelTask[] threads = new ParallelTask[procs]; 
+	    // Create an array to hold threads
+	    ParallelTask[] threads = new ParallelTask[procs]; 
 	    
 		// Loop through all possible increment types.
 		for (Timespan.Increment increment : Timespan.Increment.values()) {
@@ -123,9 +122,13 @@ public class Climate extends GeoObject {
 			// Loop through all frequencies
 			for ( String freq : frequencies) {
 				
+				suffix1 = freq;
+				
 				// Loop through all polarizations
 				for ( String pol : polarizations) {
 				
+					suffix2 = pol;
+					
 					Tools.statusMessage("Process " + dataType.toString() + " data, " +
 							"frequency = " + freq + "  polarization = " + pol +
 							"  increment = " + increment.toString());
@@ -153,88 +156,4 @@ public class Climate extends GeoObject {
 		endTime = (endTime - firstTime) / 1000;
 		Tools.statusMessage("Total time to process = " + endTime + " seconds");
 	}
-
-
-	/* ParallelTask
-	 * 
-	 * Class for a parallel thread.
-	 */
-	static class ParallelTask extends Thread { 
-
-		// Variables to be retrieved by the master thread must be static 
-		int threadNumber; 
-		
-		Dataset.DataType dataT;
-		
-		int startY;
-		int startM;
-		int startD;
-		
-		int finalY;
-		int finalM;
-		int finalD;
-		
-		Timespan.Increment inc;
-		
-		String dataP;
-		String outputP;
-		String freq;
-		String pol;
-		
-		// constructor
-		public ParallelTask(int id, Dataset.DataType datatype,
-				int startYear, int startMonth, int startDay,
-				int finalYear, int finalMonth, int finalDay,
-				Timespan.Increment increment,
-				String dataPath, String outputPath,
-				String frequency, String polarity) {
-			
-			this.threadNumber = id;
-			this.dataT = datatype;
-			
-			this.startY = startYear;
-			this.startM = startMonth;
-			this.startD = startDay;
-			
-			this.finalY = finalYear;
-			this.finalM = finalMonth;
-			this.finalD = finalDay;
-			
-			this.inc = increment;
-			this.dataP = dataPath;
-			this.outputP = outputPath;
-			this.freq = frequency;
-			this.pol = polarity;
-		}
-
-		/* run
-		 * 
-		 * This is where the work gets done.
-		 */
-		public void run() {
-
-			Tools.statusMessage("Thread: " + threadNumber +
-					"  Process " + dataT.toString() + " data, " +
-					"frequency = " + freq + "  polarization = " + pol +
-					"  increment = " + inc.toString());
-			Tools.statusMessage(
-					+ startYear + "." + startMonth + "." + startDay + " to "
-					+ finalYear + "." + finalMonth + "." + finalDay);
-
-			long startTime = System.currentTimeMillis();
-
-			Climatology climate = new Climatology( dataT,
-					startYear, startMonth, startDay,
-					finalYear, finalMonth, finalDay, inc,
-					dataP, outputP,
-					freq, pol);
-
-			climate.run();
-			
-			long endTime = System.currentTimeMillis();
-			endTime = (endTime - startTime) / 1000;
-			Tools.statusMessage("Time to process = " + endTime + " seconds");
-			Tools.statusMessage("");
-		}
-	} 
 }
