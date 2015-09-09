@@ -91,11 +91,12 @@ public class Climate extends GeoObject {
 	    procs = Runtime.getRuntime().availableProcessors(); 
 	    System.out.println("Available processors = " + procs);
 	    
-	    // Max out at 8 processes. Avoid meltdowns?
-	    procs = 8;
+	    // Max out at 8, 4 for PCs. Avoid meltdowns.
+	    if (procs >= 8) procs = 8;
+	    if (procs < 8) procs = 4;
 
 	    // Create an array to hold parallel threads.
-	    ParallelTask[] threads = new ParallelTask[procs]; 
+	    //ParallelTask[] threads = new ParallelTask[procs]; 
 	    
 		// Loop through all possible increment types.
 		for (Timespan.Increment increment : Timespan.Increment.values()) {
@@ -119,43 +120,36 @@ public class Climate extends GeoObject {
 			String[] frequencies = {"19", "22", "37", "85"};
 			String[] polarizations = {"h", "v"};
 
-			// This keeps track of how many parallel processes we create.
-			int processID = 0;
-			
 			// Loop through all frequencies
 			for ( String freq : frequencies) {
 				
 				// Loop through all polarizations
 				for ( String pol : polarizations) {
-					
-					// Create a new thread
-				    threads[processID] = new ParallelTask(
-				    		processID, dataType,
+				
+					Tools.statusMessage("Process " + dataType.toString() + " data, " +
+							"frequency = " + freq + "  polarization = " + pol +
+							"  increment = " + increment.toString());
+					Tools.statusMessage(
+							+ startYear + "." + startMonth + "." + startDay + " to "
+							+ finalYear + "." + finalMonth + "." + finalDay);
+
+					long startTime = System.currentTimeMillis();
+
+					Climatology climate = new Climatology( dataType,
 							startYear, startMonth, startDay,
-							finalYear, finalMonth, finalDay,
-							increment,
+							finalYear, finalMonth, finalDay, increment,
 							dataPath, outputPath,
-							freq, pol );
-				    
-				    // Start it.
-				    threads[processID].start();
-				    
-				    // Increment the process ID.
-				    processID++;
+							freq, pol);
+
+					climate.run();
+					
+					endTime = System.currentTimeMillis();
+					endTime = (endTime - startTime) / 1000;
+					Tools.statusMessage("Time to process = " + endTime + " seconds");
+					Tools.statusMessage("");
 				}
 			}
-
-			// Combine the output
-		    for (int i = 0; i < procs; i++) { 
-		    	try { 
-		    		// Re-unites all threads; waits until each thread is done.
-		    		threads[i].join(); 
-		    	}
-		    	catch (InterruptedException e) {
-		    	} 
-		    } 
 		}
-		
 		endTime = (endTime - firstTime) / 1000;
 		Tools.statusMessage("Total time to process = " + endTime + " seconds");
 	}

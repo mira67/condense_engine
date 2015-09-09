@@ -142,6 +142,30 @@ public class Climate extends GeoObject {
 				    
 				    // Increment the process ID.
 				    processID++;
+				    
+					/*
+					Tools.statusMessage("Process " + dataType.toString() + " data, " +
+							"frequency = " + freq + "  polarization = " + pol +
+							"  increment = " + increment.toString());
+					Tools.statusMessage(
+							+ startYear + "." + startMonth + "." + startDay + " to "
+							+ finalYear + "." + finalMonth + "." + finalDay);
+
+					long startTime = System.currentTimeMillis();
+
+					Climatology climate = new Climatology( dataType,
+							startYear, startMonth, startDay,
+							finalYear, finalMonth, finalDay, increment,
+							dataPath, outputPath,
+							freq, pol);
+
+					climate.run();
+					
+					endTime = System.currentTimeMillis();
+					endTime = (endTime - startTime) / 1000;
+					Tools.statusMessage("Time to process = " + endTime + " seconds");
+					Tools.statusMessage("");
+					*/
 				}
 			}
 
