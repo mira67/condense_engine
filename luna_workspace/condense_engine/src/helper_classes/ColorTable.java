@@ -15,7 +15,7 @@ public class ColorTable extends GeoObject {
 	
     ArrayList<Color> table = new ArrayList<Color>();
     
-    ColorTable() {
+    public ColorTable() {
     	add(BLACK);
     	add(WHITE);
     }

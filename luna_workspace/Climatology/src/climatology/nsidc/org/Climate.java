@@ -18,13 +18,12 @@ public class Climate extends GeoObject {
 	// Start and end dates for the processing.
 	// A data file for the start date *must* exist because that will be used
 	// to generate the metadata.
-	static int startYear = 2012;
-	//static int startYear = 2010;
+	//static int startYear = 2012;
+	static int startYear = 1990;
 	static int startMonth = 1;
 	static int startDay = 1;
 
-	static int finalYear = 2012;
-	//static int finalYear = 1990;
+	static int finalYear = 2014;
 	static int finalMonth = 12;
 	static int finalDay = 31;
 
@@ -41,18 +40,6 @@ public class Climate extends GeoObject {
 
 	// For parallel processing
 	static int procs; 
-
-	// Files and paths for i/o
-	
-	//...WINDOWS
-	/*
-	static final 
-	static final String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
-			dataType.toString() + "/daily/";
-	*/
-	
-	// ...LINUX
-	
 	
 	/*-------------------------------------------------------------------------
 	// MAIN PROGRAM
@@ -65,15 +52,14 @@ public class Climate extends GeoObject {
 		Tools.setWarnings(warningMessages);
 
 		long firstTime = System.currentTimeMillis();
-		long endTime = 0;
 		
 		Dataset.DataType dataType = Dataset.DataType.SSMI;
 
 		// Linux
-		// String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";
+		String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";
 		// Windows
-		String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
-				dataType.toString() + "/daily/";
+		//String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
+		//		dataType.toString() + "/daily/";
 		
 		//***************************************
 		// Generic Processing
@@ -110,11 +96,11 @@ public class Climate extends GeoObject {
 			) continue;
 
 			// Linux
-			// String outputPath = "/home/glgr9602/condense/climatology/" +
-			//			dataType.toString() + "/" + name + "/";
+			String outputPath = "/home/glgr9602/condense/climatology/" +
+						dataType.toString() + "/" + name + "/";
 			// Windows
-			String outputPath = "/Users/glgr9602/Desktop/condense/climatology/" +				
-					dataType.toString() + "/" + name + "/";
+			//String outputPath = "/Users/glgr9602/Desktop/condense/climatology/" +				
+			//		dataType.toString() + "/" + name + "/";
 			
 			String[] frequencies = {"19", "22", "37", "85"};
 			String[] polarizations = {"h", "v"};
@@ -156,8 +142,8 @@ public class Climate extends GeoObject {
 		    } 
 		}
 		
-		endTime = (endTime - firstTime) / 1000;
-		Tools.statusMessage("Total time to process = " + endTime + " seconds");
+		firstTime = (System.currentTimeMillis() - firstTime) / 1000;
+		Tools.statusMessage("Total time to process = " + firstTime + " seconds");
 	}
 
 

@@ -23,26 +23,26 @@ public class RasterLayer extends GeoObject {
 	protected String layerName = "unknown";
 
 	// Constructors
-	RasterLayer() {
+	public RasterLayer() {
 	}
 
 	// Constructor with layer name.
-	RasterLayer(String name) {
+	public RasterLayer(String name) {
 		layerName = name;
 	}
 
 	// Constructor with integer pixel data. Create monochrome pixels.
-	RasterLayer(ColorTable c, int data[][]) {
+	public RasterLayer(ColorTable c, int data[][]) {
 		addPixels(c, data);
 	}
 
 	/*// Constructor with sensor pixel data
-	RasterLayer(ColorTable c, GriddedVector sensorPix[][]) {
+	public RasterLayer(ColorTable c, GriddedVector sensorPix[][]) {
 		addPixels(c, sensorPix);
 	}*/
 
 	// Constructor with displayable pixel data.
-	RasterLayer(ArrayList<PixelDisplayable> pix) {
+	public RasterLayer(ArrayList<PixelDisplayable> pix) {
 		addPixels(pix);
 	}
 

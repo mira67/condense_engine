@@ -38,6 +38,7 @@ public class Timespan extends GeoObject {
     		days = maxDays;}
     	public int startMonth() {return startMonth;}
     	public int maxDays() {return days;}
+    	public String getName() {return name;}
 
     	/* getType
     	 * 
