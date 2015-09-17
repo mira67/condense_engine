@@ -7,6 +7,8 @@ import org.junit.After;
 
 import helper_classes.Tools;
 
+import java.nio.ByteBuffer;
+
 /**
  * Tools Tester.
  *
@@ -26,10 +28,18 @@ public class ToolsTest {
 
     /**
      * Method: randomInt(int n)
+     *
+     * I suppose you'd have to run this a bunch of times in order to get a good idea that it's compliant.
+     *      Do this if you wish ;)
      */
     @Test
     public void testRandomInt() throws Exception {
-//TODO: Test goes here... 
+
+        int numLessThan = 50;
+        int randomInt = Tools.randomInt(numLessThan);
+        Assert.assertTrue(randomInt < numLessThan);
+        Assert.assertTrue(randomInt >= 0);
+
     }
 
     /**
@@ -38,16 +48,46 @@ public class ToolsTest {
     @Test
     public void testInByteRange() throws Exception {
 
+        int greaterThan = 256;
+        int adjustedGreaterThan = Tools.inByteRange(greaterThan);
+        Assert.assertEquals(adjustedGreaterThan, 255);
 
+        int lessThan = -5;
+        int adjustedLessThan = Tools.inByteRange(lessThan);
+        Assert.assertEquals(adjustedLessThan, 0);
+
+        int middle = 100;
+        int adjustedMiddle = Tools.inByteRange(middle);
+        Assert.assertEquals(adjustedMiddle, middle);
 
     }
 
     /**
      * Method: LSBtoMSB(byte[] inBytes)
+     *
+     * TODO: This needs to have some input testing.
      */
     @Test
     public void testLSBtoMSB() throws Exception {
-//TODO: Test goes here... 
+
+        byte[] littleEndianByteArray = new byte[8];
+        littleEndianByteArray[0] = 0b0001_1000;
+        littleEndianByteArray[1] = 0b0110_0001;
+        littleEndianByteArray[2] = 0b0011_1110;
+        littleEndianByteArray[3] = 0b0101_0110;
+        littleEndianByteArray[4] = 0b0000_1001;
+        littleEndianByteArray[5] = 0b0000_1101;
+        littleEndianByteArray[6] = 0b0000_0011;
+        littleEndianByteArray[7] = 0b0111_1111;
+
+        double msbDouble = Tools.LSBtoMSB(littleEndianByteArray);
+
+//        // Leave this here, please.  It should print out 3.023557212554879E-191 when uncommented.
+//        System.out.println(ByteBuffer.wrap(littleEndianByteArray).getDouble());
+
+        // TODO: Pick a more appropriate delta for this.  I just pulled one out of a hat.
+        Assert.assertEquals(msbDouble, 6.532233196936644E303, 0.000000001);
+
     }
 
     /**
