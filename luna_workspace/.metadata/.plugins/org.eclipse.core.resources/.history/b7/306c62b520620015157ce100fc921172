@@ -37,7 +37,7 @@ public class Scratch {
 					// Read the encoded data from the files
 					int lat = latitudes.readInt();
 					int lon = longitudes.readInt();
-					int type = Tools.unsignedByteToInt(surfaceFile.readByte());
+					byte type = surfaceFile.readByte();
 					
 					// Reverse the byte order (for Windows).
 					lat = Tools.reverseByteOrder(lat);
@@ -48,7 +48,7 @@ public class Scratch {
 					double lonD = ((double) lon) / 100000.0;
 					
 					// Create the suface object at this location
-					surface[r][c] = new SurfaceVector( type,
+					surface[r][c] = new SurfaceVector( (int) type,
 							new GriddedLocation(r,c,latD,lonD), 0);
 				}
 			}
@@ -60,20 +60,20 @@ public class Scratch {
 		catch(Exception e) {
 			Tools.warningMessage("Failed to open file");
 		}
-		
-		// Output the converted file
-		makeFile(surface);
+		for (int i = 0; i < ROWS; i = i + 10) {
+			Tools.message("surface["+i+"]["+i+"] = " + surface[i][i].classification());
+		}
 	}
 
 	
 	/*
 	 * makeFile
 	 */
-	protected static void makeFile(SurfaceVector[][] surface) {
+	protected void makeFile(SurfaceVector[][] surface) {
 		
 		// Use the dates to make file names
 		
-		String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\surface-land-"+ROWS+".bin";
+		String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\surface"+ROWS+".bin";
 
 		// Write the data to the output file
 		try {
@@ -86,23 +86,16 @@ public class Scratch {
 			
 			for (int r = 0; r < ROWS; r++) {
 				for (int c = 0; c < COLS; c++) {
-					array[r][c] = (double) surface[r][c].data();
-					
-					// Add contrast to the features
-					if (array[r][c] == 0) array[r][c] = 50; // land
-					if (array[r][c] == 255) array[r][c] = 100; // water
-					if (array[r][c] == 101) array[r][c] = 255; // ice
-					if (array[r][c] == 252) array[r][c] = 0; // Coastline
-					if (array[r][c] == 254) array[r][c] = 175; // off the map
+					array[r][c] = (double) surface[r][c].getSurface();
 				}
 			}
 			
 			file.writeDouble2d(array);
 			file.close();
-			Tools.statusMessage("end program");
 		}
 		catch(Exception e) {
-			Tools.warningMessage("Could not open output file: " + filename);
+			Tools.warningMessage("Could not open output file: " +
+					filename);
 		}
 	}
 }

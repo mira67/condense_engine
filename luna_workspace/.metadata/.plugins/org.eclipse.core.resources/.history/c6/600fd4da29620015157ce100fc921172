@@ -73,7 +73,7 @@ public class Scratch {
 		
 		// Use the dates to make file names
 		
-		String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\surface-land-"+ROWS+".bin";
+		String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\surface"+ROWS+".bin";
 
 		// Write the data to the output file
 		try {

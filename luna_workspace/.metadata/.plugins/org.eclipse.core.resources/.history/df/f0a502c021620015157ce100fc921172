@@ -11,9 +11,7 @@ import helper_classes.*;
 
 public class Viewer {
 
-	///static String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\climatology\\ssmi\\climate-ssmi19h-sd-jja-19900101.bin";
-	static String path = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\";
-	static String filename = "surface-land-1441.bin";
+	static String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\climatology\\ssmi\\climate-ssmi19h-sd-jja-19900101.bin";
 
 	public enum DataType {
 		DOUBLE,
@@ -23,7 +21,7 @@ public class Viewer {
 		LONG;		
 	}
 	
-	static final DataType type = DataType.DOUBLE;
+	static final DataType type = DataType.INTEGER;
 	
 	public static void main(String[] args) {
 	
@@ -31,15 +29,11 @@ public class Viewer {
 		
 		// Read the file
 		try {
-			file = new DataFile( path+filename );
-
-			// Surface, high res
-			int rows = 1441;
-			int cols = 1441;
-
+			file = new DataFile( filename );
+			
 			// Everything less than 85 GHz.
-			///int rows = 332;
-			///int cols = 316;
+			int rows = 332;
+			int cols = 316;
 
 			// Anything more than 85 GHz
 			//int rows = 664;
@@ -65,7 +59,7 @@ public class Viewer {
 
 			file.close();
 			
-			DisplayImage(filename, array, rows, cols);
+			DisplayImage(array, rows, cols);
 		}
 		catch(Exception e) {
 			Tools.warningMessage("Failed to open file: " + filename );
@@ -74,7 +68,7 @@ public class Viewer {
 		Tools.message("End program");
 	}
 	
-	static public void DisplayImage( String filename, double[][] array, int rows, int cols ) {
+	static public void DisplayImage( double[][] array, int rows, int cols ) {
 		
 		// Create an image obect
 		Image image = new Image();
@@ -92,7 +86,7 @@ public class Viewer {
 		image.addLayer(layer);
 		
 		// Display the image
-		image.display(filename, rows, cols);
+		image.display("19GHz horizontal, Feb 1990-2014 SD", rows, cols);
 		
 	}
 

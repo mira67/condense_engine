@@ -1,0 +1,61 @@
+import helper_classes.*;
+
+/* a sandbox for code experimentation.
+ * 
+ */
+
+public class Scratch {
+
+	static String latsFile = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\SHLATLSB.bin";
+	static String lonsFile = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\SHLONLSB.bin";
+	static String coastlineFile = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\Sh_loci_land50_landcoast12.5km.1441x1441.bin";
+
+	final static int ROWS = 1441;
+	final static int COLS = 1441;
+	
+	public static void main(String[] args) {
+
+		DataFile latitudes;
+		DataFile longitudes;
+		DataFile surfaceFile;
+
+		SurfaceVector[][] surface = new SurfaceVector[ROWS][COLS];
+
+		// Read the file
+		try {
+			latitudes = new DataFile( latsFile );	
+			
+			for (int r = 0; r < ROWS; r++) {
+				for (int c = 0; c < COLS; c++) {
+					
+					int lat = latitudes.readInt();
+					int lon = longitudes.readInt();
+					byte type = surfaceFile.readByte();
+					
+					// Reverse the byte order (for Windows).
+					lat = Tools.reverseByteOrder(lat);
+					lon = Tools.reverseByteOrder(lon);
+
+					// Decode the data, convert to doubles.
+					double latD = ((double) lat) / 100000.0;
+					double lonD = ((double) lon) / 100000.0;
+					
+					surface[r][c] = new SurfaceVector( type,
+							new GriddedLocation(r,c,latD,lonD), 0);
+					
+					
+				}
+			}
+
+			file.close();			
+		}
+		catch(Exception e) {
+			Tools.warningMessage("Failed to open file: " + filename );
+		}
+
+		for (int i = 0; i < ROWS; i = i + 10) {
+			Tools.message("Array["+i+"]["+i+"] = " + array[i][i]);
+		}
+	}
+
+}

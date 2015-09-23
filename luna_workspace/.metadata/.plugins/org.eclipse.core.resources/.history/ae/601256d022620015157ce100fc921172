@@ -13,7 +13,7 @@ public class Viewer {
 
 	///static String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\climatology\\ssmi\\climate-ssmi19h-sd-jja-19900101.bin";
 	static String path = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\";
-	static String filename = "surface-land-1441.bin";
+	static String filename = "surface1441.bin";
 
 	public enum DataType {
 		DOUBLE,
@@ -23,7 +23,7 @@ public class Viewer {
 		LONG;		
 	}
 	
-	static final DataType type = DataType.DOUBLE;
+	static final DataType type = DataType.INTEGER;
 	
 	public static void main(String[] args) {
 	

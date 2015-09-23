@@ -138,6 +138,32 @@ public class DataFile extends GeoObject {
 	}
 
 	/*
+	 * readByte
+	 * 
+	 * Read a byte from the data file.
+	 */
+	public byte readByte() throws Exception {
+
+		if (!fileIsReadable) {
+			Tools.warningMessage("DataFile::readByte: " + filename
+					+ " is not open for reading.");
+			throw (new Exception("Cannot read file, not open for reading"));
+		}
+
+		byte b; 
+		
+		try {
+			// Read in the data
+			b = dataInputStream.readByte();
+		} catch (Exception e) {
+			Tools.warningMessage("DataFile::readByte: error on read - " + e);
+			throw (e);
+		}
+
+		return b;
+	}
+
+	/*
 	 * readBytes
 	 * 
 	 * Read the byte data from the file.
@@ -417,9 +443,6 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
 
-		Tools.debugMessage("    DataFile::writeDoubles: writing file: "
-				+ filename);
-
 		try {
 			// Write the data
 			for (int i = 0; i < data.length; i++) {
@@ -444,9 +467,6 @@ public class DataFile extends GeoObject {
 					+ " is not open for writing.");
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
-
-		Tools.debugMessage("    DataFile::writeDoubles: writing file: "
-				+ filename);
 
 		try {
 			// Write the data
@@ -473,9 +493,6 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
 
-		Tools.debugMessage("    DataFile::writeFloats: writing file: "
-				+ filename);
-
 		try {
 			// Write the data
 			for (int i = 0; i < data.length; i++) {
@@ -500,9 +517,6 @@ public class DataFile extends GeoObject {
 					+ " is not open for writing.");
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
-
-		Tools.debugMessage("    DataFile::writeFloat2d: writing file: "
-				+ filename);
 
 		try {
 			// Write the data
@@ -531,9 +545,6 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
 
-		Tools.debugMessage("    DataFile::writeBytes: writing file: "
-				+ filename);
-
 		try {
 			// Write the data
 			for (int i = 0; i < data.length; i++) {
@@ -558,9 +569,6 @@ public class DataFile extends GeoObject {
 					+ " is not open for writing.");
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
-
-		Tools.debugMessage("    DataFile::writeByte2d: writing file: "
-				+ filename);
 
 		try {
 			// Write the data
@@ -589,9 +597,6 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
 
-		Tools.debugMessage("    DataFile::writeInt2d: writing file: "
-				+ filename);
-
 		try {
 			// Write the data
 			for (int i = 0; i < data.length; i++) {
@@ -619,12 +624,8 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
-		Tools.debugMessage("    DataFile::readInt2d: reading file " + filename);
-
 		// Get the size of the file in bytes
 		long length = file.length();
-		Tools.debugMessage("    DataFile::readInt2d: file length = " + length
-				+ " bytes, Integers = " + length / 4);
 
 		if (length / 4 > rows * cols) {
 			Tools.warningMessage(" DataFile::readInt2d: Supplied rows and cols is greater than file size.");
@@ -675,8 +676,6 @@ public class DataFile extends GeoObject {
 					+ " is not open for reading.");
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
-
-		Tools.debugMessage("    DataFile::readByte2D: reading file " + filename);
 
 		// Get the size of the file in bytes
 		long length = file.length();
@@ -733,13 +732,8 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
-		Tools.debugMessage("    DataFile::read2ByteInts2D: reading file "
-				+ filename);
-
 		// Get the size of the file in 2-byte integers
 		long length = file.length() / 2;
-		Tools.debugMessage("    DataFile::read2ByteInts2D: file length = "
-				+ length + " 2-byte integers");
 
 		if (rows * cols > length) {
 			Tools.warningMessage(" DataFile::read2ByteInts2D: Supplied rows and cols greater than file size.");
