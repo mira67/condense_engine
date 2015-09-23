@@ -502,7 +502,7 @@ public class Condense extends GeoObject {
 				// TODO
 				
 				GriddedVector[][] condensedData = Algorithms.algorithm1(
-					data, mean, sd, threshold, increment);
+					data, mean, sd, threshold);
 
 				// Store the data in a database.
 				database.storeVectorArray(condensedData, locations);

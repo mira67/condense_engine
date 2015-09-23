@@ -19,7 +19,8 @@ public class Algorithms extends GeoObject {
 			GriddedVector[][] data,
 			double[][] mean,
 			double[][] sd,
-			double sdThreshold) {
+			double sdThreshold,
+			Timespan.Increment increment) {
 		
 		GriddedVector[][] condensedData = new GriddedVector[ data.length ][ data[0].length ];
 
