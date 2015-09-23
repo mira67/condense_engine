@@ -173,6 +173,23 @@ public class Tools extends GeoObject {
 	}
 
 	/*
+	 * reverseByteOrder
+	 * 
+	 * Converts an little-endian integer (LSB) to big-endian (MSB), and vice-versa.
+	 */
+	public static int reverseByteOrder(int i) {
+		byte[] b = Tools.intToByteArray( i );
+		
+		byte[] b2 = new byte[4];
+		b2[3] = b[0];
+		b2[2] = b[1];
+		b2[1] = b[2];
+		b2[0] = b[3];
+		
+		return Tools.byteArrayToInt(b2);
+	}
+
+	/*
 	 * uniqueFileName
 	 * 
 	 * Return a unique file name, just in case the supplied one already exists.

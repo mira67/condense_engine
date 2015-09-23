@@ -11,7 +11,7 @@ import helper_classes.*;
 
 public class Viewer {
 
-	static String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\climatology\\ssmi\\climate-ssmi19h-sd-jja-19900101.bin";
+	static String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\climatology\\ssmi\\climate-ssmi19h-sd-feb-19900101.bin";
 	
 	public static void main(String[] args) {
 	

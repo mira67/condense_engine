@@ -1,0 +1,38 @@
+import helper_classes.*;
+
+public class Scratch {
+
+	static String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\SHLATLSB.bin";
+
+	final static int ROWS = 721;
+	final static int COLS = 721;
+	
+	public static void main(String[] args) {
+
+		DataFile file;
+
+		double array[][] = new double[ROWS][COLS];
+		
+		// Read the file
+		try {
+			file = new DataFile( filename );	
+			
+			for (int r = 0; r < ROWS; r++) {
+				for (int c = 0; c < COLS; c++) {
+					array[r][c] = ((double) file.readInt()) / 1000.0;
+				}
+			}
+
+			file.close();			
+		}
+		catch(Exception e) {
+			Tools.warningMessage("Failed to open file: " + filename );
+		}
+
+		Tools.message("Array[0][0] = " + array[0][0]);
+		Tools.message("Array[ROWS-1][COLS-1] = " + array[ROWS-1][COLS-1]);
+		Tools.message("Array[ROWS/2][COLS/2] = " + array[ROWS/2][COLS/2]);
+		Tools.message("End program");
+	}
+
+}

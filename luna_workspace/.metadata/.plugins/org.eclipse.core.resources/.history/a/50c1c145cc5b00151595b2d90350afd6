@@ -58,7 +58,7 @@ public class Climate extends GeoObject {
 		
 		// Linux
 		// String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";	// SSMI
-		// String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";	// AVHRR
+		// String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";		// AVHRR
 		
 		// Windows
 		String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
@@ -74,17 +74,19 @@ public class Climate extends GeoObject {
 	    // Create an array to hold parallel threads.
 	    ParallelTask[] threads = new ParallelTask[procs]; 
 	    		
-		//************************************************
-		// Generic one-time processing - passed parameters
-		//************************************************
+		//***************************************
+		// Generic Processing - passed parameters
+		//***************************************
 		
 		///increment = Timespan.Increment.getType(args[0]);
 		///suffix1 = args[1];  // Frequency, for SSMI data
 		///suffix2 = args[2];  // Polarization, for SSMI data
 
 		//***************************************
-		// Batch Processing
+		// Batch SSMI Processing
 		//***************************************
+
+		/*
 	    
 		// Loop through all possible increment types.
 		for (Timespan.Increment increment : Timespan.Increment.values()) {
@@ -104,16 +106,12 @@ public class Climate extends GeoObject {
 			// Windows
 			//String outputPath = "/Users/glgr9602/Desktop/condense/climatology/" +				
 			//		dataType.toString() + "/" + name + "/";
+			
+			String[] frequencies = {"19", "22", "37", "85"};
+			String[] polarizations = {"h", "v"};
 
 			// This keeps track of how many parallel processes we create.
 			int processID = 0;
-			
-			//***************************************
-			// SSMI
-			//***************************************
-			/*
-			String[] frequencies = {"19", "22", "37", "85"};
-			String[] polarizations = {"h", "v"};
 			
 			// Loop through all frequencies
 			for ( String freq : frequencies) {
@@ -138,37 +136,71 @@ public class Climate extends GeoObject {
 				}
 			}
 
-			*/
+			// Combine the output
+		    for (int i = 0; i < procs; i++) { 
+		    	try { 
+		    		// Re-unites all threads; waits until each thread is done.
+		    		threads[i].join(); 
+		    	}
+		    	catch (InterruptedException e) {
+		    	} 
+		    } 
+		}
+		*/
+		
 
-			//***************************************
-			// AVHRR
-			//***************************************
+		//***************************************
+		// Batch AVHRR Processing
+		//***************************************
 
-			String[] wavelengths = {"ch1", "ch2", "ch3", "ch4", "ch5"};
+		// Loop through all possible increment types.
+		for (Timespan.Increment increment : Timespan.Increment.values()) {
+			
+			// Skip over unwanted increments
+			String name = increment.name().toLowerCase();
+			
+			if (name.compareTo("none") == 0  ||
+				name.compareTo("day") == 0  ||
+				name.compareTo("year") == 0  ||
+				name.compareTo("week") == 0
+			) continue;
 
-			// Loop through all wavelengths
-			for ( String wavelength : wavelengths) {
+			// Linux
+			String outputPath = "/home/glgr9602/condense/climatology/" +
+						dataType.toString() + "/" + name + "/";
+			// Windows
+			//String outputPath = "/Users/glgr9602/Desktop/condense/climatology/" +				
+			//		dataType.toString() + "/" + name + "/";
+			
+			String[] frequencies = {"19", "22", "37", "85"};
+			String[] polarizations = {"h", "v"};
+
+			// This keeps track of how many parallel processes we create.
+			int processID = 0;
+			
+			// Loop through all frequencies
+			for ( String freq : frequencies) {
+				
+				// Loop through all polarizations
+				for ( String pol : polarizations) {
 					
-				// Create a new thread
-			    threads[processID] = new ParallelTask(
+					// Create a new thread
+				    threads[processID] = new ParallelTask(
 				    		processID, dataType,
 							startYear, startMonth, startDay,
 							finalYear, finalMonth, finalDay,
 							increment,
 							dataPath, outputPath,
-							wavelength, "" );
-					    
-			   // Start it.
-			   threads[processID].start();
-					    
-			   // Increment the process ID.
-			   processID++;
+							freq, pol );
+				    
+				    // Start it.
+				    threads[processID].start();
+				    
+				    // Increment the process ID.
+				    processID++;
+				}
 			}
 
-			//*****************************************
-			// FINISHED WITH SENSOR-SPECIFIC PROCESSING
-			//*****************************************
-			
 			// Combine the output
 		    for (int i = 0; i < procs; i++) { 
 		    	try { 
@@ -209,8 +241,8 @@ public class Climate extends GeoObject {
 		
 		String dataP;
 		String outputP;
-		String suff1;
-		String suff2;
+		String freq;
+		String pol;
 		
 		// constructor
 		public ParallelTask(int id, Dataset.DataType datatype,
@@ -218,7 +250,7 @@ public class Climate extends GeoObject {
 				int finalYear, int finalMonth, int finalDay,
 				Timespan.Increment increment,
 				String dataPath, String outputPath,
-				String suffix1, String suffix2) {
+				String frequency, String polarity) {
 			
 			this.threadNumber = id;
 			this.dataT = datatype;
@@ -234,8 +266,8 @@ public class Climate extends GeoObject {
 			this.inc = increment;
 			this.dataP = dataPath;
 			this.outputP = outputPath;
-			this.suff1 = suffix1;
-			this.suff2 = suffix2;
+			this.freq = frequency;
+			this.pol = polarity;
 		}
 
 		/* run
@@ -246,20 +278,19 @@ public class Climate extends GeoObject {
 
 			Tools.statusMessage("Thread: " + threadNumber +
 					"  Process " + dataT.toString() + " data, " +
-					"suffix1 = " + suff1 + "  suffix2 = " + suff2 +
+					"frequency = " + freq + "  polarization = " + pol +
 					"  increment = " + inc.toString());
-			
 			Tools.statusMessage(
-					+ startY + "." + startM + "." + startD + " to "
-					+ finalY + "." + finalM + "." + finalD);
+					+ startYear + "." + startMonth + "." + startDay + " to "
+					+ finalYear + "." + finalMonth + "." + finalDay);
 
 			long startTime = System.currentTimeMillis();
 
 			Climatology climate = new Climatology( dataT,
-					startY, startM, startD,
-					finalY, finalM, finalD, inc,
+					startYear, startMonth, startDay,
+					finalYear, finalMonth, finalDay, inc,
 					dataP, outputP,
-					suff1, suff2);
+					freq, pol);
 
 			climate.run();
 			

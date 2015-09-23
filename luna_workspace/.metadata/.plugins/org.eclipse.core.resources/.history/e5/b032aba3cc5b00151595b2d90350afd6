@@ -58,7 +58,7 @@ public class Climate extends GeoObject {
 		
 		// Linux
 		// String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";	// SSMI
-		// String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";	// AVHRR
+		// String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";		// AVHRR
 		
 		// Windows
 		String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
@@ -144,7 +144,7 @@ public class Climate extends GeoObject {
 			// AVHRR
 			//***************************************
 
-			String[] wavelengths = {"ch1", "ch2", "ch3", "ch4", "ch5"};
+			String[] wavelengths = {"19", "22", "37", "85"};
 
 			// Loop through all wavelengths
 			for ( String wavelength : wavelengths) {
@@ -209,8 +209,8 @@ public class Climate extends GeoObject {
 		
 		String dataP;
 		String outputP;
-		String suff1;
-		String suff2;
+		String freq;
+		String pol;
 		
 		// constructor
 		public ParallelTask(int id, Dataset.DataType datatype,
@@ -218,7 +218,7 @@ public class Climate extends GeoObject {
 				int finalYear, int finalMonth, int finalDay,
 				Timespan.Increment increment,
 				String dataPath, String outputPath,
-				String suffix1, String suffix2) {
+				String frequency, String polarity) {
 			
 			this.threadNumber = id;
 			this.dataT = datatype;
@@ -234,8 +234,8 @@ public class Climate extends GeoObject {
 			this.inc = increment;
 			this.dataP = dataPath;
 			this.outputP = outputPath;
-			this.suff1 = suffix1;
-			this.suff2 = suffix2;
+			this.freq = frequency;
+			this.pol = polarity;
 		}
 
 		/* run
@@ -246,9 +246,8 @@ public class Climate extends GeoObject {
 
 			Tools.statusMessage("Thread: " + threadNumber +
 					"  Process " + dataT.toString() + " data, " +
-					"suffix1 = " + suff1 + "  suffix2 = " + suff2 +
+					"frequency = " + freq + "  polarization = " + pol +
 					"  increment = " + inc.toString());
-			
 			Tools.statusMessage(
 					+ startY + "." + startM + "." + startD + " to "
 					+ finalY + "." + finalM + "." + finalD);
@@ -259,7 +258,7 @@ public class Climate extends GeoObject {
 					startY, startM, startD,
 					finalY, finalM, finalD, inc,
 					dataP, outputP,
-					suff1, suff2);
+					freq, pol);
 
 			climate.run();
 			
