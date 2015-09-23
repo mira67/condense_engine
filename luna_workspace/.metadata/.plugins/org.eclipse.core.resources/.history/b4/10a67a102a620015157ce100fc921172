@@ -47,7 +47,7 @@ public class Scratch {
 					double latD = ((double) lat) / 100000.0;
 					double lonD = ((double) lon) / 100000.0;
 					
-					// Create the surface object at this location
+					// Create the suface object at this location
 					surface[r][c] = new SurfaceVector( type,
 							new GriddedLocation(r,c,latD,lonD), 0);
 				}

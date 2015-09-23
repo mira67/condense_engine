@@ -1,0 +1,31 @@
+package helper_classes;
+
+import java.io.*;
+import java.util.*;
+
+/* Algorithms
+ * 
+ * Static condensation algorithms
+ * 
+ */
+
+public class Algorithms extends GeoObject {
+
+	/*
+	 * algorithm1
+	 * 
+	 * Use the climatological mean and standard deviation to condense data.
+	 * 
+	 */
+
+	public static GriddedVector[][] algorithm1(
+			GriddedVector[][] data,
+			double sdThreshold,
+			Timespan.Increment increment,
+			String statsPath) {
+		
+		GriddedVector[][] condensedData = new GriddedVector[ data.length ][ data[0].length ];
+
+		return condensedData;
+	}
+}

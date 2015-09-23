@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Copy element &apos;Tools.java&apos; to &apos;helper_classes.Tools.java&apos;&#x0D;&#x0A;- Original project: &apos;condense_engine&apos;&#x0D;&#x0A;- Destination element: &apos;helper_classes.Tools.java&apos;&#x0D;&#x0A;- Original element: &apos;helper_classes.Tools.java&apos;" description="Copy compilation unit" destination="/src&lt;helper_classes{Tools.java" element1="/src&lt;helper_classes{Tools.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.copy" policy="org.eclipse.jdt.ui.copyResources" stamp="1443037818819" units="1" version="1.0"/>
+</session>

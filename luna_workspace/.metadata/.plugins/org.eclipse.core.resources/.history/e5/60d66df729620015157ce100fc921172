@@ -20,7 +20,7 @@ public class Viewer {
 		FLOAT,
 		INTEGER,
 		BYTE,
-		LONG;
+		LONG;		
 	}
 	
 	static final DataType type = DataType.DOUBLE;

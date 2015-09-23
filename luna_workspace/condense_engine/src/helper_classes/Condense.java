@@ -76,6 +76,7 @@ public class Condense extends GeoObject {
 	// Files and paths for i/o
 	static String outputPath = "/Users/mira67/Documents/IceData/nsidc_0001/";
 	static String dataPath = "/Users/mira67/Documents/IceData/nsidc_0001/south/";
+	static String statsPath = "";	// Location of the climatology files
 	static String databaseName;
 	static String databasePath = "jdbc:h2:tcp://localhost/~/";
 	static String surfaceFile = "";
@@ -262,8 +263,8 @@ public class Condense extends GeoObject {
 			Tools.statusMessage("Total data files processed = " + fileCount);
 		}
 
-		// We should now have a database full of condensed pixels.
-		// Let's generate some images of them...
+		// We should now have a wonderful database full of condensed pixels.
+		// Let's generate some test images of them...
 		if (generateImages)
 			generateTestImages();
 	}
@@ -493,6 +494,19 @@ public class Condense extends GeoObject {
 			break;
 
 		case ALGORITHM1:
+
+			if (data != null && addDataToDatabase) {
+
+				// Read the mean and standard deviation climatology files based
+				// on the selected increment.
+				// TODO
+				
+				GriddedVector[][] condensedData = Algorithms.algorithm1(
+					data, mean, sd, threshold, increment);
+
+				// Store the data in a database.
+				database.storeVectorArray(condensedData, locations);
+			}
 			break;
 		}
 	}
@@ -836,6 +850,10 @@ public class Condense extends GeoObject {
 				case "databasepath":
 					databasePath = textValue;
 					Tools.statusMessage("Database Path = " + databasePath);
+					break;
+				case "statspath":
+					statsPath = textValue;
+					Tools.statusMessage("Climatology (stats) Path = " + statsPath);
 					break;
 				case "surfacefile":
 					surfaceFile = textValue;

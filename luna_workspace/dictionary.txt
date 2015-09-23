@@ -1,2 +1,4 @@
 climatology
 residuals
+gridded
+climatological
