@@ -3,7 +3,6 @@ package helper_classes;
 /* Main program to experiment with algorithms for condensed data sets.
  */
 
-///import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -46,10 +45,12 @@ public class Condense extends GeoObject {
 	//-----------------------------------------------------------------------*/
 
 	static DataType dataType = DataType.SSMI;
-	static Timespan.Increment increment = Timespan.Increment.DAY;
 	static Algorithm algorithm = Algorithm.NO_CONDENSATION;
 	static DatabaseType databaseType = DatabaseType.H2;
-
+	
+	// Monthly or seasonal processing?
+	static boolean seasonalFlag = false;
+	
 	// Start and end dates for the processing.
 	static int startYear = 2013;
 	static int startMonth = 1;
@@ -83,6 +84,12 @@ public class Condense extends GeoObject {
 	static String surfaceLats = "";
 	static String surfaceLons = "";
 
+	// Stats for algorithmic processing
+	double[][] mean = null;	// Mean: [row][col]
+	double[][] sd = null; 	// Standard deviation: [row][col]
+	String meanFilename = "none";
+	String sdFilename = "none";
+	
 	// Flags
 	static boolean createDatabase = true;
 	static boolean addDataToDatabase = true;
@@ -107,8 +114,6 @@ public class Condense extends GeoObject {
 	// The image data across the specified time span [day][row][col]
 	GriddedVector data[][];
 
-	int days = 0; // Days processed during one time increment
-
 	boolean haveMetadata = false;
 
 	Metadata metadata;
@@ -123,14 +128,7 @@ public class Condense extends GeoObject {
 	// Our 'database' of objects (in lieu of an actual database app).
 	Database database;
 
-	// The mean provides a reference for deciding whether to condense the
-	// newest pixels; i.e., are the pixels varying greater than n*sd from
-	// the mean? If so, keep the newest ones and update the reference image
-	// with the new pixel values.
-	double[][] mean = null;	// Mean: [row][col]
-	double[][] sd = null; 	// Standard deviation: [row][col]
-	int population[][] = null;
-
+	// Default size of the image files
 	int rows = 316;
 	int cols = 332;
 
@@ -233,8 +231,10 @@ public class Condense extends GeoObject {
 			Timestamp finalDate = new Timestamp(finalYear, finalMonth, finalDay);
 
 			// Timespan is the total time we will process.
-			Timespan timespan = new Timespan(startDate, finalDate, increment);
+			Timespan timespan = new Timespan(startDate, finalDate, Timespan.Increment.NONE);
 
+			Tools.message("Total days to process: " + timespan.days());
+			
 			// Quit if there are no days to process.
 			if (timespan.days() == 0)
 				return;
@@ -247,7 +247,7 @@ public class Condense extends GeoObject {
 				readData(date);
 
 				// If we found data, condense it and add it to the database.
-				if (data != null) condenseData();
+				if (data != null) condenseData( date );
 
 				// Increment the date.
 				date = timespan.nextDay(date);
@@ -485,7 +485,7 @@ public class Condense extends GeoObject {
 	 * 
 	 * Condense the most recent data time span.
 	 */
-	protected void condenseData() {
+	protected void condenseData( Timestamp day ) {
 
 		switch (algorithm) {
 
@@ -497,9 +497,66 @@ public class Condense extends GeoObject {
 
 			if (data != null && addDataToDatabase) {
 
-				// Read the mean and standard deviation climatology files based
-				// on the selected increment.
-				// TODO
+				// Read the mean and standard deviation climatology files, if
+				// we haven't already. Find the file names...
+				
+				String increment = null;
+				String[] months = {"jan", "feb", "mar", "apr", "may",
+						"jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+				
+				// Process by season
+				if (seasonalFlag) {
+					if (day.month() > 2 && day.month() < 6) {		// MAM
+						increment = "mam";
+					}
+					else if (day.month() > 5 && day.month() < 9) {	// JJA
+						increment = "jja";
+					}
+					else if (day.month() > 8 && day.month() < 12) {	// SON
+						increment = "son";
+					}
+					else {											// DJF
+						increment = "djf";
+					}
+						
+				}
+				// Process by month
+				else {
+					increment = months[day.month()-1];
+				}
+				
+				// Look for the climatology files
+				String newMeanFilename = Tools.findFile(statsPath+"/"+increment+"/", suffix1+suffix2+"-mean");
+				String newSdFilename = Tools.findFile(statsPath+"/"+increment+"/", suffix1+suffix2+"-sd");
+
+				// Did we not find them?
+				if (newMeanFilename == null || newSdFilename == null) {
+					Tools.errorMessage("Condense", "CondenseData",
+							"Could not find stats files: " + newMeanFilename+
+							" or " + newSdFilename, new Exception());
+				}
+
+				// Read in the statistical data from these files -- if we haven't already done it.
+				if (meanFilename.equals(newMeanFilename) != true) {
+					meanFilename = newMeanFilename;
+					sdFilename = newSdFilename;
+
+					Tools.message("  Reading climatology files: \n    " + meanFilename +
+							"\n    " + sdFilename);
+					
+					try {
+						DataFile file = new DataFile(meanFilename);
+						mean = file.readDoubles2D( metadata.rows, metadata.cols);
+						file.close();
+						
+						file = new DataFile(sdFilename);
+						sd = file.readDoubles2D( metadata.rows, metadata.cols);
+						file.close();						
+					}
+					catch(Exception e) {
+						Tools.errorMessage("Condense", "condenseData", "Could not read stats files", e);
+					}
+				}
 				
 				GriddedVector[][] condensedData = Algorithms.algorithm1(
 					data, mean, sd, threshold);
@@ -630,8 +687,8 @@ public class Condense extends GeoObject {
 		String timeString = startTime.yearString() + startTime.monthString()
 				+ startTime.dayOfMonthString();
 		myImage.savePNG(
-				outputPath + timeString + "+" + dataType + "+" + increment
-						+ "_" + algorithm + "_" + Double.toString(threshold),
+				outputPath + timeString + "+" + dataType + "+" +
+				"_" + algorithm + "_" + Double.toString(threshold),
 				metadata.rows, metadata.cols);
 
 		// Diagnostics
@@ -646,7 +703,6 @@ public class Condense extends GeoObject {
 				+ initialStartMonth + "." + initialStartDay + " - " + finalYear
 				+ "." + finalMonth + "." + finalDay);
 		Tools.statusMessage("Algorithm: " + algorithm);
-		Tools.statusMessage("Time increment: " + increment);
 		Tools.statusMessage("Threshold: " + threshold);
 		// Tools.statusMessage("Reference image: " + refImage);
 		Tools.statusMessage("Time indicies: " + database.numberOfTimestamps());
@@ -751,45 +807,6 @@ public class Condense extends GeoObject {
 						dataType = DataType.SSMI;
 					Tools.statusMessage("Data Type = " + dataType);
 					break;
-				case "timeincrement":
-					if (value.equals("week"))
-						increment = Timespan.Increment.WEEK;
-					if (value.equals("jan"))
-						increment = Timespan.Increment.JAN;
-					if (value.equals("feb"))
-						increment = Timespan.Increment.FEB;
-					if (value.equals("mar"))
-						increment = Timespan.Increment.MAR;
-					if (value.equals("apr"))
-						increment = Timespan.Increment.APR;
-					if (value.equals("may"))
-						increment = Timespan.Increment.MAY;
-					if (value.equals("jun"))
-						increment = Timespan.Increment.JUN;
-					if (value.equals("jul"))
-						increment = Timespan.Increment.JUL;
-					if (value.equals("aug"))
-						increment = Timespan.Increment.AUG;
-					if (value.equals("sep"))
-						increment = Timespan.Increment.SEP;
-					if (value.equals("oct"))
-						increment = Timespan.Increment.OCT;
-					if (value.equals("nov"))
-						increment = Timespan.Increment.NOV;
-					if (value.equals("dec"))
-						increment = Timespan.Increment.DEC;
-					if (value.equals("year"))
-						increment = Timespan.Increment.YEAR;
-					if (value.equals("djf"))
-						increment = Timespan.Increment.DJF;
-					if (value.equals("mam"))
-						increment = Timespan.Increment.MAM;
-					if (value.equals("jja"))
-						increment = Timespan.Increment.JJA;
-					if (value.equals("son"))
-						increment = Timespan.Increment.SON;
-					Tools.statusMessage("Time Increment = " + increment);
-					break;
 				case "algorithm":
 					if (value.equals("none"))
 						algorithm = Algorithm.NO_CONDENSATION;
@@ -884,6 +901,10 @@ public class Condense extends GeoObject {
 				case "filterbaddata":
 					filterBadData = Boolean.valueOf(value);
 					Tools.statusMessage("Filter bad data = " + filterBadData);
+					break;
+				case "seasonal":
+					seasonalFlag = Boolean.valueOf(value);
+					Tools.statusMessage("Process by season = " + seasonalFlag);
 					break;
 				case "generateimages":
 					generateImages = Boolean.valueOf(value);

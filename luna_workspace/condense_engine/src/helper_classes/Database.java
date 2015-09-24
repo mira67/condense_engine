@@ -99,12 +99,18 @@ public abstract class Database extends GeoObject {
 		
 		for (int r = 0; r < v.length; r++) {
 			for (int c = 0; c < v[0].length; c++) {
+
+				// If this vector is empty, it didn't get through condensation. Continue on.
+				if (v[r][c] == null) continue;
 				
-				// Make sure the vectors have the all the location information
-				// Location information, especially the ID, may have been updated
-				// when it was added to the database.
-				v[r][c].location = locations[r][c];
+				// Before storing a vector, make sure it has the latest location information:
+				// Location information, especially the ID, may have been updated when the
+				// locations were added to the database. Don't try to update when null.
+				if (locations[r][c] != null) {
+					v[r][c].location = locations[r][c];					
+				}
 				
+				// Store the vector in the database.
 				storeVector(v[r][c]);					
 			}
 		}

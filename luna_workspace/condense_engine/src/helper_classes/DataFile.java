@@ -393,6 +393,38 @@ public class DataFile extends GeoObject {
 	}
 
 	/*
+	 * readDoubles2D
+	 * 
+	 * Reads a 2-dimensional double data from the file.
+	 */
+	public double[][] readDoubles2D(int rows, int cols) throws Exception {
+
+		if (!fileIsReadable) {
+			Tools.warningMessage("DataFile::readDoubles2D: " + filename
+					+ " is not open for reading.");
+			throw (new Exception("Cannot read file, not open for reading"));
+		}
+
+		// Create the array to hold the data. Double = 8 bytes.
+		double[][] doubles = new double[rows][cols];
+
+		try {
+			// Read in the data
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
+					doubles[r][c] = dataInputStream.readDouble();					
+				}
+			}
+		} catch (Exception e) {
+			Tools.warningMessage(" DataFile::readDoubles2D: error on read - "
+					+ e);
+			throw(e);
+		}
+
+		return doubles;
+	}
+
+	/*
 	 * readFloats
 	 * 
 	 * Read float data from the file.

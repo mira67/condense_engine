@@ -31,11 +31,9 @@ public class Algorithms extends GeoObject {
 			for (int c = 0; c < data[0].length; c++) {
 				
 				// Calculate a low and high threshold using the mean and standard deviation
-				low = mean[r][c] - sdThreshold * sd[r][c];
-				high = mean[r][c] + sdThreshold * sd[r][c];
+				low = mean[r][c] - sdThreshold;
+				high = mean[r][c] - sdThreshold;
 				
-				// If the vector exceeds either threshold, keep it. Otherwise discard it.
-				// TODO: should we enable differing high and low thresholds?
 				if (data[r][c].data() < low || data[r][c].data() > high) condensedData[r][c] = data[r][c];
 			}
 		}

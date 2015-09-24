@@ -523,4 +523,29 @@ public class Tools extends GeoObject {
 		return newString;
 	}
 	
+	/*
+	 * findFile
+	 * 
+	 * Search a directory for a file containing a specified string in its name.
+	 * If more than one file is found, return the first one, with the full path
+	 * and file name.
+	 */
+	public static String findFile( String path, String searchString ) {
+
+		File dir = new File(path);
+
+		File[] matches = dir.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.contains(searchString);
+			}
+		});
+
+		// Did we find a file with that search string? If yes, use the first occurrence.
+		if (matches != null) {
+			if (matches.length != 0)
+				return matches[0].getPath();
+		}
+
+		return null;
+	}
 }
