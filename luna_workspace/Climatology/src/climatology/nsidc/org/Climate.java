@@ -100,7 +100,7 @@ public class Climate extends GeoObject {
 
 			// Linux
 			String outputPath = "/home/glgr9602/condense/climatology/" +
-						dataType.toString() + "/" + name + "/";
+						dataType.toString() + "/";
 			// Windows
 			//String outputPath = "/Users/glgr9602/Desktop/condense/climatology/" +				
 			//		dataType.toString() + "/" + name + "/";

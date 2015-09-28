@@ -28,6 +28,8 @@
 <fullyQualifiedTypeName name="org.jfree.chart.ChartUtilities"/>
 <fullyQualifiedTypeName name="helper_classes.Timestamp"/>
 <fullyQualifiedTypeName name="helper_classes.Tools"/>
-<fullyQualifiedTypeName name="helper_classes.Timespan.Increment"/>
 <fullyQualifiedTypeName name="helper_classes.Dataset.DataType"/>
+<fullyQualifiedTypeName name="helper_classes.Timespan.Increment"/>
+<fullyQualifiedTypeName name="net.sf.saxon.exslt.Date"/>
+<fullyQualifiedTypeName name="org.joda.time.Months"/>
 </qualifiedTypeNameHistroy>

@@ -492,7 +492,8 @@ public class Climatology extends GeoObject {
 			// Mean baseline climatology file
 			filename = outputPath + climatologyPrefix + dataType.toString() + 
 					frequency + polarization +
-					"-mean-" + incName + "-" + firstDate.dateString() + ".bin";
+					"-mean-" + incName + "-" + firstDate.yearString() +
+					"-" + lastDate.yearString() + ".bin";
 
 			Tools.statusMessage("    mean output filename = " + filename);
 			
@@ -504,7 +505,8 @@ public class Climatology extends GeoObject {
 			// Standard deviation climatology file
 			filename = outputPath + climatologyPrefix + dataType.toString() +
 					frequency + polarization +
-					"-sd-" + incName + "-" + firstDate.dateString() + ".bin";
+					"-sd-" + incName + "-" + firstDate.yearString() +
+					"-" + lastDate.yearString() + ".bin";
 
 			Tools.statusMessage("    sd output filename = " + filename);
 			

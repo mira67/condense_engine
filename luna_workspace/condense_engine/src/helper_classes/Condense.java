@@ -526,8 +526,8 @@ public class Condense extends GeoObject {
 				}
 				
 				// Look for the climatology files
-				String newMeanFilename = Tools.findFile(statsPath+"/"+increment+"/", suffix1+suffix2+"-mean");
-				String newSdFilename = Tools.findFile(statsPath+"/"+increment+"/", suffix1+suffix2+"-sd");
+				String newMeanFilename = Tools.findFile(statsPath+"/", suffix1+suffix2+"-mean-"+increment);
+				String newSdFilename = Tools.findFile(statsPath+"/", suffix1+suffix2+"-sd-"+increment);
 
 				// Did we not find them?
 				if (newMeanFilename == null || newSdFilename == null) {
