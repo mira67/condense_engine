@@ -11,12 +11,8 @@ public class Algorithms extends GeoObject {
 	/*
 	 * algorithm1
 	 * 
-	 * Example algorithm.
-	 * 
 	 * Use the climatological mean and standard deviation to condense data.
 	 * 
-	 * sdThreshold is the number of standard deviations to use for selecting
-	 * anomalous pixels.
 	 */
 
 	public static GriddedVector[][] algorithm1(
@@ -33,8 +29,8 @@ public class Algorithms extends GeoObject {
 		double low;
 		double high;
 
-		// PART 1...
-		// Keep only the pixels that exceed the threshold value (# of standard deviations)
+		// PART 1:
+		// Keep only the pixels that exceed the threshold value.
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
 				
@@ -42,32 +38,25 @@ public class Algorithms extends GeoObject {
 				low = mean[r][c] - sdThreshold * sd[r][c];
 				high = mean[r][c] + sdThreshold * sd[r][c];
 				
-				// If the pixel value exceeds either threshold, keep it. It's an anomaly.
-				// TODO: should we offer different high and low thresholds?
+				// If the vector exceeds either threshold, keep it. Otherwise discard it.
+				// TODO: should we enable differing high and low thresholds?
 				if (data[r][c].data() < low || data[r][c].data() > high) {
 					condensedData[r][c] = data[r][c];
 				}
 			}
 		}
 
-		// PART 2...
-		// Filter: If a pixel doesn't have enough adjacent anomalous pixels, it
-		// might be noise -- ignore it.
-		
-		// Set up a new place to put the filtered pixels
-		GriddedVector[][] anomalies = new GriddedVector[ rows ][ cols ];
+		// PART 2:
+		// If a pixel doesn't have enough adjacent anomalous pixels, it might be
+		// noise -- ignore it.
 
-		// Number of adjacent anomalous pixels necessary for deciding whether
-		// any one pixel is a keeper?
-		int minAnomalies = 1;
+		// Number of adjacent anomalous pixels necessary for determining
+		// that any one pixel is a keeper?
+		int minAnomalies = 2;
 
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
 				
-				// Is this an anomalous pixel? If not, don't bother.
-				if (condensedData[r][c] == null) continue;
-
-				// How many anomalous pixels are adjacent to this pixel?
 				int adjacentAnomalies = 0;
 				
 				// Look at adjacent pixels, counting the anomalies
@@ -83,18 +72,15 @@ public class Algorithms extends GeoObject {
 						// Found one. Count it.
 						if (condensedData[r1][c1] != null) adjacentAnomalies++;
 					}
-
-					// Did we find enough adjacent anomalous pixels?
-					if (adjacentAnomalies >= minAnomalies) {
-						// Yup.
-						anomalies[r][c] = condensedData[r][c];
-						
-						break;
-					}
+				}
+				// Did we find enough adjacent anomalous pixels?
+				if (adjacentAnomalies < minAnomalies) {
+					// Nope.
+					condensedData[r][c] = null;
 				}
 			}
 		}
 		
-		return anomalies;
+		return condensedData;
 	}
 }

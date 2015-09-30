@@ -14,7 +14,7 @@ public class Viewer {
 	///static String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\climatology\\ssmi\\climate-ssmi19h-sd-jja-19900101.bin";
 	///static String path = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\";
 	static String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/";
-	static String filename = "climate-ssmi85h-mean-dec-1990-2014.bin";
+	static String filename = "climate-ssmi37v-mean-jan-1990-2014.bin";
 
 	public enum DataType {
 		DOUBLE,
@@ -35,16 +35,16 @@ public class Viewer {
 			file = new DataFile( path+filename );
 
 			// Surface, high res
-			int rows = 1441;
-			int cols = 1441;
+			///int rows = 1441;
+			///int cols = 1441;
 
 			// Everything less than 85 GHz.
-			rows = 332;
-			cols = 316;
+			int rows = 332;
+			int cols = 316;
 
 			// Anything more than 85 GHz
-			rows = 664;
-			cols = 632;
+			//int rows = 664;
+			//int cols = 632;
 			
 			double array[][] = new double[rows][cols];
 			

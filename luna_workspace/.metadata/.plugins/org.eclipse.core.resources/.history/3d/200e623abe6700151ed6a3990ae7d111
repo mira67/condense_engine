@@ -11,8 +11,6 @@ public class Algorithms extends GeoObject {
 	/*
 	 * algorithm1
 	 * 
-	 * Example algorithm.
-	 * 
 	 * Use the climatological mean and standard deviation to condense data.
 	 * 
 	 * sdThreshold is the number of standard deviations to use for selecting
@@ -33,7 +31,7 @@ public class Algorithms extends GeoObject {
 		double low;
 		double high;
 
-		// PART 1...
+		// PART 1:
 		// Keep only the pixels that exceed the threshold value (# of standard deviations)
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
@@ -50,9 +48,9 @@ public class Algorithms extends GeoObject {
 			}
 		}
 
-		// PART 2...
-		// Filter: If a pixel doesn't have enough adjacent anomalous pixels, it
-		// might be noise -- ignore it.
+		// PART 2:
+		// If a pixel doesn't have enough adjacent anomalous pixels, it might be
+		// noise -- ignore it.
 		
 		// Set up a new place to put the filtered pixels
 		GriddedVector[][] anomalies = new GriddedVector[ rows ][ cols ];
@@ -65,7 +63,7 @@ public class Algorithms extends GeoObject {
 			for (int c = 0; c < cols; c++) {
 				
 				// Is this an anomalous pixel? If not, don't bother.
-				if (condensedData[r][c] == null) continue;
+				if (condensedData[r1][c1] != null) continue;
 
 				// How many anomalous pixels are adjacent to this pixel?
 				int adjacentAnomalies = 0;

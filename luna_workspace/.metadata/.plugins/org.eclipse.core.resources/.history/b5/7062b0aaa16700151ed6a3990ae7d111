@@ -14,7 +14,7 @@ public class Viewer {
 	///static String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\climatology\\ssmi\\climate-ssmi19h-sd-jja-19900101.bin";
 	///static String path = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\";
 	static String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/";
-	static String filename = "climate-ssmi85h-mean-dec-1990-2014.bin";
+	static String filename = "climate-ssmi85h-mean-aug-1990-2014.bin";
 
 	public enum DataType {
 		DOUBLE,
