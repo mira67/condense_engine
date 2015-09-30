@@ -28,8 +28,10 @@ public class Algorithms extends GeoObject {
 		int rows = data.length;
 		int cols = data[0].length;
 		
+		// A place to store the anomalous pixels
 		GriddedVector[][] condensedData = new GriddedVector[ rows ][ cols ];
 
+		// Threshold pixel values
 		double low;
 		double high;
 
@@ -54,17 +56,18 @@ public class Algorithms extends GeoObject {
 		// Filter: If a pixel doesn't have enough adjacent anomalous pixels, it
 		// might be noise -- ignore it.
 		
-		// Set up a new place to put the filtered pixels
+		// A new place to put the newly filtered pixels
 		GriddedVector[][] anomalies = new GriddedVector[ rows ][ cols ];
 
 		// Number of adjacent anomalous pixels necessary for deciding whether
 		// any one pixel is a keeper?
-		int minAnomalies = 1;
+		final int minAnomalies = 1;
 
+		// Go through every pixel location
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
 				
-				// Is this an anomalous pixel? If not, don't bother.
+				// Is there an anomalous pixel here? If not, don't bother.
 				if (condensedData[r][c] == null) continue;
 
 				// How many anomalous pixels are adjacent to this pixel?
