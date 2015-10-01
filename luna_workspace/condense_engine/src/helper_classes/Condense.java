@@ -156,16 +156,9 @@ public class Condense extends GeoObject {
 		if (System.getenv("datapath") != null)
 			dataPath = System.getenv("datapath");
 
-		// Read the configuration file. First, check to see if the the config
-		// file has been specified with an environment variable. If not, look
-		// for the file path (with name) as input on the command line, arg[0].
-		String path = System.getenv("configfile");
-		if (path == null) {
-			configFilename = args[0];
-		} else {
-			configFilename = path;
-		}
-
+		// Read the configuration file.
+		configFilename = args[0];
+		
 		try {
 			if (!readConfigFile(configFilename)) {
 				Tools.errorMessage("Condense", "main",
