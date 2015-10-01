@@ -72,17 +72,20 @@ public class DatabaseH2 extends Database {
 
 		createIfDoesNotExist = true;
 
-		// Open the database.
+		// Open the database. On connecting, create a custom schema name so
+		// it doesn't default to "PUBLIC". Using the default schema creates
+		// ID conflicts when working with multiple open databases.
 		try {
 			Class.forName("org.h2.Driver");
-			conn = DriverManager.getConnection(dbPath + dbName, null, null);
+			conn = DriverManager.getConnection(dbPath + dbName +
+				";INIT=CREATE SCHEMA IF NOT EXISTS " + dbName + "\\;" + 
+                "SET SCHEMA " + dbName, null, null);
 
 			conn.setAutoCommit(true);
 
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2", "connect",
-					"Could not connect with database " + dbName + ", Path: "
-							+ dbPath, e);
+					"Could not connect with database " + dbPath + dbName, e);
 			return false;
 		}
 
@@ -127,17 +130,18 @@ public class DatabaseH2 extends Database {
 		
 		try {
 			Class.forName("org.h2.Driver");
-			conn = DriverManager.getConnection(dbPath + dbName
-					+ ";IFEXISTS=TRUE", null, null);//
+			conn = DriverManager.getConnection(dbPath + dbName +
+				";IFEXISTS=TRUE\\;" + 
+                "SET SCHEMA " + dbName, null, null);
 
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2", "connectReadOnly",
-					"Could not connect with database " + dbName, e);
+					"Could not connect with database " + dbPath + dbName, e);
 
 			return false;
 		}
 
-		Tools.statusMessage("Connected to database, read-only: " + dbName);
+		Tools.statusMessage("Connected to database, read-only: " + dbPath + dbName);
 		status = Status.CONNECTED_READ_ONLY;
 
 		return true;
@@ -158,7 +162,7 @@ public class DatabaseH2 extends Database {
 		try {
 			conn.close();
 		} catch (Exception e) {
-			Tools.warningMessage("Unable to close database: " + dbName);
+			Tools.warningMessage("Unable to close database: " + dbPath + dbName);
 			status = Status.UNKNOWN;
 			return;
 		}
@@ -240,7 +244,7 @@ public class DatabaseH2 extends Database {
 						"VECTORS = " + metadata.vectors + " WHERE ID = 1");
 
 			} catch (Exception e) {
-				Tools.errorMessage("DatabaseH2", "updateMetadata", "When updating metadata", e);
+				Tools.errorMessage("DatabaseH2", "updateMetadata", "When updating " + dbPath + dbName + " metadata", e);
 			}
 		}
 		return;
@@ -303,7 +307,7 @@ public class DatabaseH2 extends Database {
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2",
 					"storeTimestamp",
-					"When storing timestamp " + t.toString(), e);
+					"When storing timestamp " + t.toString() + " in " + dbPath + dbName, e);
 		}
 		
 		return metadata.timestamps;
@@ -334,7 +338,7 @@ public class DatabaseH2 extends Database {
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2",
 					"storeVector",
-					"When storing vector " + v.toString(), e);
+					"When storing vector " + v.toString() + " in " + dbPath + dbName, e);
 		}
 	
 		return;
@@ -370,7 +374,7 @@ public class DatabaseH2 extends Database {
 			rs.close();
 			statement.close();
 		} catch(SQLException e) {
-			Tools.errorMessage("DatabaseH2", "getMetadata", "query failed", e);
+			Tools.errorMessage("DatabaseH2", "getMetadata", dbPath + dbName + " query failed", e);
 		}
 		
 		return metadata;
@@ -397,7 +401,7 @@ public class DatabaseH2 extends Database {
 			rs.close();
 			statement.close();
 		} catch(SQLException e) {
-			Tools.errorMessage("DatabaseH2", "getTimestamp", "query failed", e);
+			Tools.errorMessage("DatabaseH2", "getTimestamp", dbPath + dbName + " query failed", e);
 		}
 		
 		return t;
@@ -427,7 +431,7 @@ public class DatabaseH2 extends Database {
 			rs.close();
 			statement.close();
 		} catch(SQLException e) {
-			Tools.errorMessage("DatabaseH2", "getLocation", "query failed", e);
+			Tools.errorMessage("DatabaseH2", "getLocation", dbPath + dbName + " query failed", e);
 		}
 		
 		return loc;
@@ -458,7 +462,7 @@ public class DatabaseH2 extends Database {
 			rs.close();
 			statement.close();
 		} catch(SQLException e) {
-			Tools.errorMessage("DatabaseH2", "getTimestamps", "query failed", e);
+			Tools.errorMessage("DatabaseH2", "getTimestamps", dbPath + dbName + " query failed", e);
 		}
 				
 		return timestamps;
@@ -495,7 +499,7 @@ public class DatabaseH2 extends Database {
 			rs.close();
 			statement.close();
 		} catch(SQLException e) {
-			Tools.errorMessage("DatabaseH2", "getLocations", "query failed", e);
+			Tools.errorMessage("DatabaseH2", "getLocations", dbPath + dbName + " query failed", e);
 		}
 				
 		return locations;
@@ -538,7 +542,7 @@ public class DatabaseH2 extends Database {
 			rs.close();
 			statement.close();
 		} catch(SQLException e) {
-			Tools.errorMessage("DatabaseH2", "getVectorsAtTime", "query failed", e);
+			Tools.errorMessage("DatabaseH2", "getVectorsAtTime", dbPath + dbName + " query failed", e);
 		}
 
 		return vectors;
