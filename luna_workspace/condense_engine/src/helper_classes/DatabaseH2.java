@@ -23,10 +23,10 @@ public class DatabaseH2 extends Database {
 	 */
 	public enum Table {
 		
-		METADATA("METADATA","(ID INT PRIMARY KEY, ROWS SMALLINT, COLS SMALLINT, TIMESTAMPS INT, LOCATIONS INT, VECTORS BIGINT)"),
+		METADATA("METADATA","(ID TINYINT PRIMARY KEY, ROWS SMALLINT, COLS SMALLINT, TIMESTAMPS INT, LOCATIONS INT, VECTORS BIGINT)"),
 		LOCATIONS("LOCATIONS","(ID INT PRIMARY KEY, ROW SMALLINT, COL SMALLINT, LAT DOUBLE, LON DOUBLE)"),
-		TIMESTAMPS("TIMESTAMPS","(ID INT PRIMARY KEY, TIMESTAMP FLOAT)"),
-		VECTORS("VECTORS","(ID BIGINT PRIMARY KEY, VALUE INT, LOCATIONID INT, TIMESTAMPID INT)");
+		TIMESTAMPS("TIMESTAMPS","(ID SMALLINT PRIMARY KEY, TIMESTAMP FLOAT)"),
+		VECTORS("VECTORS","(ID INT PRIMARY KEY, VALUE SMALLINT, LOCATIONID INT, TIMESTAMPID SMALLINT)");
 			
 		protected final String name;
 		protected final String SQLcolumns;
@@ -78,8 +78,8 @@ public class DatabaseH2 extends Database {
 		try {
 			Class.forName("org.h2.Driver");
 			conn = DriverManager.getConnection(dbPath + dbName +
-				";INIT=CREATE SCHEMA IF NOT EXISTS " + dbName + "\\;" + 
-                "SET SCHEMA " + dbName, null, null);
+					";INIT=CREATE SCHEMA IF NOT EXISTS " + dbName + "\\;" + 
+	                "SET SCHEMA " + dbName, null, null);
 
 			conn.setAutoCommit(true);
 
@@ -95,30 +95,6 @@ public class DatabaseH2 extends Database {
 	}
 
 	/*
-	 * clean
-	 * 
-	 * Reset the database, clean out all existing data and tables. Empty tables
-	 * are created afterward.
-	 */
-	public void clean() {
-		
-		// Drop each table.
-		for (Table table : Table.values()) {
-			try {
-				sqlCreate = conn.createStatement();
-				Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS "
-						+ table.name);
-				Tools.debugMessage("DatabaseH2 table clean: " + table.name
-						+ " status: " + status);
-			} catch (Exception e) {
-				// Do nothing right now.
-				// Assume it either didn't exist, or was dropped successfully.
-				// Might want to re-visit this assumption at a later time.
-			}
-		}
-	}
-
-	/*
 	 * connectReadOnly
 	 * 
 	 * Connect to an existing database for reading. Return true on success.
@@ -131,8 +107,7 @@ public class DatabaseH2 extends Database {
 		try {
 			Class.forName("org.h2.Driver");
 			conn = DriverManager.getConnection(dbPath + dbName +
-				";IFEXISTS=TRUE\\;" + 
-                "SET SCHEMA " + dbName, null, null);
+					";INIT=SET SCHEMA " + dbName, null, null);
 
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2", "connectReadOnly",
@@ -170,6 +145,30 @@ public class DatabaseH2 extends Database {
 		status = Status.DISCONNECTED;
 
 		Tools.statusMessage("Disconnected from database");
+	}
+
+	/*
+	 * clean
+	 * 
+	 * Reset the database, clean out all existing data and tables. Empty tables
+	 * are created afterward.
+	 */
+	public void clean() {
+		
+		// Drop each table.
+		for (Table table : Table.values()) {
+			try {
+				sqlCreate = conn.createStatement();
+				Boolean status = sqlCreate.execute("DROP TABLE IF EXISTS "
+						+ table.name);
+				Tools.debugMessage("DatabaseH2 table clean: " + table.name
+						+ " status: " + status);
+			} catch (Exception e) {
+				// Do nothing right now.
+				// Assume it either didn't exist, or was dropped successfully.
+				// Might want to re-visit this assumption at a later time.
+			}
+		}
 	}
 
     //

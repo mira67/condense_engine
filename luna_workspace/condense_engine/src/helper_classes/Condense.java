@@ -68,15 +68,15 @@ public class Condense extends GeoObject {
 	static int imageEndIndex = 0;
 
 	// What level of anomaly threshold do we want for condensing the data?
-	static double threshold = 1.0; // Standard deviations
+	static double threshold = 2.0; // Standard deviations
 	static boolean filterBadData = false; // Filter out bad data points using
 
 	static int minValue = -1000000000; // Minimum acceptable data value
 	static int maxValue = 1000000000; // Maximum acceptable data value
 
 	// Files and paths for i/o
-	static String outputPath = "/Users/mira67/Documents/IceData/nsidc_0001/";
-	static String dataPath = "/Users/mira67/Documents/IceData/nsidc_0001/south/";
+	static String outputPath = "/Users/glgr9602/Desktop/condense/output/";
+	static String dataPath = "/Users/glgr9602/Desktop/condense/data/ssmi/daily/";
 	static String statsPath = "";	// Location of the climatology files
 	static String databaseName;
 	static String databasePath = "jdbc:h2:tcp://localhost/~/";
