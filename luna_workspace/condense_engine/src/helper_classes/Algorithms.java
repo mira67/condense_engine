@@ -17,13 +17,21 @@ public class Algorithms extends GeoObject {
 	 * 
 	 * sdThreshold is the number of standard deviations to use for selecting
 	 * anomalous pixels.
+	 * 
+	 * minValue and maxValue are the minimum and maximum "reasonable" values
+	 * for the data we're condensing. For instance, if the data set is
+	 * temperature data (K), values below, say, 50K or above 400K are clearly
+	 * errors-- ignore that data. This will also take care of missing data that
+	 * slips through the other filters, such as a pole hole.  
 	 */
 
 	public static GriddedVector[][] algorithm1(
 			GriddedVector[][] data,
 			double[][] mean,
 			double[][] sd,
-			double sdThreshold) {
+			double sdThreshold,
+			double minValue,
+			double maxValue ) {
 		
 		int rows = data.length;
 		int cols = data[0].length;
@@ -39,6 +47,9 @@ public class Algorithms extends GeoObject {
 		// Keep only the pixels that exceed the threshold value (# of standard deviations)
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
+				
+				// Don't store data that is clearly bad.
+				if (data[r][c].data() < minValue || data[r][c].data() > maxValue) continue;
 				
 				// Calculate a low and high threshold using the mean and standard deviation
 				low = mean[r][c] - sdThreshold * sd[r][c];

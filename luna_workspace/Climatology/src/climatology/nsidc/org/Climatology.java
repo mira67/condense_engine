@@ -37,8 +37,8 @@ public class Climatology extends GeoObject {
 	
 	static boolean filterBadData = true; 	// Filter out bad data points
 	
-	static final int minValue = -1000000000;	// Minimum acceptable data value
-	static final int maxValue = 1000000000;		// Maximum acceptable data value
+	static final int minValue = 10;			// Minimum acceptable data value
+	static final int maxValue = 400;		// Maximum acceptable data value
 
 	static final String climatologyPrefix = "climate-";
 	
@@ -297,7 +297,7 @@ public class Climatology extends GeoObject {
 					// (brightness temperatures in degrees K) anything less than
 					// 10 or greater than 400 is clearly bogus.
 					if (filterBadData) {						
-						data[d] = GriddedVector.filterBadData(data[d], 10, 400, NODATA);
+						data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue, NODATA);
 					}
 					
 					// Success

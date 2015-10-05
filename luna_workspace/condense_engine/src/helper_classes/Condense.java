@@ -69,10 +69,10 @@ public class Condense extends GeoObject {
 
 	// What level of anomaly threshold do we want for condensing the data?
 	static double threshold = 2.0; // Standard deviations
-	static boolean filterBadData = false; // Filter out bad data points using
-
-	static int minValue = -1000000000; // Minimum acceptable data value
-	static int maxValue = 1000000000; // Maximum acceptable data value
+	
+	static boolean filterBadData = true; 	// Filter out bad data points
+	static double minValue = 10;		// Minimum acceptable data value
+	static double maxValue = 400;		// Maximum acceptable data value
 
 	// Files and paths for i/o
 	static String outputPath = "/Users/glgr9602/Desktop/condense/output/";
@@ -552,7 +552,7 @@ public class Condense extends GeoObject {
 				}
 				
 				GriddedVector[][] condensedData = Algorithms.algorithm1(
-					data, mean, sd, threshold);
+					data, mean, sd, threshold, minValue, maxValue);
 
 				// Store the data in a database.
 				database.storeVectorArray(condensedData, locations);
@@ -815,11 +815,11 @@ public class Condense extends GeoObject {
 							+ threshold);
 					break;
 				case "minvalue":
-					minValue = Integer.valueOf(value);
+					minValue = Double.valueOf(value);
 					Tools.statusMessage("Low threshold = " + minValue);
 					break;
 				case "maxvalue":
-					maxValue = Integer.valueOf(value);
+					maxValue = Double.valueOf(value);
 					Tools.statusMessage("High threshold = " + maxValue);
 					break;
 				case "createdatabase":
