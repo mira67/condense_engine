@@ -14,3 +14,9 @@ luna_workspace/.metadata/.plugins/org.eclipse.core.resources/.history/44/a06ffc1
 luna_workspace/.metadata/.plugins/org.eclipse.jdt.launching/libraryInfos.xml
 *.prefs
 luna_workspace/.metadata/*
+.project
+.classpath
+.properties
+.DS_Store
+.settings/
+.metadata/
