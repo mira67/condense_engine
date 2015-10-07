@@ -71,12 +71,13 @@ public class Condense extends GeoObject {
 	static double threshold = 2.0; // Standard deviations
 	
 	static boolean filterBadData = true; 	// Filter out bad data points
-	static double minValue = 10;		// Minimum acceptable data value
-	static double maxValue = 400;		// Maximum acceptable data value
+	static double minValue = 5;		// Minimum acceptable data value
+	static double maxValue = 450;		// Maximum acceptable data value
 
 	// Files and paths for i/o
-	static String outputPath = "/Users/glgr9602/Desktop/condense/output/";
-	static String dataPath = "/Users/glgr9602/Desktop/condense/data/ssmi/daily/";
+	static String outputPath = "/Users/glgr9602/Desktop/condense/output/";			// Where any output files are put.
+	static String dataPath = "/Users/glgr9602/Desktop/condense/data/ssmi/daily/";	// Where the data is located
+	static String locationsPath = "/Users/glgr9602/Desktop/condense/data/ssmi/";	// Where the lat/lon files are located
 	static String statsPath = "";	// Location of the climatology files
 	static String databaseName;
 	static String databasePath = "jdbc:h2:tcp://localhost/~/";
@@ -389,7 +390,7 @@ public class Condense extends GeoObject {
 					startMonth, startDay, addYearToInputDirectory, suffix1,
 					suffix2);
 
-			dataset = new DatasetSSMI(filename);
+			dataset = new DatasetSSMI(filename, locationsPath);
 
 			getMetadata(filename);
 
@@ -860,6 +861,10 @@ public class Condense extends GeoObject {
 				case "databasepath":
 					databasePath = textValue;
 					Tools.statusMessage("Database Path = " + databasePath);
+					break;
+				case "locationspath":
+					locationsPath = textValue;
+					Tools.statusMessage("Locations Path = " + locationsPath);
 					break;
 				case "statspath":
 					statsPath = textValue;

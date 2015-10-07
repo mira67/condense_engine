@@ -14,14 +14,15 @@ public class DatasetSSMI extends Dataset {
 	/*
 	 * Constructor
 	 * 
-	 * A single file name is required to read the metadata.
+	 * A single file name is required to read the metadata, and a path for
+	 * the files containing the lat/lon location data.
 	 */
-	public DatasetSSMI(String filename) {
+	public DatasetSSMI(String filename, String locationsPath) {
 		metadata = new Metadata();
 		readMetadata(filename);
 
 		locs = new GriddedLocation[metadata.rows][metadata.cols];
-		readLocations();
+		readLocations( locationsPath );
 	}
 
 	/*
@@ -157,14 +158,54 @@ public class DatasetSSMI extends Dataset {
 	 * 
 	 * Read the locations for this gridded dataset.
 	 */
-	protected void readLocations() {
-		for (int r = 0; r < metadata.rows; r++) {
-			for (int c = 0; c < metadata.cols; c++) {
-				
-				// TODO: lat/lons
-				locs[r][c] = new GriddedLocation(r, c);
-			}
+	protected void readLocations(String locationsPath) {
+
+		// Temporary file name hard-code until we have time for something better. :-(
+		
+		// 25km resolution grid cells
+		String latsFileName = locationsPath + "pss25lats_v3.dat";
+		String lonsFileName = locationsPath + "pss25lons_v3.dat";
+		
+		// 12.5km resolution grid cells
+		if (metadata.rows > 332 ) {
+			latsFileName = locationsPath + "pss12lats_v3.dat";
+			lonsFileName = locationsPath + "pss12lons_v3.dat";
 		}
+		
+		// Read the files
+		try {
+			
+			// Open the files
+			DataFile latitudes = new DataFile( latsFileName );
+			DataFile longitudes = new DataFile( lonsFileName );
+
+			for (int r = 0; r < metadata.rows; r++) {
+				for (int c = 0; c < metadata.cols; c++) {
+							
+					// Read the encoded data from the files
+							
+					int lat = latitudes.readInt();
+					int lon = longitudes.readInt();
+		
+					// Reverse the byte order (for Windows).
+					lat = Tools.reverseByteOrder(lat);
+					lon = Tools.reverseByteOrder(lon);
+
+					// Decode the data, convert to doubles.
+					double latD = ((double) lat) / 100000.0;
+					double lonD = ((double) lon) / 100000.0;
+							
+					// Create the surface object at this location
+					locs[r][c] = new GriddedLocation(r,c,latD,lonD);
+				}
+			}
+
+			latitudes.close();			
+			longitudes.close();			
+		}
+		catch(Exception e) {
+			Tools.warningMessage("Failed to open file");
+		}				
 	}
 
 	/*

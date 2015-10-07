@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="" key="selection"/>
+		<item value="minValue" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="minValue"/>
+			<item value="algorithm1"/>
+			<item value="readLocation"/>
+			<item value="100000"/>
+			<item value="filterBadData"/>
+			<item value="maxValue"/>
 			<item value="config.txt"/>
 			<item value="SET"/>
-			<item value="dbName + &quot;.&quot; + "/>
-			<item value="dbPath + dbName + &quot;.&quot;"/>
-			<item value="dbPath"/>
-			<item value="dbpath"/>
-			<item value="dbName"/>
-			<item value="sql"/>
 		</list>
 		<list key="replacehistory">
 			<item value=""/>

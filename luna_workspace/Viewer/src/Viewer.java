@@ -14,7 +14,7 @@ public class Viewer {
 	///static String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\climatology\\ssmi\\climate-ssmi19h-sd-jja-19900101.bin";
 	///static String path = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\";
 	static String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/";
-	static String filename = "climate-ssmi85h-mean-dec-1990-2014.bin";
+	static String filename = "climate-ssmi85h-mean-jul-1990-2014.bin";
 
 	public enum DataType {
 		DOUBLE,
@@ -29,11 +29,14 @@ public class Viewer {
 	public static void main(String[] args) {
 	
 		DataFile file;
+		DataFile outfile;
 		
 		// Read the file
 		try {
 			file = new DataFile( path+filename );
-
+			outfile = new DataFile();
+			outfile.create(path+filename+"-data.txt");
+			
 			// Surface, high res
 			int rows = 1441;
 			int cols = 1441;
@@ -61,10 +64,17 @@ public class Viewer {
 						default:
 							break;
 					}
+					
+					// Write out the data to a file, randomly, every tenth point
+					if (Tools.randomInt(10) == 1) {
+						Long i = Math.round(array[r][c]);
+						outfile.writeString( i.toString(), true);
+					}
 				}
 			}
 
 			file.close();
+			outfile.close();
 			
 			DisplayImage(filename, array, rows, cols);
 		}
