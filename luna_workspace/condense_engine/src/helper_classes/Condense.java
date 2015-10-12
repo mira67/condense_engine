@@ -121,7 +121,7 @@ public class Condense extends GeoObject {
 
 	// Surface type information.
 	Metadata surfaceMetadata;
-	SurfaceVector surfaceVectors[][];
+	VectorSurface surfaceVectors[][];
 
 	// The dataset we're going to read.
 	Dataset dataset;
@@ -232,7 +232,6 @@ public class Condense extends GeoObject {
 			// Quit if there are no days to process.
 			if (timespan.days() == 0)
 				return;
-
 			Timestamp date = startDate;
 
 			// Read the data files. Stop when we run out of dates.
@@ -453,18 +452,10 @@ public class Condense extends GeoObject {
 		case SEA_ICE:
 			// TODO
 		case SSMI:
-			// TODO
-			// temporary locations, for testing
-			for (int r = 0; r < metadata.rows; r++) {
-				for (int c = 0; c < metadata.cols; c++) {
-					locations[r][c] = new GriddedLocation(r, c,
-							(double) Tools.randomInt(90),
-							(double) Tools.randomInt(180));
-				}
-			}
+			locations = dataset.getLocations();
 			break;
 		case AVHRR:
-			// todo
+			// TODO
 			break;
 		}
 

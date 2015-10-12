@@ -7,7 +7,6 @@ package helper_classes;
 
 import java.io.File;
 import java.io.FilenameFilter;
-import java.util.ArrayList;
 
 public class DatasetSSMI extends Dataset {
 
@@ -214,9 +213,9 @@ public class DatasetSSMI extends Dataset {
 	 * Read the SSMI data from a file. FileName should include the full path.
 	 * Returns null if it doesn't find the file.
 	 */
-	public SSMIVector[][] readData(String filename, GriddedLocation[][] locs, int timestampID) throws Exception {
+	public VectorSSMI[][] readData(String filename, GriddedLocation[][] locs, int timestampID) throws Exception {
 
-		SSMIVector[][] ssmiVectors = null;
+		VectorSSMI[][] ssmiVectors = null;
 
 		DataFile file = new DataFile(filename);
 
@@ -241,12 +240,12 @@ public class DatasetSSMI extends Dataset {
 			data = Tools.scaleIntArray2D(data, 0, 350);
 
 			// Create a place to store the data.
-			ssmiVectors = new SSMIVector[rows()][cols()];
+			ssmiVectors = new VectorSSMI[rows()][cols()];
 
 			// Convert from NETcdf bytes to vectorData.
 			for (int r = 0; r < rows(); r++) {
 				for (int c = 0; c < cols(); c++) {
-					ssmiVectors[r][c] = new SSMIVector(data[r][c], locs[r][c], timestampID);
+					ssmiVectors[r][c] = new VectorSSMI(data[r][c], locs[r][c], timestampID);
 				}
 			}
 		} catch (Exception error) {
@@ -266,22 +265,5 @@ public class DatasetSSMI extends Dataset {
 		}
 
 		return ssmiVectors;
-	}
-
-	/*
-	 * locationsAsArrayList
-	 * 
-	 * Return the matrix of locations as an arraylist.
-	 */
-	public ArrayList<GriddedLocation> locationsAsArrayList() {
-		ArrayList<GriddedLocation> list = new ArrayList<GriddedLocation>();
-
-		for (int r = 0; r < rows(); r++) {
-			for (int c = 0; c < cols(); c++) {
-				list.add(locs[r][c]);
-			}
-		}
-
-		return list;
 	}
 }

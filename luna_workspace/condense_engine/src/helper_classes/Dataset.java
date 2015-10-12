@@ -13,7 +13,6 @@ public abstract class Dataset extends GeoObject {
 	protected Metadata metadata;
 	protected boolean haveMetadata = false;
 	protected GriddedLocation[][] locs;
-	// /protected ArrayList<GriddedLocation> locs;
 
 	public int rows() {
 		return metadata.rows;
@@ -24,8 +23,8 @@ public abstract class Dataset extends GeoObject {
 	}
 
 	public abstract Metadata readMetadata( String filename );
-	public abstract ArrayList<GriddedLocation> locationsAsArrayList();
-	
+    public GriddedLocation[][] getLocations() { return locs; }
+    
 	// Data types
 	public enum DataType {
 		SEA_ICE("seaice"), SSMI("ssmi"), AVHRR("avhrr");
@@ -38,6 +37,23 @@ public abstract class Dataset extends GeoObject {
 		public String toString() {
 			return name;
 		}
+	}
+
+	/*
+	 * locationsAsArrayList
+	 * 
+	 * Return the matrix of locations as an arraylist.
+	 */
+	public ArrayList<GriddedLocation> locationsAsArrayList() {
+		ArrayList<GriddedLocation> list = new ArrayList<GriddedLocation>();
+
+		for (int r = 0; r < rows(); r++) {
+			for (int c = 0; c < cols(); c++) {
+				list.add(locs[r][c]);
+			}
+		}
+
+		return list;
 	}
 
 }

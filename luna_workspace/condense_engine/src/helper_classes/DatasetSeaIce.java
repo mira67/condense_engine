@@ -157,9 +157,9 @@ public class DatasetSeaIce extends Dataset {
 	 * 
 	 * Read the sea ice data from a file. FileName should include the full path.
 	 */
-	public SeaIceVector[][] readData(String filename, GriddedLocation[][] locs, int timestampID) throws Exception {
+	public VectorSeaIce[][] readData(String filename, GriddedLocation[][] locs, int timestampID) throws Exception {
 
-		SeaIceVector[][] seaIceVectors = null;
+		VectorSeaIce[][] seaIceVectors = null;
 
 		NetcdfFile ncfile = null;
 
@@ -189,7 +189,7 @@ public class DatasetSeaIce extends Dataset {
 			netcdfData = (ArrayByte.D3) seaice.read();
 
 			// Create a place to store the data.
-			seaIceVectors = new SeaIceVector[rows()][cols()];
+			seaIceVectors = new VectorSeaIce[rows()][cols()];
 
 			// Convert from NETcdf bytes to vector data.
 			for (int r = 0; r < rows(); r++) {
@@ -199,7 +199,7 @@ public class DatasetSeaIce extends Dataset {
 					// /seaIceVectors[r][c] = new SeaIceVector( (int)
 					// ((float)netcdfData.get(0,r,c) * 2.55), r, c );
 
-					seaIceVectors[r][c] = new SeaIceVector(
+					seaIceVectors[r][c] = new VectorSeaIce(
 							(int) netcdfData.get(0, r, c), locs[r][c], timestampID);
 				}
 			}

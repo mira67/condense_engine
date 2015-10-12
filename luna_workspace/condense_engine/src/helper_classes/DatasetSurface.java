@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class DatasetSurface extends Dataset {
 
-	protected SurfaceVector[][] vectors;
+	protected VectorSurface[][] vectors;
 	protected int rows = 0;
 	protected int cols = 0;
 
@@ -68,7 +68,7 @@ public class DatasetSurface extends Dataset {
 	 * the surface data - surfaceLats is a file containing the latitudes -
 	 * surfaceLons is a file containing the longitudes
 	 */
-	public SurfaceVector[][] readData(String surfaceFile, String surfaceLats,
+	public VectorSurface[][] readData(String surfaceFile, String surfaceLats,
 			String surfaceLons) {
 
 		Tools.debugMessage("Reading surface mask files");
@@ -76,7 +76,7 @@ public class DatasetSurface extends Dataset {
 		// Make sure we have the metadata.
 		metadata = readMetadata(surfaceFile);
 
-		vectors = new SurfaceVector[rows][cols];
+		vectors = new VectorSurface[rows][cols];
 
 		byte[][] surfaceBytes = new byte[rows][cols];
 
@@ -116,7 +116,7 @@ public class DatasetSurface extends Dataset {
 					
 					// Create the surface vector. 0 is used for the timestampID
 					// because all surface vectors will have the same time.
-					vectors[r][c] = new SurfaceVector(value, locs[r][c], 0);
+					vectors[r][c] = new VectorSurface(value, locs[r][c], 0);
 				}
 			}
 			file.close();
