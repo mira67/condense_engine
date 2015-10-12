@@ -237,7 +237,7 @@ public class DatasetSSMI extends Dataset {
 			// data = Tools.discardBadData(data, 1000, 4000);
 
 			// TODO for testing
-			data = Tools.scaleIntArray2D(data, 0, 350);
+			//data = Tools.scaleIntArray2D(data, 0, 350);
 
 			// Create a place to store the data.
 			ssmiVectors = new VectorSSMI[rows()][cols()];

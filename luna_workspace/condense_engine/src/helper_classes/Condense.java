@@ -71,8 +71,8 @@ public class Condense extends GeoObject {
 	static double threshold = 2.0; // Standard deviations
 	
 	static boolean filterBadData = true; 	// Filter out bad data points
-	static double minValue = 5;		// Minimum acceptable data value
-	static double maxValue = 450;		// Maximum acceptable data value
+	static double minValue = 50;		// Minimum acceptable data value
+	static double maxValue = 4500;		// Maximum acceptable data value
 
 	// Files and paths for i/o
 	static String outputPath = "/Users/glgr9602/Desktop/condense/output/";			// Where any output files are put.

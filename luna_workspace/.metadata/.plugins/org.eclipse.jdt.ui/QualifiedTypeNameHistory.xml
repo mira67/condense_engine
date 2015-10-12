@@ -32,4 +32,5 @@
 <fullyQualifiedTypeName name="helper_classes.Timespan.Increment"/>
 <fullyQualifiedTypeName name="net.sf.saxon.exslt.Date"/>
 <fullyQualifiedTypeName name="org.joda.time.Months"/>
+<fullyQualifiedTypeName name="helper_classes.DatasetSSMI"/>
 </qualifiedTypeNameHistroy>
