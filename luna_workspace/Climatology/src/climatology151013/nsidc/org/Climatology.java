@@ -37,8 +37,8 @@ public class Climatology extends GeoObject {
 	
 	static boolean filterBadData = true; 	// Filter out bad data points
 	
-	static final int minValue = 50;			// Minimum acceptable data value
-	static final int maxValue = 4000;		// Maximum acceptable data value
+	static final int minValue = 10;			// Minimum acceptable data value
+	static final int maxValue = 400;		// Maximum acceptable data value
 
 	static final String climatologyPrefix = "climate-";
 	

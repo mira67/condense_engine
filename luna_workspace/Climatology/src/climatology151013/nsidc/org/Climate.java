@@ -57,12 +57,12 @@ public class Climate extends GeoObject {
 		// Where does the data come from? Set the path. Platform dependent.
 		
 		// Linux
-		String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";	// SSMI
+		// String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";	// SSMI
 		// String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";	// AVHRR
 		
 		// Windows
-		//String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
-		//		  dataType.toString() + "/daily/";
+		String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
+				dataType.toString() + "/daily/";
 		
 		// How many processors do we have available?
 	    procs = Runtime.getRuntime().availableProcessors(); 
@@ -111,7 +111,7 @@ public class Climate extends GeoObject {
 			//***************************************
 			// SSMI
 			//***************************************
-			
+			/*
 			String[] frequencies = {"19", "22", "37", "85"};
 			String[] polarizations = {"h", "v"};
 			
@@ -138,10 +138,12 @@ public class Climate extends GeoObject {
 				}
 			}
 
+			*/
+
 			//***************************************
 			// AVHRR
 			//***************************************
-			/*
+
 			String[] wavelengths = {"ch1", "ch2", "ch3", "ch4", "ch5"};
 
 			// Loop through all wavelengths
@@ -162,7 +164,7 @@ public class Climate extends GeoObject {
 			   // Increment the process ID.
 			   processID++;
 			}
-			*/
+
 			//*****************************************
 			// FINISHED WITH SENSOR-SPECIFIC PROCESSING
 			//*****************************************

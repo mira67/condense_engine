@@ -2,12 +2,13 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="readLocations" key="selection"/>
+		<item value="scaleIn" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="scaleIn"/>
 			<item value="readLocations"/>
 			<item value="minValue"/>
 			<item value="algorithm1"/>
@@ -15,7 +16,6 @@
 			<item value="100000"/>
 			<item value="filterBadData"/>
 			<item value="maxValue"/>
-			<item value="config.txt"/>
 		</list>
 		<list key="replacehistory">
 			<item value=""/>

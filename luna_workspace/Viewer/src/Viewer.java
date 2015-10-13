@@ -14,7 +14,7 @@ public class Viewer {
 	///static String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\climatology\\ssmi\\climate-ssmi19h-sd-jja-19900101.bin";
 	///static String path = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\";
 	static String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/";
-	static String filename = "climate-ssmi85h-mean-jul-1990-2014.bin";
+	static String filename = "climate-ssmi85h-mean-jan-1990-2014.bin";
 
 	public enum DataType {
 		DOUBLE,
@@ -42,8 +42,8 @@ public class Viewer {
 			int cols = 1441;
 
 			// Everything less than 85 GHz.
-			rows = 332;
-			cols = 316;
+			//rows = 332;
+			//cols = 316;
 
 			// Anything more than 85 GHz
 			rows = 664;
