@@ -615,6 +615,9 @@ public class Condense extends GeoObject {
 		int[][] sensorData = GriddedVector.createArrayFromVectorList(metadata.rows,
 				metadata.cols, pixList);
 
+		// Scale the data so that it goes from 0 - 255
+		sensorData = Tools.scaleIntArray2D(sensorData, 0, 255);
+		
 		// Make a color table.
 		ColorTable colors = new ColorTable();
 		colors.prism();
