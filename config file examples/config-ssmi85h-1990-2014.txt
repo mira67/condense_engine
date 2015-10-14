@@ -1,0 +1,116 @@
+* Example configuration file for Condensate program
+*
+* Lines starting with "*", "#", or ";" are treated as comments.
+* Blank lines are ignored.
+*
+* Lines don't have to be in any particular order.
+*
+* If a data line is missing, the program may use defaults.
+*
+* If a data line is not understood, the program will continue
+* but print out a warning.
+*
+* Text case and spacing is ignored. For instance:
+*   "start year = 2013" is the same thing as "STARTYEAR=2013"
+*
+* Listed below are the possible options, with some explanations. Possible
+* command options are shown in <angle> brackets.
+* 
+*
+* To choose the range of processing dates:
+*   start year = yyyy
+*   start month = mm
+*   start day = dd
+*   final year = yyyy
+*   final month = mm
+*   final day = dd
+*
+* To specify the directories of the I/O and type of data to use:
+*   
+*   datatype = <none|sea_ice>
+*   datapath = text
+*     The text string is the full directory path of the data files,
+*     with a closing slash.
+*   outputPath = text
+*     The full output path, with a closing slash, for any data files and images.
+*   addyear = <true|false>
+*     Add the year to the file path?
+*   frequency = nn
+*     For SSMI data, what frequency to use (ignored for other types of data)
+*   polarization = <h|v>
+*     For SSMI data, the polarization
+*   surfacefile = text
+*     If you want to read the surface type image, this option specifies
+*     the full path and filename of the file.
+*   surfacelats = text
+*   surfacelons = text
+*     The surface type file uses separate files for the data's lats and lons.
+*     These path+file names specify where to find those files.
+*
+* Processing control:
+*
+*   timeincrement = <weekly|monthly|yearly|seasonal>
+*   algorithm = <no_condensation|temporal|minmax>
+*   threshold = ff.fff
+*     The threshold is the standard deviations above and below the mean.
+*     The mean is calculated across the time increment. 
+*   debug = <true|false>
+*     Turns debugging messages on or off. The default is off.
+*   warnings = <true|false>
+*   readSurface = <true|false>
+*     Read the surface type file?
+*   writetext = <true|false>
+*     This option forces the resulting databse to be output
+*     as a plain text file. This is handy for debugging but
+*     can also take a lot of time.
+*   writebinary = <true|false>
+*     Writes the database out as a binary finally. Potentially,
+*     this file can be read back in to the program (rather than
+*     processing the input data files). The binary is also much
+*     more conpact than the text file.
+*   image start = n
+*   image end = n
+*     When an image is generated, use the stored pixels between (and
+*     including) these two time indexes (the nth timestamps in the
+*     the database, not the index IDs in the database).
+*
+data path =C:\Users\glgr9602\Desktop\condense\data\ssmi\daily\
+output Path =C:\Users\glgr9602\Desktop\condense\output\
+
+data type = SSMI
+database name =ssmi85h19902014
+polarization=h
+frequency=85
+
+database path =jdbc:h2:tcp://localhost/~/Desktop/condense/databases/
+addyear = true
+
+surfaceFile = C:\Users\glgr9602\Desktop\condense\Data\Surface\Sh_loci_land50_coast0km.1441x1441.bin
+surfaceLats = C:\Users\glgr9602\Desktop\condense\Data\Surface\SHLATLSB.bin
+surfaceLons = C:\Users\glgr9602\Desktop\condense\Data\Surface\SHLONLSB.bin
+
+stats path = C:\Users\glgr9602\Desktop\condense\climatology\ssmi\
+
+start year = 1990
+start month = 1
+start day = 1
+final year = 2014
+final month = 12
+final day = 31
+
+seasonal = false
+
+algorithm = algorithm1
+threshold = 2.0
+
+debug = false
+warnings = false
+readsurface = false
+
+database = h2
+
+generate images = false
+image start = 1
+
+createdatabase = TRUE
+add data to database = TRUE
