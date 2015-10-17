@@ -6,7 +6,13 @@ package helper_classes;
  * 
  */
 
+
 public class Algorithms extends GeoObject {
+
+	// The first time the algorithm is used, print out
+	// what our criteria is -- logs the thresholds and
+	// may eliminate confusion later.
+	static boolean printCriteria = true;
 
 	/*
 	 * algorithm1
@@ -35,6 +41,10 @@ public class Algorithms extends GeoObject {
 		
 		int rows = data.length;
 		int cols = data[0].length;
+
+		// Number of adjacent anomalous pixels necessary for deciding whether
+		// any one pixel is a keeper?
+		final int minAnomalies = 2;
 		
 		// A place to store the anomalous pixels
 		GriddedVector[][] condensedData = new GriddedVector[ rows ][ cols ];
@@ -70,10 +80,6 @@ public class Algorithms extends GeoObject {
 		// A new place to put the newly filtered pixels
 		GriddedVector[][] anomalies = new GriddedVector[ rows ][ cols ];
 
-		// Number of adjacent anomalous pixels necessary for deciding whether
-		// any one pixel is a keeper?
-		final int minAnomalies = 1;
-
 		// Go through every pixel location
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
@@ -107,6 +113,18 @@ public class Algorithms extends GeoObject {
 					}
 				}
 			}
+		}
+		
+		// The first time through, print the criteria.
+		if (printCriteria) {
+			Tools.message("Algorithm1:");
+			Tools.message("    Min value allowable: " + minValue);
+			Tools.message("    Max value allowable: " + maxValue);
+			Tools.message("    SD threshold: " + sdThreshold);
+			Tools.message("    Adjacent anomalies requires: " + minAnomalies);
+			
+			// Turn off the printing.
+			printCriteria = false;
 		}
 		
 		return anomalies;

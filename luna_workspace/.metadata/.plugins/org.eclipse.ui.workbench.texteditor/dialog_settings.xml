@@ -2,30 +2,30 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="scaleIn" key="selection"/>
+		<item value="statsPath" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="statsPath"/>
+			<item value="frequencies"/>
+			<item value="polarizations"/>
 			<item value="scaleIn"/>
 			<item value="readLocations"/>
 			<item value="minValue"/>
 			<item value="algorithm1"/>
 			<item value="readLocation"/>
-			<item value="100000"/>
-			<item value="filterBadData"/>
-			<item value="maxValue"/>
 		</list>
 		<list key="replacehistory">
+			<item value="frequency"/>
+			<item value="polarization"/>
 			<item value=""/>
 			<item value="dbName + &quot;.&quot;"/>
 			<item value="dbPath"/>
 			<item value="dbpath + dbName"/>
 			<item value="processID"/>
 			<item value="makeStatsFiles"/>
-			<item value="calculateStats"/>
-			<item value="startYear"/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">

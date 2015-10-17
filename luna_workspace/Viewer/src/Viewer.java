@@ -11,11 +11,6 @@ import helper_classes.*;
 
 public class Viewer {
 
-	///static String filename = "C:\\Users\\glgr9602\\Desktop\\condense\\climatology\\ssmi\\climate-ssmi19h-sd-jja-19900101.bin";
-	///static String path = "C:\\Users\\glgr9602\\Desktop\\condense\\data\\surface\\";
-	static String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/";
-	static String filename = "climate-ssmi85h-mean-dec-1990-2014.bin";
-
 	public enum DataType {
 		DOUBLE,
 		FLOAT,
@@ -24,33 +19,75 @@ public class Viewer {
 		LONG;
 	}
 	
-	static final DataType type = DataType.DOUBLE;
-	
 	public static void main(String[] args) {
+
+		String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/1990-2014/";
+		String filenameRoot = "climate-ssmi";
+		String filenameTail = "-1990-2014.bin";
+		
+		DataType type = DataType.DOUBLE;
+		
+		String[] months = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
+		String[] frequency = {"19", "22", "37", "85"};
+		String[] polarization = {"h", "v"};
+		String[] stat = {"mean", "sd"};
+
+		String filename;
+		String imageFilename;
+		
+		int rows = 0;
+		int cols = 0;
+		
+		for (int m = 0; m < 12; m++) {
+			for (int f = 0; f <= 3; f++) {
+				for (int p = 0; p < 2; p++) {
+					for (int s = 0; s < 2; s++) {
+
+						filename = path + filenameRoot + frequency[f] + polarization[p] + "-" + stat[s] + "-" + months[m] + filenameTail;
+						
+						Tools.message(filename);
+
+						// Determine rows and columns in the file...
+
+						// Everything less than 85 GHz.
+						rows = 332;
+						cols = 316;
+
+						// 85 or 91 GHz
+						if ( f > 2 ) {
+							rows = 664;
+							cols = 632;							
+						}
+
+						// Read the file
+						double[][] array = readFile( filename, rows, cols, type);
+						
+						int numericalMonth = m + 1;
+						
+						// Display the image
+						imageFilename = path + filenameRoot + frequency[f] + polarization[p] + stat[s] + numericalMonth;
+						DisplayImage(imageFilename, array, rows, cols);
+					}
+				}
+			}
+		}
+			
+		Tools.message("End program");
+	}
 	
+	/* readFile
+	 * 
+	 *  Read the file, return the data.
+	 */
+	public static double[][] readFile( String filename, int rows, int cols, DataType type ){
+
 		DataFile file;
-		DataFile outfile;
+		double array[][] = new double[rows][cols];
 		
 		// Read the file
 		try {
-			file = new DataFile( path+filename );
-			outfile = new DataFile();
-			outfile.create(path+filename+"-data.txt");
-			
-			// Surface, high res
-			int rows = 1441;
-			int cols = 1441;
-
-			// Everything less than 85 GHz.
-			//rows = 332;
-			//cols = 316;
-
-			// Anything more than 85 GHz
-			rows = 664;
-			cols = 632;
-			
-			double array[][] = new double[rows][cols];
-			
+			file = new DataFile( filename );
+				
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < cols; c++) {
 					
@@ -64,26 +101,18 @@ public class Viewer {
 						default:
 							break;
 					}
-					
-					// Write out the data to a file, randomly, every tenth point
-					if (Tools.randomInt(10) == 1) {
-						Long i = Math.round(array[r][c]);
-						outfile.writeString( i.toString(), true);
-					}
 				}
 			}
 
 			file.close();
-			outfile.close();
-			
-			DisplayImage(filename, array, rows, cols);
 		}
 		catch(Exception e) {
 			Tools.warningMessage("Failed to open file: " + filename );
 		}
-
-		Tools.message("End program");
+	
+		return array;
 	}
+				
 	
 	static public void DisplayImage( String filename, double[][] array, int rows, int cols ) {
 		
@@ -105,6 +134,8 @@ public class Viewer {
 		// Display the image
 		image.display(filename, rows, cols);
 		
+		// Save a png version
+		image.savePNG(filename, rows, cols);
 	}
 
 }

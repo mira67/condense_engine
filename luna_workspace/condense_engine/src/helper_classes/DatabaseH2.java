@@ -579,7 +579,11 @@ public class DatabaseH2 extends Database {
 		Tools.statusMessage("  Database path = " + dbPath);
 		Tools.statusMessage("  Timestamp entries = " + metadata.timestamps);
 		Tools.statusMessage("  Location entries  = " + metadata.locations);
-		Tools.statusMessage("  Vector entries    = " + metadata.vectors);
+		double total = metadata.locations * metadata.timestamps;
+		Tools.statusMessage("  Total possible Vector entries  = " + (long) total);
+		Tools.statusMessage("  Actual Vector entries    = " + metadata.vectors);
+		double percent = 100.0 * metadata.vectors / total;
+		Tools.statusMessage("  Percent stored    = " + percent );
 		Tools.statusMessage("  ========================================");
 	}
 }
