@@ -1,48 +1,116 @@
-*   database type = <RAM|FILE|H2|PERST|EXTREMEDB|ORIGODB|AEROSPIKE|BLANKDB>
-*       How should the database be stored? RAM keeps everything in memory
-*       as Java objects; FILE stores everything in binary files. Other possible
-*       DBMSs, which may not be implemented yet: H2, Perst, ExtremeDB, Aerospike,
-*       OrigoDB, and a BlankDB.
-
-* Output images:
+* Example configuration file for Condensate program
 *
+* Lines starting with "*", "#", or ";" are treated as comments.
+* Blank lines are ignored.
+*
+* Lines don't have to be in any particular order.
+*
+* If a data line is missing, the program may use defaults.
+*
+* If a data line is not understood, the program will continue
+* but print out a warning.
+*
+* Text case and spacing is ignored. For instance:
+*   "start year = 2013" is the same thing as "STARTYEAR=2013"
+*
+* Listed below are the possible options, with some explanations. Possible
+* command options are shown in <angle> brackets.
+* 
+*
+* To choose the range of processing dates:
+*   start year = yyyy
+*   start month = mm
+*   start day = dd
+*   final year = yyyy
+*   final month = mm
+*   final day = dd
+*
+* To specify the directories of the I/O and type of data to use:
+*   
+*   datatype = <none|sea_ice>
+*   datapath = text
+*     The text string is the full directory path of the data files,
+*     with a closing slash.
+*   outputPath = text
+*     The full output path, with a closing slash, for any data files and images.
+*   addyear = <true|false>
+*     Add the year to the file path?
+*   frequency = nn
+*     For SSMI data, what frequency to use (ignored for other types of data)
+*   polarization = <h|v>
+*     For SSMI data, the polarization
+*   surfacefile = text
+*     If you want to read the surface type image, this option specifies
+*     the full path and filename of the file.
+*   surfacelats = text
+*   surfacelons = text
+*     The surface type file uses separate files for the data's lats and lons.
+*     These path+file names specify where to find those files.
+*
+* Processing control:
+*
+*   timeincrement = <weekly|monthly|yearly|seasonal>
+*   algorithm = <no_condensation|temporal|minmax>
+*   threshold = ff.fff
+*     The threshold is the standard deviations above and below the mean.
+*     The mean is calculated across the time increment. 
+*   debug = <true|false>
+*     Turns debugging messages on or off. The default is off.
+*   warnings = <true|false>
+*   readSurface = <true|false>
+*     Read the surface type file?
+*   writetext = <true|false>
+*     This option forces the resulting databse to be output
+*     as a plain text file. This is handy for debugging but
+*     can also take a lot of time.
+*   writebinary = <true|false>
+*     Writes the database out as a binary finally. Potentially,
+*     this file can be read back in to the program (rather than
+*     processing the input data files). The binary is also much
+*     more conpact than the text file.
 *   image start = n
 *   image end = n
-*     Create an image using the stored pixels between (and
-*     including) these two time indexes. For instance, if the first
-*     day of data in the database is June 1, and the last day is June
-*     30, using imagestart = 0 and imageend = 2 will generate an
-*     image using the stored pixels for June 1, 2 and 3 (timestamps
-*     are indexed from zero).
+*     When an image is generated, use the stored pixels between (and
+*     including) these two time indexes (the nth timestamps in the
+*     the database, not the index IDs in the database).
 *
-* Windows paths...
-*data path = C:\Users\glgr9602\Desktop\Condensate\Data\SeaIce\Daily\
-*output Path = C:\Users\glgr9602\Desktop\Condensate\output\
+data path =/Users/elrapidopescado/data/work/nsidc/data/IceData/nsidc_0001/data/ssmi/daily/
+output Path =/Users/elrapidopescado/data/work/nsidc/data/IceData/nsidc_0001/output/
+database name =ssmi1
+database path =jdbc:h2:tcp://localhost/~/data/work/nsidc/data/IceData/nsidc_0001/db/
 
-* Linux paths...
-data path =/Users/mira67/Documents/IceData/nsidc_0001/south/
-add year = true
-output path =/Users/mira67/Documents/IceData/nsidc_0001/
-start year = 1990
+addyear = true
+
+surfaceFile = C:\Users\glgr9602\Desktop\Condense\Data\Surface\Sh_loci_land50_coast0km.1441x1441.bin
+surfaceLats = C:\Users\glgr9602\Desktop\Condense\Data\Surface\SHLATLSB.bin
+surfaceLons = C:\Users\glgr9602\Desktop\Condense\Data\Surface\SHLONLSB.bin
+
+start year = 2012
 start month = 1
-start day = 1
-final year = 1990
-final month = 1
-final day = 3
-data type = ssmi
-time increment = monthly
-algorithm = SPECIALSAMPLING
+start day = 30
+final year = 2012
+final month = 2
+final day = 28
+data type = SSMI
+
+time increment = multiyearDJF
+algorithm = none
 threshold = 0.5
+
 debug = false
 warnings = false
 readsurface = false
-image start = 0
-image end = 0
-*rows = 316
-*cols = 332
 
-polarization = h
-frequency = 37
-*database type = perst
-database type = H2
-filter bad data = false
+database = h2
+
+generate images = true
+image start = 1
+
+
+polarization=h
+frequency=37
+
+createdatabase = TRUE
+add data to database = TRUE
+
+algorithm = algorithm1

@@ -3,6 +3,9 @@ package helper_classes;
 /* Main program to experiment with algorithms for condensed data sets.
  */
 
+import helper_classes.algorithms.Algorithm;
+import helper_classes.algorithms.Algorithm1;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -543,11 +546,13 @@ public class Condense extends GeoObject {
 					}
 				}
 				
-				GriddedVector[][] condensedData = Algorithms.algorithm1(
-					data, mean, sd, threshold, minValue, maxValue);
+//				GriddedVector[][] condensedData = Algorithms.algorithm1(
+//					data, mean, sd, threshold, minValue, maxValue);
+
+				helper_classes.algorithms.Algorithm alg = new Algorithm1(data, mean, sd, threshold, minValue, maxValue);
 
 				// Store the data in a database.
-				database.storeVectorArray(condensedData, locations);
+				database.storeVectorArray(alg.execute(), locations);
 			}
 			break;
 		}
