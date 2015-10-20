@@ -52,26 +52,11 @@ public class DatasetAVHRR extends Dataset {
 			path = path + dayString + "/";
 		}
 		
+		final String searchString = yearString + dayString + "_" + time + "_" + channel;
+		String filename = Tools.findFile(path, searchString);
 		
-		final String date = yearString + dayString;
-
-		final String suffix = time + "_" + channel;
+		if (filename.length() != 0) return filename;
 		
-		// Search for this date in the directory of file names.
-		File dir = new File(path);
-
-		File[] matches = dir.listFiles(new FilenameFilter() {
-			public boolean accept(File dir, String name) {
-				return name.contains(date) && name.contains(suffix);
-			}
-		});
-
-		// Did we find a file with that date? If yes, use the first occurrence.
-		if (matches != null) {
-			if (matches.length != 0)
-				return matches[0].getPath();
-		}
-
 		// Nothing. 
 		return null;
 	}

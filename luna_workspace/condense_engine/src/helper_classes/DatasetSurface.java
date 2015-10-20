@@ -85,12 +85,12 @@ public class DatasetSurface extends Dataset {
 			// Read the locations.
 			// Start with the latitudes
 			DataFile file = new DataFile(surfaceLats);
-			int[][] lats = file.readInt2d(rows, cols);
+			int[][] lats = file.readInt2D(rows, cols);
 			file.close();
 
 			// Read the longitudes
 			file = new DataFile(surfaceLons);
-			int[][] lons = file.readInt2d(rows, cols);
+			int[][] lons = file.readInt2D(rows, cols);
 			file.close();
 
 			// Locations of the vectors

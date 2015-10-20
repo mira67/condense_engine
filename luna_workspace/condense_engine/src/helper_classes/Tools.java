@@ -296,6 +296,27 @@ public class Tools extends GeoObject {
 	}
 
 	/*
+	 * shortArrayToInteger
+	 * 
+	 * Convert an array of shorts to an array of integers. Also just because.
+	 */
+	public static int[][] shortArrayToInteger(short array[][]) {
+
+		int rows = array.length;
+		int cols = array[0].length;
+
+		int[][] newArray = new int[rows][cols];
+
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				newArray[r][c] = (int) array[r][c];
+			}
+		}
+
+		return newArray;
+	}
+
+	/*
 	 * doubleArrayToInteger
 	 * 
 	 * Convert an array of doubles to an array of integers. Just because.
@@ -547,5 +568,20 @@ public class Tools extends GeoObject {
 		}
 
 		return null;
+	}
+	
+	/*
+	 * copyFromIntArray
+	 * 
+	 * Convert a 2-dimensional integer array to a double array.
+	 */
+	public static double[][] copyFromIntArray(int[][] source) {
+	    double[][] dest = new double[source.length][source[0].length];
+	    for (int r = 0; r < source.length; r++) {
+	    	for (int c = 0; c < source[0].length; c++) {
+	    		dest[r][c] = source[r][c];
+	    	}
+	    }
+	    return dest;
 	}
 }

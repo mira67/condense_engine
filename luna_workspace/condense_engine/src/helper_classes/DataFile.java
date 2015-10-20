@@ -49,7 +49,7 @@ public class DataFile extends GeoObject {
 		} catch (FileNotFoundException noFile) {
 			throw (noFile);
 		}
-		
+
 		fileIsReadable = true;
 	}
 
@@ -150,8 +150,8 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
-		byte b; 
-		
+		byte b;
+
 		try {
 			// Read in the data
 			b = dataInputStream.readByte();
@@ -197,6 +197,40 @@ public class DataFile extends GeoObject {
 		}
 
 		return bytes;
+	}
+
+	/*
+	 * readShort
+	 * 
+	 * Read a short integer from the file.
+	 */
+	public short readShort() throws Exception {
+
+		if (!fileIsReadable) {
+			Tools.warningMessage("DataFile::readShort: " + filename
+					+ " is not open for reading.");
+			throw (new Exception("Cannot read file, not open for reading"));
+		}
+
+		Tools.debugMessage("    DataFile::readShort: reading file " + filename);
+
+		// Get the size of the file in bytes
+		long length = file.length();
+		Tools.debugMessage("    DataFile::readShort: file length = " + length
+				+ " bytes, shorts = " + length / 2);
+
+		// Create the byte array to hold the data. Short integer = 2 bytes.
+		short data = 0;
+
+		try {
+			// Read in the data
+			data = dataInputStream.readShort();
+		} catch (Exception e) {
+			Tools.warningMessage("DataFile::readShort: error on read - " + e);
+			throw (e);
+		}
+
+		return data;
 	}
 
 	/*
@@ -412,13 +446,13 @@ public class DataFile extends GeoObject {
 			// Read in the data
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < cols; c++) {
-					doubles[r][c] = dataInputStream.readDouble();					
+					doubles[r][c] = dataInputStream.readDouble();
 				}
 			}
 		} catch (Exception e) {
 			Tools.warningMessage(" DataFile::readDoubles2D: error on read - "
 					+ e);
-			throw(e);
+			throw (e);
 		}
 
 		return doubles;
@@ -503,7 +537,7 @@ public class DataFile extends GeoObject {
 		try {
 			// Write the data
 			for (int i = 0; i < data.length; i++) {
-				writeDoubles( data[i] );
+				writeDoubles(data[i]);
 			}
 		} catch (Exception up) {
 			Tools.warningMessage(" DataFile::writeDoubles: error on write - "
@@ -644,14 +678,14 @@ public class DataFile extends GeoObject {
 	}
 
 	/*
-	 * readInt2d
+	 * readInt2D
 	 * 
 	 * Read integer data (a 2-D array) from the file.
 	 */
-	public int[][] readInt2d(int rows, int cols) throws Exception {
+	public int[][] readInt2D(int rows, int cols) throws Exception {
 
 		if (!fileIsReadable) {
-			Tools.warningMessage("DataFile::readInt2d: " + filename
+			Tools.warningMessage("DataFile::readInt2D: " + filename
 					+ " is not open for reading.");
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
@@ -660,17 +694,17 @@ public class DataFile extends GeoObject {
 		long length = file.length();
 
 		if (length / 4 > rows * cols) {
-			Tools.warningMessage(" DataFile::readInt2d: Supplied rows and cols is greater than file size.");
+			Tools.warningMessage(" DataFile::readInt2D: Supplied rows and cols is greater than file size.");
 			Tools.warningMessage(" Rows * Cols = " + rows * cols);
 			throw (new Error(
-					"Error in FataFile::readInt2d: rows and cols mismatch with file"));
+					"Error in FataFile::readInt2D: rows and cols mismatch with file"));
 		}
 
 		if (length / 4 != rows * cols) {
-			Tools.warningMessage(">>>> DataFile::readInt2d: Warning! Supplied rows and cols mismatch with file size.");
-			Tools.warningMessage(">>>> DataFile::readInt2d: file length = "
-					+ length + " bytes, Integers = " + length / 4);
-			Tools.warningMessage(">>>> Rows * Cols = " + rows * cols);
+			Tools.warningMessage("DataFile::readInt2D: Warning! Supplied rows and cols mismatch with file size.");
+			Tools.warningMessage("DataFile::readInt2D: file length = " + length
+					+ " bytes, Integers = " + length / 4);
+			Tools.warningMessage("Rows * Cols = " + rows * cols);
 		}
 
 		// Create the byte array to hold the data. Integer = 4 bytes.
@@ -689,11 +723,64 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::readInt2d: error on read - " + up);
+			Tools.warningMessage(" DataFile::readInt2D: error on read - " + up);
 			throw (up);
 		}
 
 		return ints;
+	}
+
+	/*
+	 * readShort2D
+	 * 
+	 * Read short integer data (a 2-D array) from the file.
+	 */
+	public short[][] readShort2D(int rows, int cols) throws Exception {
+
+		if (!fileIsReadable) {
+			Tools.warningMessage("DataFile::readShort2D: " + filename
+					+ " is not open for reading.");
+			throw (new Exception("Cannot read file, not open for reading"));
+		}
+
+		// Get the size of the file in bytes
+		long length = file.length();
+
+		if (length / 2 > rows * cols) {
+			Tools.warningMessage(" DataFile::readShort2D: Supplied rows and cols is greater than file size.");
+			Tools.warningMessage(" Rows * Cols = " + rows * cols);
+			throw (new Error(
+					"Error in FataFile::readShort2D: rows and cols mismatch with file"));
+		}
+
+		if (length / 2 != rows * cols) {
+			Tools.warningMessage("DataFile::readShort2D: Warning! Supplied rows and cols mismatch with file size.");
+			Tools.warningMessage("DataFile::readShort2D: file length = "
+					+ length + " bytes, Integers = " + length / 2);
+			Tools.warningMessage("Rows * Cols = " + rows * cols);
+		}
+
+		// Create the byte array to hold the data. Short integer = 2 bytes.
+		short[][] shorts = new short[rows][cols];
+		int r = 0;
+		int c = 0;
+
+		try {
+			// Read in the data
+			for (int i = 0; i < length / 2; i++) {
+				shorts[r][c] = dataInputStream.readShort();
+				c++;
+				if (c == cols) {
+					r++;
+					c = 0;
+				}
+			}
+		} catch (Exception up) {
+			Tools.warningMessage(" DataFile::readShort2D: error on read - " + up);
+			throw (up);
+		}
+
+		return shorts;
 	}
 
 	/*
@@ -754,7 +841,7 @@ public class DataFile extends GeoObject {
 	 * read2ByteInts2D
 	 * 
 	 * Read integer data (a 2-D array) from the file, where the integers are
-	 * 2-bytes.
+	 * 2-byte little-Endian format.
 	 */
 	public int[][] read2ByteInts2D(int rows, int cols) throws Exception {
 
@@ -799,7 +886,7 @@ public class DataFile extends GeoObject {
 		} catch (Exception e) {
 			Tools.warningMessage(" DataFile::read2ByteInts2D: error on read - "
 					+ e);
-			throw(e);
+			throw (e);
 		}
 
 		return ints;
@@ -831,10 +918,10 @@ public class DataFile extends GeoObject {
 		}
 
 		if (length / 4 != rows * cols) {
-			Tools.warningMessage(">>>> DataFile::readFloat2d: Warning! Supplied rows and cols mismatch with file size.");
-			Tools.warningMessage(">>>> DataFile::readFloat2d: file length = "
+			Tools.warningMessage("DataFile::readFloat2d: Warning! Supplied rows and cols mismatch with file size.");
+			Tools.warningMessage("DataFile::readFloat2d: file length = "
 					+ length + " bytes, floats = " + length / 4);
-			Tools.warningMessage(">>>> Rows * Cols = " + rows * cols);
+			Tools.warningMessage("Rows * Cols = " + rows * cols);
 		}
 
 		// Create the byte array to hold the data. Integer = 4 bytes.
@@ -853,7 +940,7 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::readFloat2d: error on read - "
+			Tools.warningMessage(" DataFile::readFloat2D: error on read - "
 					+ up);
 			throw (up);
 		}

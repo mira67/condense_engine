@@ -21,6 +21,7 @@ public class Viewer {
 	
 	public static void main(String[] args) {
 
+		//String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/1990-2014/";
 		String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/1990-2014/";
 		String filenameRoot = "climate-ssmi";
 		String filenameTail = "-1990-2014.bin";

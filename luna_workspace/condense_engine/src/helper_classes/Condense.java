@@ -98,8 +98,9 @@ public class Condense extends GeoObject {
 	static boolean warningMessages = false; // Receive warning messages?
 	static boolean debugMessages = false; 	// Receive debug messages?
 	
-	// The input files may be stored in subdirectories by year
+	// The input files may be stored in subdirectories by year and day
 	static boolean addYearToInputDirectory = true; 	
+	static boolean addDayToInputDirectory = false;	// Day-of-year 	
 	
 	// Create test images?
 	static boolean generateImages = false; // Generate test images
@@ -383,7 +384,7 @@ public class Condense extends GeoObject {
 			filename = DatasetSeaIce.getFileName(dataPath, startYear,
 					startMonth, startDay, addYearToInputDirectory);
 			dataset = new DatasetSeaIce(filename);
-			getMetadata(filename);
+
 			break;
 
 		case SSMI:
@@ -393,20 +394,27 @@ public class Condense extends GeoObject {
 
 			dataset = new DatasetSSMI(filename, locationsPath);
 
-			getMetadata(filename);
-
-			getLocations();
-
 			break;
 
 		case AVHRR:
-			// todo
+
+			filename = DatasetAVHRR.getFileName(dataPath, startYear,
+					startDay, addYearToInputDirectory, addDayToInputDirectory,
+					suffix1, suffix2);
+
+			dataset = new DatasetAVHRR(filename, locationsPath);
+			
 			break;
 
 		case NONE:
-			break;
+			return;
 
 		}
+
+		getMetadata(filename);
+
+		getLocations();
+
 	}
 
 	/*
@@ -795,6 +803,8 @@ public class Condense extends GeoObject {
 						dataType = DataType.SEA_ICE;
 					if (value.equals("ssmi"))
 						dataType = DataType.SSMI;
+					if (value.equals("avhrr"))
+						dataType = DataType.AVHRR;
 					Tools.statusMessage("Data Type = " + dataType);
 					break;
 				case "algorithm":
@@ -842,6 +852,11 @@ public class Condense extends GeoObject {
 					Tools.statusMessage("Add the year to the input directory = "
 							+ addYearToInputDirectory);
 					break;
+				case "adddoy":   // Add the day-of-year to the data path
+					addDayToInputDirectory = Boolean.valueOf(value);
+					Tools.statusMessage("Add the day-of-year to the input directory = "
+							+ addDayToInputDirectory);
+					break;
 				case "datapath":
 					dataPath = textValue;
 					Tools.statusMessage("Data Path = " + dataPath);
@@ -887,6 +902,14 @@ public class Condense extends GeoObject {
 				case "frequency":
 					suffix1 = value;
 					Tools.statusMessage("Frequency = " + suffix1);
+					break;
+				case "channel":		// AVHRR channel: chn1, chn2, etc. The file name suffix.
+					suffix2 = value;
+					Tools.statusMessage("Channel = " + suffix2);
+					break;
+				case "time":			// AVHRR time: 0200 or 1400, also a file name suffix.
+					suffix1 = value;
+					Tools.statusMessage("Time = " + suffix1);
 					break;
 				case "readsurface":
 					readSurface = Boolean.valueOf(value);
