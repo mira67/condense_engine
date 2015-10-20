@@ -18,7 +18,7 @@ public class Climate extends GeoObject {
 	// A data file for the start date *must* exist because that will be used
 	// to generate the metadata.
 	//static int startYear = 2012;
-	static int startYear = 1992;
+	static int startYear = 1990;
 	static int startMonth = 1;
 	static int startDay = 1;
 

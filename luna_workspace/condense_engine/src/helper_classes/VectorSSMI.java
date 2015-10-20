@@ -1,8 +1,8 @@
 package helper_classes;
 
-/* SeaIceVector
+/* SSMIVector
  * 
- * A vector for sea ice data.
+ * A vector for SSMI data.
  * 
  */
 
@@ -11,8 +11,8 @@ public class VectorSSMI extends GriddedVector {
 	// Default constructor. Location only, no data.
 	public VectorSSMI(GriddedLocation loc) {
 		super(loc);
-		// The pixel is classified as unknown by default.
-		data = 0;
+
+		data = NODATA;
 	}
 
 	// Constructor using a supplied value and location, and timestamp ID.

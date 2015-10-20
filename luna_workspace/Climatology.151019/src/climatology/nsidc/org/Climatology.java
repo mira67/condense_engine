@@ -52,10 +52,6 @@ public class Climatology extends GeoObject {
 	String frequency = ""; // Frequency of SSMI data
 	String polarization = ""; // SSMI polarization, h or v
 
-	// AVHRR data selection
-	String time = "1400";		// Median time of the AVHRR data, 0200 or 1400 Z
-	String channel = "chn1";	// AVHRR channel suffix: chn1, chn2, chn3, chn4, chn5, or temp
-
 	// Locations of the pixels
 	// TODO temporary hard-code
 	static String locationsPath = "/Users/glgr9602/Desktop/condense/data/ssmi/";	// Where the lat/lon files are located
@@ -202,6 +198,35 @@ public class Climatology extends GeoObject {
 		return true;
 	}
 
+	
+	/* 
+	 * getLocations
+	 * 
+	 * Got the data locations? Metadata must be read first.
+	 */
+	protected void getLocations() {
+		
+		if (!haveMetadata) {
+			Tools.errorMessage("Condense", "getLocations", "Metadata must be read before retrieving locations.",
+					new Exception());
+		}
+		
+		locations = new GriddedLocation[metadata.rows()][metadata.cols()];
+		
+		switch (dataType) {
+    		case SEA_ICE:
+    			// TODO
+    		case SSMI:
+    			locations = dataset.getLocations();
+    			break;
+    		case AVHRR:
+    			// todo
+    			break;
+		}
+		
+		return;
+	}
+
 	/*
 	 * readData
 	 * 
@@ -311,6 +336,10 @@ public class Climatology extends GeoObject {
 			filename = DatasetSeaIce.getFileName(dataPath, startYear,
 					startMonth, startDay, addYearToInputDirectory);
 			dataset = new DatasetSeaIce(filename);
+
+			if (!getMetadata(filename)) return false;
+
+			getLocations();
 			
 			break;
 
@@ -320,24 +349,28 @@ public class Climatology extends GeoObject {
 					polarization);
 			
 			dataset = new DatasetSSMI(filename, locationsPath);
+
+			if (!getMetadata(filename)) return false;
+
+			getLocations();
 			
 			break;
 
 		case AVHRR:
-			filename = DatasetAVHRR.getFileName(dataPath, startYear,
-						startDay, addYearToInputDirectory, true, time, channel);
-			
-			dataset = new DatasetAVHRR(filename, locationsPath);
-			
+			/*TODO
+			 * filename = DatasetAVHRR.getAVHRRFileName(dataPath, startYear,
+			 * startMonth, startDay, addYearToInputDirectory);
+			 * 
+			 * dataset = new DatasetAVHRR(filename);
+			 * 
+			 * getMetadata( filename );
+			 * 
+			 * getLocations();
+			 */
+
 			break;
 		}
-
-		// Get the metadata
-		if (!getMetadata(filename)) return false;
 		
-		// Get the locations
-		locations = dataset.getLocations();
-
 		// Make the data array. Add 1 for possible leap year when
 		// processing multiple years.
 		data = new GriddedVector[maximumDays+1][rows][cols];
