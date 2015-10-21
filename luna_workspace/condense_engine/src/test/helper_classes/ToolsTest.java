@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.junit.Before;
 import org.junit.After;
 
-import helper_classes.Tools;
+import condense.Tools;
 
 import java.nio.ByteBuffer;
 

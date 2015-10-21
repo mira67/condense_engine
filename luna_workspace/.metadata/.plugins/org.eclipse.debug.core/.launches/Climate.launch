@@ -7,5 +7,6 @@
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="climatology.nsidc.org.Climate"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="C:\Users\glgr9602\Desktop\condense\climatology\configfiles\config.txt"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="Climatology"/>
 </launchConfiguration>

@@ -1,5 +1,5 @@
 
-import helper_classes.*;
+import condense.*;
 
 /* ViewSingleImage
  * 
@@ -30,7 +30,7 @@ public class ViewSingleImage {
 		String inputPath = "C:/Users/glgr9602/Desktop/condense/data/avhrr/north/2000/002/";
 		String outputPath = "C:/Users/glgr9602/Desktop/";
 		
-		String searchString = "2000002_1400_chn3";
+		String searchString = "2000002_1400_temp";
 		
 		String filename = Tools.findFile(inputPath, searchString);
 		if (filename == null) {
@@ -121,7 +121,7 @@ public class ViewSingleImage {
 		int rows = array.length;
 		int cols = array[0].length;
 		
-		// Create an image obect
+		// Create an image object
 		Image image = new Image();
 		
 		// Create the color table
@@ -129,7 +129,7 @@ public class ViewSingleImage {
 		ct.grayScale();
 		
 		// Get rid of bad data points
-		array = Tools.discardBadData(array, 2, 3100);
+		array = Tools.discardBadData(array, 1900, 3100);
 		
 		// Scale the data for display
 		array = Tools.scaleIntArray2D(array, 0, 255);

@@ -1,6 +1,10 @@
 package climatology.nsidc.org;
 
-import helper_classes.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+
+import condense.*;
+import condense.Dataset.DataType;
 
 
 /* Climate
@@ -14,32 +18,46 @@ import helper_classes.*;
 
 public class Climate extends GeoObject {
 
-	// Start and end dates for the processing.
+	// The type of data we're processing
+	static Dataset.DataType dataType;
+	
+    // Parallel processes. Max out at 8 to avoid meltdowns?
+    static int procs = 8;
+    
+    // Min and max allowable data values
+    static double minValue = -9999999;
+    static double maxValue = 9999999;
+    
+    // When reading the source data, do we have to modify the path?
+    static boolean addYearToInputDirectory = true;
+    static boolean addDayToInputDirectory = true;   // Day-of-year, not day of month
+
+	// Where to get the source data, and store the output
+    static String dataPath = "";
+    static String outputPath = "";
+    
+    // What to do about bad data in the files?
+    static boolean filterBadData = true;
+    
+    // Start and end dates for the processing.
 	// A data file for the start date *must* exist because that will be used
 	// to generate the metadata.
-	//static int startYear = 2012;
-	static int startYear = 1992;
-	static int startMonth = 1;
-	static int startDay = 1;
+	static int startYear = 0;
+	static int startMonth = 0;
+	static int startDay = 0;
 
-	static int finalYear = 2014;
-	static int finalMonth = 12;
-	static int finalDay = 31;
-
-	static int lastStartYear = 0;
-	static int lastStartMonth = 0;
-	static int lastStartDay = 0;
+	static int finalYear = 0;
+	static int finalMonth = 0;
+	static int finalDay = 0;
 	
+    
 	static boolean warningMessages = true; // Receive warning messages?
 	static boolean debugMessages = false; // Receive debug messages?
 
-	// SSMI data selection
-	static String suffix1 = ""; // Frequency of SSMI data
-	static String suffix2 = ""; // SSMI polarization, h or v
+	// File suffixes, for data selection
+	static String suffix1 = ""; // Frequency of SSMI data or AVHRR time
+	static String suffix2 = ""; // SSMI polarization, h or v, or AVHRR channel
 
-	// For parallel processing
-	static int procs; 
-	
 	/*-------------------------------------------------------------------------
 	// MAIN PROGRAM
 	//-----------------------------------------------------------------------*/
@@ -52,24 +70,32 @@ public class Climate extends GeoObject {
 
 		long firstTime = System.currentTimeMillis();
 		
-		Dataset.DataType dataType = Dataset.DataType.SSMI;
 
+		// Read the configuration file.
+		if (args.length < 1) {
+			Tools.message("No configuration file specifiec.");
+			System.exit(1);
+		}
+		String configFilename = args[0];
+		
+		try {
+			if (!readConfigFile(configFilename)) {
+				Tools.errorMessage("Condense", "main",
+						"Could not read the cofiguration file: "
+								+ configFilename, new Exception());
+			}
+		} catch (Exception e) {
+			Tools.message("Error when reading configuration file: " + configFilename);
+			System.out.println(e);
+			Tools.errorMessage("Climate", "main", "", new Exception());
+		}
+		
 		// Where does the data come from? Set the path. Platform dependent.
-		
-		// Linux
-		String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";	// SSMI
-		// String dataPath = "/home/glgr9602/DATASETS/nsidc0001_polar_stereo_tbs/south/";	// AVHRR
-		
-		// Windows
-		//String dataPath = "/Users/glgr9602/Desktop/condense/data/" +
-		//		  dataType.toString() + "/daily/";
 		
 		// How many processors do we have available?
 	    procs = Runtime.getRuntime().availableProcessors(); 
 	    System.out.println("Available processors = " + procs);
 	    
-	    // Max out at 8 processes. Avoid meltdowns?
-	    procs = 8;
 
 	    // Create an array to hold parallel threads.
 	    ParallelTask[] threads = new ParallelTask[procs]; 
@@ -98,20 +124,13 @@ public class Climate extends GeoObject {
 				name.compareTo("week") == 0
 			) continue;
 
-			// Linux
-			String outputPath = "/home/glgr9602/condense/climatology/" +
-						dataType.toString() + "/";
-			// Windows
-			//String outputPath = "/Users/glgr9602/Desktop/condense/climatology/" +				
-			//		dataType.toString() + "/" + name + "/";
-
 			// This keeps track of how many parallel processes we create.
 			int processID = 0;
 			
 			//***************************************
 			// SSMI
 			//***************************************
-			
+			/*
 			String[] frequencies = {"19", "22", "37", "85"};
 			String[] polarizations = {"h", "v"};
 			
@@ -137,15 +156,18 @@ public class Climate extends GeoObject {
 				    processID++;
 				}
 			}
-
+			*/
+			
 			//***************************************
 			// AVHRR
 			//***************************************
-			/*
-			String[] wavelengths = {"ch1", "ch2", "ch3", "ch4", "ch5"};
+			
+			// TODO
+			//String[] channels = {"temp", "albd", "chn1", "chn2", "chn3", "chn4", "chn5"};
+			String[] channels = {"temp"};
 
 			// Loop through all wavelengths
-			for ( String wavelength : wavelengths) {
+			for ( String channel : channels) {
 					
 				// Create a new thread
 			    threads[processID] = new ParallelTask(
@@ -154,7 +176,7 @@ public class Climate extends GeoObject {
 							finalYear, finalMonth, finalDay,
 							increment,
 							dataPath, outputPath,
-							wavelength, "" );
+							channel, suffix2 );
 					    
 			   // Start it.
 			   threads[processID].start();
@@ -162,7 +184,7 @@ public class Climate extends GeoObject {
 			   // Increment the process ID.
 			   processID++;
 			}
-			*/
+			
 			//*****************************************
 			// FINISHED WITH SENSOR-SPECIFIC PROCESSING
 			//*****************************************
@@ -257,7 +279,7 @@ public class Climate extends GeoObject {
 					startY, startM, startD,
 					finalY, finalM, finalD, inc,
 					dataP, outputP,
-					suff1, suff2);
+					suff1, suff2, minValue, maxValue, filterBadData);
 
 			climate.run();
 			
@@ -267,4 +289,163 @@ public class Climate extends GeoObject {
 			Tools.statusMessage("");
 		}
 	} 
+	/*
+	 * readConfigFile
+	 * 
+	 * Read parameters from a configuration file.
+	 */
+	public static boolean readConfigFile(String filename) throws Exception {
+
+		Tools.statusMessage("--------------------------------------------------------------");
+
+		try {
+			DataFile file = new DataFile(filename);
+
+			Tools.statusMessage("Configuration file: " + filename);
+
+			// All the lines in the file.
+			ArrayList<String> lines = file.readStrings();
+
+			Iterator<String> lineIter = lines.iterator();
+
+			// Process the lines in the configuration file.
+			while (lineIter.hasNext()) {
+
+				// Read the line
+				String input = lineIter.next();
+
+				// Before cleaning up the string, save any literal text values.
+				String textValue = Tools.parseString(input, 1, "=");
+				textValue = textValue.trim(); // Remove any white space at the
+												// beginning and end
+
+				// Clean up the string: remove white spaces, and make all lower
+				// case
+				String line = Tools.removeCharacters(input, ' ');
+				line = line.toLowerCase();
+
+				Tools.debugMessage("  line: " + line);
+
+				// Parse out the variable and parameter value
+				String variable = Tools.parseString(line, 0, "=");
+				String value = Tools.parseString(line, 1, "=");
+
+				// Handle blank lines.
+				if (variable.length() == 0)
+					continue;
+
+				// Comment lines
+				if (variable.indexOf("*") == 0 ||
+						variable.indexOf("#") == 0 ||
+						variable.indexOf("!") == 0 ||
+						variable.indexOf(";") == 0) continue;
+				
+				// Process the variable
+				switch (variable) {
+				case "startyear":
+					startYear = Integer.valueOf(value);
+					Tools.statusMessage("Start Year = " + startYear);
+					break;
+				case "startmonth":
+					startMonth = Integer.valueOf(value);
+					Tools.statusMessage("Start Month = " + startMonth);
+					break;
+				case "startday":
+					startDay = Integer.valueOf(value);
+					Tools.statusMessage("Start Day = " + startDay);
+					break;
+				case "finalyear":
+					finalYear = Integer.valueOf(value);
+					Tools.statusMessage("Final Year = " + finalYear);
+					break;
+				case "finalmonth":
+					finalMonth = Integer.valueOf(value);
+					Tools.statusMessage("Final Month = " + finalMonth);
+					break;
+				case "finalday":
+					finalDay = Integer.valueOf(value);
+					Tools.statusMessage("Final Day = " + finalDay);
+					break;
+				case "datatype":
+					if (value.equals("sea_ice"))
+						dataType = DataType.SEA_ICE;
+					if (value.equals("ssmi"))
+						dataType = DataType.SSMI;
+					if (value.equals("avhrr"))
+						dataType = DataType.AVHRR;
+					Tools.statusMessage("Data Type = " + dataType);
+					break;
+				case "minvalue":
+					minValue = Double.valueOf(value);
+					Tools.statusMessage("Low threshold = " + minValue);
+					break;
+				case "maxvalue":
+					maxValue = Double.valueOf(value);
+					Tools.statusMessage("High threshold = " + maxValue);
+					break;
+				case "debug":
+					debugMessages = Boolean.valueOf(value);
+					Tools.statusMessage("Debug = " + debugMessages);
+					Tools.setDebug(debugMessages);
+					break;
+				case "warnings":
+					warningMessages = Boolean.valueOf(value);
+					Tools.statusMessage("Warnings = " + warningMessages);
+					Tools.setWarnings(warningMessages);
+					break;
+				case "addyear":
+					addYearToInputDirectory = Boolean.valueOf(value);
+					Tools.statusMessage("Add the year to the input directory = "
+							+ addYearToInputDirectory);
+					break;
+				case "adddoy":   // Add the day-of-year to the data path
+					addDayToInputDirectory = Boolean.valueOf(value);
+					Tools.statusMessage("Add the day-of-year to the input directory = "
+							+ addDayToInputDirectory);
+					break;
+				case "datapath":
+					dataPath = textValue;
+					Tools.statusMessage("Data Path = " + dataPath);
+					break;
+				case "outputpath":
+					outputPath = textValue;
+					Tools.statusMessage("Output Path = " + outputPath);
+					break;
+				case "polarization":
+					suffix2 = value;
+					Tools.statusMessage("Polarization = " + suffix2);
+					break;
+				case "frequency":
+					suffix1 = value;
+					Tools.statusMessage("Frequency = " + suffix1);
+					break;
+				case "channel":		// AVHRR channel: chn1, chn2, etc. The file name suffix.
+					suffix1 = value;
+					Tools.statusMessage("Channel = " + suffix1);
+					break;
+				case "time":			// AVHRR time: 0200 or 1400, also a file name suffix.
+					suffix2 = value;
+					Tools.statusMessage("Time = " + suffix2);
+					break;
+				case "filterbaddata":
+					filterBadData = Boolean.valueOf(value);
+					Tools.statusMessage("Filter bad data = " + filterBadData);
+					break;
+				default:
+					Tools.warningMessage("Configuration file line not understood: "
+							+ input);
+					break;
+
+				}
+
+				file.close();
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+
+		Tools.statusMessage("--------------------------------------------------------------");
+
+		return true;
+	}
 }

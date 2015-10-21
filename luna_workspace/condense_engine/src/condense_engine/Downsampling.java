@@ -1,6 +1,6 @@
 package condense_engine;
 
-import helper_classes.Tools;
+import condense.Tools;
 
 /**
  * Downsampling condense methods library

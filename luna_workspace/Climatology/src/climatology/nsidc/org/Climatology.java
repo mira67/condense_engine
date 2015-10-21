@@ -1,6 +1,6 @@
 package climatology.nsidc.org;
 
-import helper_classes.*;
+import condense.*;
 
 /* Climatology
  * 
@@ -12,6 +12,8 @@ import helper_classes.*;
  */
 
 public class Climatology extends GeoObject {
+
+	Dataset.DataType dataType;
 
 	Timespan.Increment increment;
 
@@ -35,30 +37,22 @@ public class Climatology extends GeoObject {
 	// This is the date we are processing.
 	Timestamp date;
 	
-	static boolean filterBadData = true; 	// Filter out bad data points
+	static boolean filterBadData; 	// Filter out bad data points
 	
-	static final int minValue = 50;			// Minimum acceptable data value
-	static final int maxValue = 4000;		// Maximum acceptable data value
+	static int minValue;			// Minimum acceptable data value
+	static int maxValue;			// Maximum acceptable data value
 
 	static final String climatologyPrefix = "climate-";
 	
 	static boolean warningMessages = true; // Receive warning messages?
-	static boolean debugMessages = false; // Receive debug messages?
+	static boolean debugMessages = false;  // Receive debug messages?
 	static boolean addYearToInputDirectory = true; // The input files may be
 													// stored in subdirectories
 													// by year
 
-	// SSMI data selection
-	String frequency = ""; // Frequency of SSMI data
-	String polarization = ""; // SSMI polarization, h or v
-
-	// AVHRR data selection
-	String time = "1400";		// Median time of the AVHRR data, 0200 or 1400 Z
-	String channel = "chn1";	// AVHRR channel suffix: chn1, chn2, chn3, chn4, chn5, or temp
-
-	// Locations of the pixels
-	// TODO temporary hard-code
-	static String locationsPath = "/Users/glgr9602/Desktop/condense/data/ssmi/";	// Where the lat/lon files are located
+	// SSMI and AVHRR data selection
+	String suffix1;	// SSMI frequency, or AVHRR channel suffix
+	String suffix2;	// SSMI polarization, or median time of the AVHRR data, 0200 or 1400 Z
 
 	// The image data across the specified time increment [day][row][col]
 	GriddedVector data[][][];
@@ -73,9 +67,6 @@ public class Climatology extends GeoObject {
 	// The dataset we're going to read.
 	Dataset dataset;
 
-	// Gridded pixel locations.
-	GriddedLocation locations[][];
-
 	// The mean provides a reference for deciding whether to condense the
 	// newest pixels; i.e., are the pixels varying greater than n*sd from
 	// the mean? If so, keep the newest ones and update the reference image
@@ -88,8 +79,6 @@ public class Climatology extends GeoObject {
 
 	// Number of files successfully read, for sanity checks
 	int fileCount = 0;
-
-	static Dataset.DataType dataType;
 
 	// Files and paths for i/o
 	String outputPath;
@@ -106,7 +95,8 @@ public class Climatology extends GeoObject {
 			int finalY, int finalM, int finalD,
 			Timespan.Increment inc,
 			String dataP, String outputP,
-			String suffix1, String suffix2) {
+			String suff1, String suff2,
+			double min, double max, boolean filter) {
 		
 		dataType = type;
 		
@@ -123,8 +113,13 @@ public class Climatology extends GeoObject {
 		dataPath = dataP;
 		outputPath = outputP;
 		
-		frequency = suffix1;
-		polarization = suffix2;
+		suffix1 = suff1;
+		suffix2 = suff2;
+		
+		minValue = (int) Math.round(min);
+		maxValue = (int) Math.round(max);
+		
+		filterBadData = filter;
 	}
 	
 	/* run
@@ -250,7 +245,7 @@ public class Climatology extends GeoObject {
 							addYearToInputDirectory);
 
 					data[d] = (GriddedVector[][]) ((DatasetSeaIce) dataset)
-							.readData(filename, locations, date.id());
+							.readData(filename, new GriddedLocation[rows][cols], date.id());
 
 					// Success
 					fileCount++;
@@ -260,15 +255,13 @@ public class Climatology extends GeoObject {
 				case SSMI:
 					filename = DatasetSSMI.getFileName(dataPath, date.year(),
 							date.month(), date.dayOfMonth(),
-							addYearToInputDirectory, frequency, polarization);
+							addYearToInputDirectory, suffix1, suffix2);
 
 					// Read the data
 					data[d] = (GriddedVector[][]) ((DatasetSSMI) dataset)
-							.readData(filename, locations, date.id());
+							.readData(filename,  new GriddedLocation[rows][cols], date.id());
 
-					// Get rid of any unrealistic data points. For SSMI data
-					// (brightness temperatures in degrees K) anything less than
-					// 10 or greater than 400 is clearly bogus.
+					// Get rid of any unrealistic data points.
 					if (filterBadData) {						
 						data[d] = GriddedVector.filterBadData(data[d], minValue, maxValue, NODATA);
 					}
@@ -316,18 +309,18 @@ public class Climatology extends GeoObject {
 
 		case SSMI:
 			filename = DatasetSSMI.getFileName(dataPath, startYear,
-					startMonth, startDay, addYearToInputDirectory, frequency,
-					polarization);
+					startMonth, startDay, addYearToInputDirectory, suffix1,
+					suffix2);
 			
-			dataset = new DatasetSSMI(filename, locationsPath);
+			dataset = new DatasetSSMI(filename, "");
 			
 			break;
 
 		case AVHRR:
 			filename = DatasetAVHRR.getFileName(dataPath, startYear,
-						startDay, addYearToInputDirectory, true, time, channel);
+						startDay, addYearToInputDirectory, true, suffix1, suffix2);
 			
-			dataset = new DatasetAVHRR(filename, locationsPath);
+			dataset = new DatasetAVHRR(filename, "");
 			
 			break;
 		}
@@ -335,9 +328,6 @@ public class Climatology extends GeoObject {
 		// Get the metadata
 		if (!getMetadata(filename)) return false;
 		
-		// Get the locations
-		locations = dataset.getLocations();
-
 		// Make the data array. Add 1 for possible leap year when
 		// processing multiple years.
 		data = new GriddedVector[maximumDays+1][rows][cols];
@@ -456,7 +446,7 @@ public class Climatology extends GeoObject {
 		try {
 			// Mean baseline climatology file
 			filename = outputPath + climatologyPrefix + dataType.toString() + 
-					frequency + polarization +
+					suffix1 + suffix2 +
 					"-mean-" + incName + "-" + firstDate.yearString() +
 					"-" + lastDate.yearString() + ".bin";
 
@@ -469,7 +459,7 @@ public class Climatology extends GeoObject {
 			
 			// Standard deviation climatology file
 			filename = outputPath + climatologyPrefix + dataType.toString() +
-					frequency + polarization +
+					suffix1 + suffix2 +
 					"-sd-" + incName + "-" + firstDate.yearString() +
 					"-" + lastDate.yearString() + ".bin";
 
