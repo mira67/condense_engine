@@ -18,7 +18,7 @@ public class DatasetAVHRR extends Dataset {
 		readMetadata(filename);
 
 		locs = new GriddedLocation[metadata.rows][metadata.cols];
-		readLocations( locationsPath );
+		//readLocations( locationsPath );
 	}
 
 	/*
@@ -68,26 +68,22 @@ public class DatasetAVHRR extends Dataset {
 	 */
 	public Metadata readMetadata(String filename) {
 
+		if (haveMetadata) return metadata;
+		
 		// AVHRR data comes in a binary file without metadata. It is assumed
 		// the user will know 'a priori' the dimensions of the data.
-		// TODO: A description of the files can be found here: ???
+		// A description of the files can be found here:
+		// http://nsidc.org/data/docs/daac/nsidc0066_avhrr_5km.gd.html#size
 		
-		long length = 0;
-		
-		try {
-			DataFile file = new DataFile(filename);
-			length = file.length();
-			file.close();
-		} catch(Exception e) {
-			Tools.warningMessage("DatasetAVHRR::readMetadata: could not get metadata from " +
-		                       "the file: " + filename + " -- Unable to open it.");
-			return null;
+		// Northern hemisphere
+		if (filename.indexOf("_n") > 0) {
+			metadata.rows = 1805;
+			metadata.cols = 1805;			
 		}
-		
-		// TODO: set rows and columns for 5km or 25km data, by looking at the file size
-		if (length < 999999) {
-			metadata.rows = 664;
-			metadata.cols = 632;			
+		else {
+			// Southern hemisphere
+			metadata.rows = 1605;
+			metadata.cols = 1605;			
 		}
 
 		haveMetadata = true;
@@ -115,28 +111,21 @@ public class DatasetAVHRR extends Dataset {
 	/*
 	 * readLocations
 	 * 
-	 * Read the locations for this gridded dataset.
+	 * Read the locations for this gridded dataset. LatsPath and lonsPath
+	 * are the latitude and longitude files.
 	 */
-	protected void readLocations(String locationsPath) {
-
-		// Temporary file name hard-code until we have time for something better. :-(
+	protected void readLocations(String latsPath, String lonsPath) {
 		
-		// 25km resolution grid cells
-		String latsFileName = locationsPath + "pss25lats_v3.dat";
-		String lonsFileName = locationsPath + "pss25lons_v3.dat";
-		
-		// 12.5km resolution grid cells
-		if (metadata.rows > 332 ) {
-			latsFileName = locationsPath + "pss12lats_v3.dat";
-			lonsFileName = locationsPath + "pss12lons_v3.dat";
-		}
+		// If no file information was provided, bail out.
+		if (latsPath == null) return;
+		if (latsPath.length() == 0) return;
 		
 		// Read the files
 		try {
 			
 			// Open the files
-			DataFile latitudes = new DataFile( latsFileName );
-			DataFile longitudes = new DataFile( lonsFileName );
+			DataFile latitudes = new DataFile( latsPath );
+			DataFile longitudes = new DataFile( lonsPath );
 
 			for (int r = 0; r < metadata.rows; r++) {
 				for (int c = 0; c < metadata.cols; c++) {
@@ -177,6 +166,8 @@ public class DatasetAVHRR extends Dataset {
 
 		VectorAVHRR[][] AVHRRVectors = null;
 
+		if (filename == null) return AVHRRVectors;
+		
 		DataFile file = new DataFile(filename);
 
 		try {
@@ -191,7 +182,7 @@ public class DatasetAVHRR extends Dataset {
 		// Read the data.
 		try {
 			// Read the data
-			int[][] data = file.read2ByteInts2D(rows(), cols());
+			short[][] data = file.readShort2D(rows(), cols());
 
 			// Create a place to store the data.
 			AVHRRVectors = new VectorAVHRR[rows()][cols()];

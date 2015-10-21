@@ -21,8 +21,8 @@ public class Climate extends GeoObject {
 	// The type of data we're processing
 	static Dataset.DataType dataType;
 	
-    // Parallel processes. Max out at 8 to avoid meltdowns?
-    static int procs = 8;
+    // Parallel processes.
+    static int procs;
     
     // Min and max allowable data values
     static double minValue = -9999999;
@@ -94,8 +94,13 @@ public class Climate extends GeoObject {
 		
 		// How many processors do we have available?
 	    procs = Runtime.getRuntime().availableProcessors(); 
-	    System.out.println("Available processors = " + procs);
+	    Tools.message("Available processors = " + procs);
 	    
+	    // Max out at 8 to avoid melt-downs?
+	    if (procs > 8) {
+	    	Tools.message("Using only " + procs + " processors.");
+	    	procs = 8;
+	    }
 
 	    // Create an array to hold parallel threads.
 	    ParallelTask[] threads = new ParallelTask[procs]; 

@@ -27,10 +27,10 @@ public class ViewSingleImage {
 		Tools.setDebug(false);
 		
 		//String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/1990-2014/";
-		String inputPath = "C:/Users/glgr9602/Desktop/condense/data/avhrr/north/2000/002/";
+		String inputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/";
 		String outputPath = "C:/Users/glgr9602/Desktop/";
 		
-		String searchString = "2000002_1400_temp";
+		String searchString = "1400-mean";
 		
 		String filename = Tools.findFile(inputPath, searchString);
 		if (filename == null) {
@@ -46,7 +46,7 @@ public class ViewSingleImage {
 			}
 		}
 		
-		DataType type = DataType.SHORT;
+		DataType type = DataType.DOUBLE;
 		
 		int rows = 1805;
 		int cols = 1805;
