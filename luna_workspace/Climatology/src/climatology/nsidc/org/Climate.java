@@ -50,6 +50,9 @@ public class Climate extends GeoObject {
 	static int finalMonth = 0;
 	static int finalDay = 0;
 	
+	// If we're testing, not doing a full run, set this to true --
+	// eliminates some debugging junk.
+	static boolean testing = false;
     
 	static boolean warningMessages = true; // Receive warning messages?
 	static boolean debugMessages = false; // Receive debug messages?
@@ -97,11 +100,13 @@ public class Climate extends GeoObject {
 	    Tools.message("Available processors = " + procs);
 	    
 	    // Max out at 8 to avoid melt-downs?
-	    if (procs > 8) {
-	    	Tools.message("Using only " + procs + " processors.");
-	    	procs = 8;
-	    }
+	    if (procs > 8) procs = 8; 
+	    
+	    // Limit to one processor for testing
+	    if (testing) procs = 1;
 
+	    Tools.message("Using: " + procs + " processors.");
+	    
 	    // Create an array to hold parallel threads.
 	    ParallelTask[] threads = new ParallelTask[procs]; 
 	    		
@@ -181,7 +186,7 @@ public class Climate extends GeoObject {
 							finalYear, finalMonth, finalDay,
 							increment,
 							dataPath, outputPath,
-							channel, suffix2 );
+							channel, suffix2, testing );
 					    
 			   // Start it.
 			   threads[processID].start();
@@ -237,13 +242,15 @@ public class Climate extends GeoObject {
 		String suff1;
 		String suff2;
 		
+		boolean testing;
+		
 		// constructor
 		public ParallelTask(int id, Dataset.DataType datatype,
 				int startYear, int startMonth, int startDay,
 				int finalYear, int finalMonth, int finalDay,
 				Timespan.Increment increment,
 				String dataPath, String outputPath,
-				String suffix1, String suffix2) {
+				String suffix1, String suffix2, boolean test) {
 			
 			this.threadNumber = id;
 			this.dataT = datatype;
@@ -261,6 +268,8 @@ public class Climate extends GeoObject {
 			this.outputP = outputPath;
 			this.suff1 = suffix1;
 			this.suff2 = suffix2;
+			
+			this.testing = test;
 		}
 
 		/* run
@@ -284,7 +293,9 @@ public class Climate extends GeoObject {
 					startY, startM, startD,
 					finalY, finalM, finalD, inc,
 					dataP, outputP,
-					suff1, suff2, minValue, maxValue, filterBadData);
+					suff1, suff2, minValue, maxValue, filterBadData,
+					addYearToInputDirectory, addDayToInputDirectory,
+					testing);
 
 			climate.run();
 			
@@ -294,6 +305,7 @@ public class Climate extends GeoObject {
 			Tools.statusMessage("");
 		}
 	} 
+	
 	/*
 	 * readConfigFile
 	 * 
@@ -387,6 +399,10 @@ public class Climate extends GeoObject {
 				case "maxvalue":
 					maxValue = Double.valueOf(value);
 					Tools.statusMessage("High threshold = " + maxValue);
+					break;
+				case "testing":
+					testing = Boolean.valueOf(value);
+					Tools.statusMessage("Testing = " + testing);
 					break;
 				case "debug":
 					debugMessages = Boolean.valueOf(value);

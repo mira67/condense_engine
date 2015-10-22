@@ -2,30 +2,30 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="filter" key="selection"/>
+		<item value="readData" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="filter"/>
-			<item value="doubleArr"/>
-			<item value="intArra"/>
-			<item value="short2D"/>
-			<item value="&gt;&gt;&gt;&gt; "/>
-			<item value="&gt;&gt;&gt;&gt;"/>
-			<item value="2D"/>
-			<item value="readShort"/>
+			<item value="readData"/>
+			<item value="mean"/>
+			<item value="population at"/>
+			<item value="totalDays"/>
+			<item value="sd"/>
+			<item value="rows"/>
+			<item value=" to "/>
+			<item value="openDataset"/>
 		</list>
 		<list key="replacehistory">
+			<item value="suffix2"/>
+			<item value="suffix1"/>
 			<item value=""/>
 			<item value="readInt2D"/>
 			<item value="ViewSingleImage"/>
 			<item value="AVHRR"/>
 			<item value="frequency"/>
 			<item value="polarization"/>
-			<item value="dbName + &quot;.&quot;"/>
-			<item value="dbPath"/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">

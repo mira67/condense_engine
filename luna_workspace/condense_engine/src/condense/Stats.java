@@ -201,7 +201,7 @@ public class Stats {
 	 * standardDeviationNoBadData2d
 	 * 
 	 * Compute the SD at each location of a 2-D array of double values,
-	 * where the doubles are the sums of the differences squared.
+	 * where the values are the sums of the differences squared.
 	 */
 	static public double[][] standardDeviationNoBadData2d(double[][] values,
 			int population[][], double bad, double bias) {

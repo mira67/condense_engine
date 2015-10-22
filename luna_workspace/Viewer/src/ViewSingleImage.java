@@ -30,7 +30,7 @@ public class ViewSingleImage {
 		String inputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/";
 		String outputPath = "C:/Users/glgr9602/Desktop/";
 		
-		String searchString = "1400-mean";
+		String searchString = "1400-sd";
 		
 		String filename = Tools.findFile(inputPath, searchString);
 		if (filename == null) {
@@ -48,8 +48,15 @@ public class ViewSingleImage {
 		
 		DataType type = DataType.DOUBLE;
 		
-		int rows = 1805;
-		int cols = 1805;
+		// Southern hemisphere AVHRR
+		int rows = 1605;
+		int cols = 1605;			
+
+		// Northern hemisphere AVHRR
+		if (filename.indexOf("_n") > 0) {
+			rows = 1805;
+			cols = 1805;			
+		}
 
 		Tools.message(filename);
 		Tools.message("");
@@ -129,7 +136,13 @@ public class ViewSingleImage {
 		ct.grayScale();
 		
 		// Get rid of bad data points
-		array = Tools.discardBadData(array, 1900, 3100);
+		///array = Tools.discardBadData(array, 1900, 3100);
+		
+		/// DEBUG: look at a random selection of the data
+		for (int i = 0; i < rows; i = i + 40) {
+			System.out.print( array[i][i] + " ");
+		}
+		System.out.println();
 		
 		// Scale the data for display
 		array = Tools.scaleIntArray2D(array, 0, 255);

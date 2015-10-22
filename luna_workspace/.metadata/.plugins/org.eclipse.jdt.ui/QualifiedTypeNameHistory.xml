@@ -33,4 +33,5 @@
 <fullyQualifiedTypeName name="net.sf.saxon.exslt.Date"/>
 <fullyQualifiedTypeName name="org.joda.time.Months"/>
 <fullyQualifiedTypeName name="helper_classes.DatasetSSMI"/>
+<fullyQualifiedTypeName name="condense.Dataset.DataType"/>
 </qualifiedTypeNameHistroy>

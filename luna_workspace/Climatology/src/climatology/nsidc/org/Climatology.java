@@ -44,12 +44,6 @@ public class Climatology extends GeoObject {
 
 	static final String climatologyPrefix = "climate-";
 
-	static boolean warningMessages = true; // Receive warning messages?
-	static boolean debugMessages = false; // Receive debug messages?
-	static boolean addYearToInputDirectory = true; // The input files may be
-													// stored in subdirectories
-													// by year
-
 	// SSMI and AVHRR data selection
 	String suffix1; // SSMI frequency, or AVHRR channel suffix
 	String suffix2; // SSMI polarization, or median time of the AVHRR data, 0200
@@ -85,6 +79,12 @@ public class Climatology extends GeoObject {
 	String outputPath;
 	String dataPath;
 
+	// Flags for the input path spec.
+	boolean addYearToInputDirectory;
+	boolean addDayToInputDirectory;
+	
+	boolean testing;
+	
 	/*
 	 * Climatology
 	 * 
@@ -93,7 +93,8 @@ public class Climatology extends GeoObject {
 	public Climatology(Dataset.DataType type, int startY, int startM,
 			int startD, int finalY, int finalM, int finalD,
 			Timespan.Increment inc, String dataP, String outputP, String suff1,
-			String suff2, double min, double max, boolean filter) {
+			String suff2, double min, double max, boolean filter,
+			boolean addYear, boolean addDay, boolean test) {
 
 		dataType = type;
 
@@ -117,6 +118,11 @@ public class Climatology extends GeoObject {
 		maxValue = (int) Math.round(max);
 
 		filterBadData = filter;
+		
+		addYearToInputDirectory = addYear;
+		addDayToInputDirectory = addDay;
+		
+		testing = test;
 	}
 
 	/*
@@ -166,7 +172,7 @@ public class Climatology extends GeoObject {
 						+ timespan.endTimestamp().dateString() + "  days = "
 						+ timespan.days());
 
-				readData(timespan);
+				readData(timespan, pass);
 
 				// Store the data for later statistical calculations.
 				accumulateData(data, (pass == 2));
@@ -188,7 +194,7 @@ public class Climatology extends GeoObject {
 
 			if (pass == 2)
 				sd = Stats.standardDeviationNoBadData2d(accumulator,
-						population, NODATA, 1);
+						population, (double) NODATA, 1.0);
 		}
 
 		// Write out the stats to files
@@ -210,8 +216,14 @@ public class Climatology extends GeoObject {
 	 * Doesn't care if a file is missing. Assumes the data isn't available and
 	 * plows ahead.
 	 */
-	protected void readData(Timespan timespan) {
+	protected void readData(Timespan timespan, int pass) {
 
+		/// FOR TESTING
+		// Create an image and the color table
+		ColorTable ct = new ColorTable();
+		ct.grayScale();
+		int[][] array;
+		
 		// Have we opened the dataset?
 		if (data == null) {
 			Tools.errorMessage("Climatology", "readData", "dataset not open",
@@ -273,6 +285,20 @@ public class Climatology extends GeoObject {
 					data[d] = (GriddedVector[][]) ((DatasetAVHRR) dataset)
 							.readData(filename,
 									new GriddedLocation[rows][cols], date.id());
+					
+					// For QA -- generate an image of the data
+					if (pass == 1) {
+						array = GriddedVector.createIntArrayFromVectorArray2d(data[d]);
+						array = Tools.discardBadData(array,
+								minValue, maxValue);
+						array = Tools.scaleIntArray2D(array, 0, 255);
+						RasterLayer layer = new RasterLayer( ct, array );
+						Image image = new Image();
+						image.addLayer(layer);
+						// Save a png version
+						image.savePNG(dataPath+"image"+date.yearString()+"."+
+								date.dayOfYearString()+"_"+suffix1+"_"+suffix2, rows, cols);						
+					}
 					break;
 				}
 			} catch (Exception e) {
@@ -299,6 +325,9 @@ public class Climatology extends GeoObject {
 
 			// Next day.
 			date = timespan.nextDay(date);
+			
+			// Bail out early if were's just testing
+			if (testing && fileCount > 1) break;
 		}
 	}
 
@@ -421,8 +450,7 @@ public class Climatology extends GeoObject {
 							}
 
 							// For accumulating data differences squared (useful
-							// for standard
-							// deviation calculation):
+							// for standard deviation calculation):
 							if (sdFlag) {
 								accumulator[r][c] += Math.pow(
 										input[d][r][c].data() - mean[r][c], 2);
@@ -446,9 +474,9 @@ public class Climatology extends GeoObject {
 		Timestamp firstDate = t.startTimestamp();
 		Timestamp lastDate = t.endTimestamp();
 
-		Tools.statusMessage("  Climatology: " + firstDate.dateString() + " to "
+		Tools.statusMessage("  Climatology::makeStatsFiles: " + firstDate.dateString() + " to "
 				+ lastDate.dateString() + " in increments of "
-				+ increment.toString() + " (total days = " + totalDays + ")");
+				+ increment.toString() + " (total days = " + totalDays/2 + ")");
 
 		String filename = "no name";
 		Timestamp.dateSeparator("");
@@ -490,8 +518,8 @@ public class Climatology extends GeoObject {
 		Timestamp.dateSeparator(".");
 
 		// Warm-fuzzy check...
-		int r = 50;
-		int c = 50;
+		int r = 52;
+		int c = 52;
 		Tools.message("Rows,cols = " + rows + "," + cols);
 		Tools.message("Population at " + r + "," + c + " = " + population[r][c]);
 		Tools.message("Mean at " + r + "," + c + " = " + mean[r][c]);
