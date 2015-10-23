@@ -23,7 +23,8 @@ public class Climatology extends GeoObject {
 	int startYear;
 	int startMonth;
 	int startDay;
-
+	int startDOY;
+	
 	int finalYear;
 	int finalMonth;
 	int finalDay;
@@ -101,7 +102,9 @@ public class Climatology extends GeoObject {
 		startYear = startY;
 		startMonth = startM;
 		startDay = startD;
-
+		Timestamp ts = new Timestamp(startYear, startMonth, startDay);
+		startDOY = ts.dayOfYear();
+		
 		finalYear = finalY;
 		finalMonth = finalM;
 		finalDay = finalD;
@@ -217,12 +220,6 @@ public class Climatology extends GeoObject {
 	 * plows ahead.
 	 */
 	protected void readData(Timespan timespan, int pass) {
-
-		/// FOR TESTING
-		// Create an image and the color table
-		ColorTable ct = new ColorTable();
-		ct.grayScale();
-		int[][] array;
 		
 		// Have we opened the dataset?
 		if (data == null) {
@@ -286,19 +283,6 @@ public class Climatology extends GeoObject {
 							.readData(filename,
 									new GriddedLocation[rows][cols], date.id());
 					
-					// For QA -- generate an image of the data
-					if (pass == 1) {
-						array = GriddedVector.createIntArrayFromVectorArray2d(data[d]);
-						array = Tools.discardBadData(array,
-								minValue, maxValue);
-						array = Tools.scaleIntArray2D(array, 0, 255);
-						RasterLayer layer = new RasterLayer( ct, array );
-						Image image = new Image();
-						image.addLayer(layer);
-						// Save a png version
-						image.savePNG(dataPath+"image"+date.yearString()+"."+
-								date.dayOfYearString()+"_"+suffix1+"_"+suffix2, rows, cols);						
-					}
 					break;
 				}
 			} catch (Exception e) {
@@ -360,7 +344,7 @@ public class Climatology extends GeoObject {
 			break;
 
 		case AVHRR:
-			filename = DatasetAVHRR.getFileName(dataPath, startYear, startDay,
+			filename = DatasetAVHRR.getFileName(dataPath, startYear, startDOY,
 					addYearToInputDirectory, true, suffix1, suffix2);
 
 			dataset = new DatasetAVHRR(filename, "");

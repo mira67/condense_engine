@@ -172,9 +172,7 @@ public class Climate extends GeoObject {
 			// AVHRR
 			//***************************************
 			
-			// TODO
-			//String[] channels = {"temp", "albd", "chn1", "chn2", "chn3", "chn4", "chn5"};
-			String[] channels = {"temp"};
+			String[] channels = {"temp", "albd", "chn1", "chn2", "chn3", "chn4", "chn5"};
 
 			// Loop through all wavelengths
 			for ( String channel : channels) {
