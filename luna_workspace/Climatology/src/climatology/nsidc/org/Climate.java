@@ -109,23 +109,12 @@ public class Climate extends GeoObject {
 	    
 	    // Create an array to hold parallel threads.
 	    ParallelTask[] threads = new ParallelTask[procs]; 
-	    		
-		//************************************************
-		// Generic one-time processing - passed parameters
-		//************************************************
-		
-		///increment = Timespan.Increment.getType(args[0]);
-		///suffix1 = args[1];  // Frequency, for SSMI data
-		///suffix2 = args[2];  // Polarization, for SSMI data
 
-		//***************************************
-		// Batch Processing
-		//***************************************
-	    
 		// Loop through all possible increment types.
 		for (Timespan.Increment increment : Timespan.Increment.values()) {
-			
-			// Skip over unwanted increments
+
+			// Skip over unwanted increments, i.e., only process in the
+			// desired increments.
 			String name = increment.name().toLowerCase();
 			
 			if (name.compareTo("none") == 0  ||
@@ -137,65 +126,72 @@ public class Climate extends GeoObject {
 			// This keeps track of how many parallel processes we create.
 			int processID = 0;
 			
-			//***************************************
-			// SSMI
-			//***************************************
-			/*
-			String[] frequencies = {"19", "22", "37", "85"};
-			String[] polarizations = {"h", "v"};
-			
-			// Loop through all frequencies
-			for ( String freq : frequencies) {
-				
-				// Loop through all polarizations
-				for ( String pol : polarizations) {
+		    switch(dataType) {
+		    	case SEA_ICE:
+		    		System.exit(1);
+		    		break;
+		    		
+		    	case SSMI:
+					String[] frequencies = {"19", "22", "37", "85"};
+					String[] polarizations = {"h", "v"};
 					
-					// Create a new thread
-				    threads[processID] = new ParallelTask(
-				    		processID, dataType,
-							startYear, startMonth, startDay,
-							finalYear, finalMonth, finalDay,
-							increment,
-							dataPath, outputPath,
-							freq, pol );
-				    
-				    // Start it.
-				    threads[processID].start();
-				    
-				    // Increment the process ID.
-				    processID++;
-				}
-			}
-			*/
-			
-			//***************************************
-			// AVHRR
-			//***************************************
-			
-			String[] channels = {"temp", "albd", "chn1", "chn2", "chn3", "chn4", "chn5"};
+					// Loop through all frequencies
+					for ( String freq : frequencies) {
+						
+						// Loop through all polarizations
+						for ( String pol : polarizations) {
+							
+							// Create a new thread
+						    threads[processID] = new ParallelTask(
+						    		processID, dataType,
+									startYear, startMonth, startDay,
+									finalYear, finalMonth, finalDay,
+									increment,
+									dataPath, outputPath,
+									freq, pol, testing );
+						    
+						    // Start it.
+						    threads[processID].start();
+						    
+						    // Increment the process ID.
+						    processID++;
+						}
+					}
+					
+					break;
+					
+		    	case AVHRR:
+		    		
+		    		String[] channels = {"temp", "albd", "chn1", "chn2", "chn3", "chn4", "chn5"};
+		    		String[] channels_short = {"temp"};
+		    		
+		    		// If testing, only do one channel.
+		    		if (testing) {
+		    			channels = channels_short;
+		    		}
 
-			// Loop through all wavelengths
-			for ( String channel : channels) {
-					
-				// Create a new thread
-			    threads[processID] = new ParallelTask(
-				    		processID, dataType,
-							startYear, startMonth, startDay,
-							finalYear, finalMonth, finalDay,
-							increment,
-							dataPath, outputPath,
-							channel, suffix2, testing );
-					    
-			   // Start it.
-			   threads[processID].start();
-					    
-			   // Increment the process ID.
-			   processID++;
-			}
-			
-			//*****************************************
+					// Loop through all wavelengths
+					for ( String channel : channels) {
+							
+						// Create a new thread
+					    threads[processID] = new ParallelTask(
+						    		processID, dataType,
+									startYear, startMonth, startDay,
+									finalYear, finalMonth, finalDay,
+									increment,
+									dataPath, outputPath,
+									channel, suffix2, testing );
+							    
+					   // Start it.
+					   threads[processID].start();
+							    
+					   // Increment the process ID.
+					   processID++;
+					}
+					break;
+		    }
+		    
 			// FINISHED WITH SENSOR-SPECIFIC PROCESSING
-			//*****************************************
 			
 			// Combine the output
 		    for (int i = 0; i < procs; i++) { 
@@ -207,7 +203,6 @@ public class Climate extends GeoObject {
 		    	} 
 		    } 
 		}
-		
 		
 		firstTime = (System.currentTimeMillis() - firstTime) / 1000;
 		Tools.statusMessage("Total time to process = " + firstTime + " seconds");
@@ -287,13 +282,26 @@ public class Climate extends GeoObject {
 
 			long startTime = System.currentTimeMillis();
 
-			Climatology climate = new Climatology( dataT,
-					startY, startM, startD,
-					finalY, finalM, finalD, inc,
-					dataP, outputP,
-					suff1, suff2, minValue, maxValue, filterBadData,
-					addYearToInputDirectory, addDayToInputDirectory,
-					testing);
+			Climatology climate;
+			
+			if (dataT == Dataset.DataType.AVHRR) {
+				climate = new ClimatologyAVHRR( dataT,
+						startY, startM, startD,
+						finalY, finalM, finalD, inc,
+						dataP, outputP,
+						suff1, suff2, minValue, maxValue, filterBadData,
+						addYearToInputDirectory, addDayToInputDirectory,
+						testing);			
+			}
+			else {
+				climate = new ClimatologySSMI( dataT,
+						startY, startM, startD,
+						finalY, finalM, finalD, inc,
+						dataP, outputP,
+						suff1, suff2, minValue, maxValue, filterBadData,
+						addYearToInputDirectory, addDayToInputDirectory,
+						testing);				
+			}
 
 			climate.run();
 			

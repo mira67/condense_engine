@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="readData" key="selection"/>
+		<item value="rows =" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="readData"/>
-			<item value="mean"/>
-			<item value="population at"/>
-			<item value="totalDays"/>
-			<item value="sd"/>
-			<item value="rows"/>
-			<item value=" to "/>
+			<item value="rows ="/>
+			<item value="getMetadata"/>
+			<item value="discard"/>
+			<item value="readShort2"/>
 			<item value="openDataset"/>
+			<item value="maximumDays"/>
+			<item value="ata = new shor"/>
+			<item value="accumulateData"/>
 		</list>
 		<list key="replacehistory">
 			<item value="suffix2"/>

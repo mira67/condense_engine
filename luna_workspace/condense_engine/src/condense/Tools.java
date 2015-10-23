@@ -296,6 +296,29 @@ public class Tools extends GeoObject {
 	}
 
 	/*
+	 * discardBadData
+	 * 
+	 * In a 2D short array, filter out any bad data (replace with NODATA
+	 * value).
+	 */
+	public static short[][] discardBadData(short[][] array, int min, int max) {
+
+		int rows = array.length;
+		int cols = array[0].length;
+
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				if (array[r][c] < min)
+					array[r][c] = NODATA;
+				if (array[r][c] > max)
+					array[r][c] = NODATA;
+			}
+		}
+
+		return array;
+	}
+
+	/*
 	 * shortArrayToInteger
 	 * 
 	 * Convert an array of shorts to an array of integers. Also just because.

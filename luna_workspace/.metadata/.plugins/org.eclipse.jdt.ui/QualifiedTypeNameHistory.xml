@@ -34,4 +34,5 @@
 <fullyQualifiedTypeName name="org.joda.time.Months"/>
 <fullyQualifiedTypeName name="helper_classes.DatasetSSMI"/>
 <fullyQualifiedTypeName name="condense.Dataset.DataType"/>
+<fullyQualifiedTypeName name="condense.Timespan.Increment"/>
 </qualifiedTypeNameHistroy>
