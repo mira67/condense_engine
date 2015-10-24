@@ -61,6 +61,7 @@ public class DataFile extends GeoObject {
 	public void create(String filename) throws Exception {
 		fileIsReadable = false;
 		fileIsWritable = false;
+		this.filename = filename;
 
 		// Open the file.
 		try {
@@ -70,7 +71,6 @@ public class DataFile extends GeoObject {
 			throw (e);
 		}
 
-		this.filename = filename;
 		fileIsWritable = true;
 	}
 
@@ -95,6 +95,10 @@ public class DataFile extends GeoObject {
 
 		fileIsReadable = false;
 		fileIsWritable = false;
+
+		file = null;
+		dataInputStream = null;
+		dataOutputStream = null;
 	}
 
 	/*

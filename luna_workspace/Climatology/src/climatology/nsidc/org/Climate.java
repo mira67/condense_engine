@@ -446,10 +446,6 @@ public class Climate extends GeoObject {
 					suffix1 = value;
 					Tools.statusMessage("Frequency = " + suffix1);
 					break;
-				case "channel":		// AVHRR channel: chn1, chn2, etc. The file name suffix.
-					suffix1 = value;
-					Tools.statusMessage("Channel = " + suffix1);
-					break;
 				case "time":			// AVHRR time: 0200 or 1400, also a file name suffix.
 					suffix2 = value;
 					Tools.statusMessage("Time = " + suffix2);

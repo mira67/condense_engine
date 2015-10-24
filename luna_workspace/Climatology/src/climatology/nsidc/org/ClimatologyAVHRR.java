@@ -379,10 +379,11 @@ public class ClimatologyAVHRR extends Climatology {
 
 			Tools.statusMessage("    sd output filename = " + filename);
 
-			file = new DataFile();
-			file.create(filename);
-			file.writeDouble2d(sd);
-			file.close();
+			DataFile fileSD = new DataFile();
+			fileSD.create(filename);
+			fileSD.writeDouble2d(sd);
+			fileSD.close();
+			
 		} catch (Exception e) {
 			Tools.warningMessage("Could not open output baseline data file: "
 					+ filename);
