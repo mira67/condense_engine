@@ -30,7 +30,7 @@ public class ViewSingleImage {
 		String inputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/";
 		String outputPath = "C:/Users/glgr9602/Desktop/";
 		
-		String searchString = "1400-sd";
+		String searchString = "1400-mean";
 		
 		String filename = Tools.findFile(inputPath, searchString);
 		if (filename == null) {

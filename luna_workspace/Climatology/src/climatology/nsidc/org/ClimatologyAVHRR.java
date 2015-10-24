@@ -54,15 +54,10 @@ public class ClimatologyAVHRR extends Climatology {
 	// The image data across the specified time increment [day][row][col]
     short data[][][];
     
-	// The accumulated data across all time increments. [row][col]
-	double accumulator[][] = null;
+	// The accumulated data across all time increments, for stats. [row][col]
+	double sums[][] = null;
+	double diffSquared[][] = null;
 	int population[][] = null;
-
-	boolean haveMetadata = false;
-	Metadata metadata;
-
-	// The dataset we're going to read.
-	Dataset dataset;
 
 	// The mean provides a reference for deciding whether to condense the
 	// newest pixels; i.e., are the pixels varying greater than n*sd from
@@ -150,12 +145,17 @@ public class ClimatologyAVHRR extends Climatology {
 
 		// Create space for the data. Add 1 day for unexpected leap years.
 		data = new short[increment.maxDays()+1][rows][cols];
+		
+		// Create the statistical arrays.
+		sums = new double[rows][cols];
+		diffSquared = new double[rows][cols];
+		population = new int[rows][cols];
 
 		// Two passes. First to calculate the mean, the second to
 		// find the standard deviation (which requires the mean).
-		for (int pass = 1; pass < 3; pass++) {
+		for (int pass = 1; pass <= 2; pass++) {
 
-			Tools.message("  PASS " + pass);
+			Tools.message("  PASS " + pass + " Time increment = " + increment.getName());
 
 			// What is our first date to process? Note that, depending on the
 			// choice of increment, the first processing day may not be on the
@@ -178,7 +178,12 @@ public class ClimatologyAVHRR extends Climatology {
 						+ timespan.endTimestamp().dateString() + "  days = "
 						+ timespan.days());
 
-				readData(timespan, pass);
+				// Before reading all the data for this timespan, null-out data
+				// for each day. This is how we keep track of whether
+				// there was data collected on any particular day.
+				for (int i = 0; i < data.length; i++) data[i] = null;
+
+				readData(timespan);
 
 				// Store the data for later statistical calculations.
 				accumulateData(data, (pass == 2));
@@ -192,14 +197,11 @@ public class ClimatologyAVHRR extends Climatology {
 			Tools.message("  CALCULATING STATS");
 
 			if (pass == 1) {
-				mean = Stats.meanNoBadData2d(accumulator, population, NODATA);
-
-				// Zero-out the data accumulator
-				accumulator = null;
+				mean = Stats.meanNoBadData2d(sums, population, NODATA);
 			}
 
 			if (pass == 2)
-				sd = Stats.standardDeviationNoBadData2d(accumulator,
+				sd = Stats.standardDeviationNoBadData2d(diffSquared,
 						population, (double) NODATA, 1.0);
 		}
 
@@ -207,7 +209,7 @@ public class ClimatologyAVHRR extends Climatology {
 		makeStatsFiles(totalTimespan);
 
 		// Warm fuzzy feedback.
-		Tools.statusMessage("  Total data files processed = " + fileCount);
+		Tools.statusMessage("  Total data files processed = " + fileCount/2);
 
 		return true;
 	}
@@ -222,7 +224,7 @@ public class ClimatologyAVHRR extends Climatology {
 	 * Doesn't care if a file is missing. Assumes the data isn't available and
 	 * plows ahead.
 	 */
-	protected void readData(Timespan timespan, int pass) {
+	protected void readData(Timespan timespan) {
 		
 		String filename = "";
 		DataFile file;
@@ -282,9 +284,6 @@ public class ClimatologyAVHRR extends Climatology {
 
 			// Next day.
 			date = timespan.nextDay(date);
-			
-			// Bail out early if were's just testing
-			if (testing && fileCount > 1) break;
 		}
 	}
 	
@@ -296,43 +295,32 @@ public class ClimatologyAVHRR extends Climatology {
 	 */
 	protected void accumulateData(short[][][] input, boolean sdFlag) {
 
-		// Number of days in the data array
 		int days = input.length;
-
-		// First time through? Initialize things.
-		if (accumulator == null) {
-			accumulator = new double[rows][cols];
-			population = new int[rows][cols];
-		}
-
+		
 		// Cycle through all days
 		for (int d = 0; d < days; d++) {
 
 			// Missing data for a day? Skip it.
-			if (input[d] == null)
-				continue;
+			if (input[d] == null) continue;	
 
 			// Go through all locations on this day
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < cols; c++) {
 
 					// Is there data at this location/date?
-					if (input[d] != null) {
-						if (input[d][r][c] != NODATA) {
+					if (input[d][r][c] != NODATA) {
 
-							// For accumulating data sums:
-							if (!sdFlag) {
-								accumulator[r][c] += input[d][r][c];
-								population[r][c]++;
-							}
+						// For accumulating the sums, used for the mean:
+						if (!sdFlag) {
+							sums[r][c] += input[d][r][c];
+							population[r][c]++;
+						}
 
-							// For accumulating data differences squared (useful
-							// for standard deviation calculation):
-							if (sdFlag) {
-								accumulator[r][c] += Math.pow(
-										input[d][r][c] - mean[r][c], 2);
-								population[r][c]++;
-							}
+						// Differences squared: (value - mean)^2
+						// for standard deviation calculation
+						if (sdFlag) {
+							diffSquared[r][c] += Math.pow(
+									input[d][r][c] - mean[r][c], 2);
 						}
 					}
 				}
@@ -346,7 +334,7 @@ public class ClimatologyAVHRR extends Climatology {
 	 * Create a climatology baseline using the most recent data time span.
 	 */
 	protected void makeStatsFiles(Timespan t) {
-
+		
 		// Use the dates to make file names
 		Timestamp firstDate = t.startTimestamp();
 		Timestamp lastDate = t.endTimestamp();
@@ -354,6 +342,14 @@ public class ClimatologyAVHRR extends Climatology {
 		Tools.statusMessage("  Climatology::makeStatsFiles: " + firstDate.dateString() + " to "
 				+ lastDate.dateString() + " in increments of "
 				+ increment.toString() + " (total days = " + totalDays/2 + ")");
+
+		// Warm-fuzzy QA feedback, arbitrary location...
+		int r = 52;
+		int c = 52;
+		Tools.message("Rows,cols = " + rows + "," + cols);
+		Tools.message("Population at " + r + "," + c + " = " + population[r][c]);
+		Tools.message("Mean at " + r + "," + c + " = " + mean[r][c]);
+		Tools.message("Standard deviation at " + r + "," + c + " = " + sd[r][c]);
 
 		String filename = "no name";
 		Timestamp.dateSeparator("");
@@ -394,12 +390,5 @@ public class ClimatologyAVHRR extends Climatology {
 
 		Timestamp.dateSeparator(".");
 
-		// Warm-fuzzy check...
-		int r = 52;
-		int c = 52;
-		Tools.message("Rows,cols = " + rows + "," + cols);
-		Tools.message("Population at " + r + "," + c + " = " + population[r][c]);
-		Tools.message("Mean at " + r + "," + c + " = " + mean[r][c]);
-		Tools.message("Standard deviation at " + r + "," + c + " = " + sd[r][c]);
 	}
 }
