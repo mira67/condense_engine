@@ -67,13 +67,9 @@ public class ClimatologyAVHRR extends Climatology {
 	double[][] sd = null; // Standard deviation: [row][col]
 
 	// Northern hemisphere
-	///rows = 1805;
-	///cols = 1805;			
+	int rows = 1805;
+	int cols = 1805;			
 
-	// Southern hemisphere
-	int rows = 1605;
-	int cols = 1605;
-	
 	// Number of files successfully read, for sanity checks
 	int fileCount = 0;
 
@@ -127,6 +123,12 @@ public class ClimatologyAVHRR extends Climatology {
 		addDayToInputDirectory = addDay;
 		
 		testing = test;
+		
+		// Southern hemisphere image size, rows and cols
+		if (outputPath.indexOf("south") > 0) {
+			rows = 1605;
+			cols = 1605;
+		}
 	}
 	
 	/*
@@ -360,7 +362,7 @@ public class ClimatologyAVHRR extends Climatology {
 		try {
 			// Mean baseline climatology file
 			filename = outputPath + climatologyPrefix + dataType.toString()
-					+ suffix1 + suffix2 + "-mean-" + incName + "-"
+					+ suffix1 + suffix2 + "-mean-" + incName + "-" 
 					+ firstDate.yearString() + "-" + lastDate.yearString()
 					+ ".bin";
 
@@ -368,7 +370,8 @@ public class ClimatologyAVHRR extends Climatology {
 
 			DataFile file = new DataFile();
 			file.create(filename);
-			file.writeDouble2d(mean);
+			short[][] shortMean = Tools.doubleArrayToShort(mean);
+			file.writeShort2d(shortMean);
 			file.close();
 
 			// Standard deviation climatology file
@@ -381,7 +384,8 @@ public class ClimatologyAVHRR extends Climatology {
 
 			DataFile fileSD = new DataFile();
 			fileSD.create(filename);
-			fileSD.writeDouble2d(sd);
+			short[][] shortSD = Tools.doubleArrayToShort(sd);
+			fileSD.writeShort2d(shortSD);
 			fileSD.close();
 			
 		} catch (Exception e) {

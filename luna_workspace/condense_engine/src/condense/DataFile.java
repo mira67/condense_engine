@@ -655,6 +655,33 @@ public class DataFile extends GeoObject {
 	}
 
 	/*
+	 * writeShort2d
+	 * 
+	 * Write short integer data (a 2-D array) to the file.
+	 */
+	public void writeShort2d(short[][] data) throws Exception {
+
+		if (!fileIsWritable) {
+			Tools.warningMessage("DataFile::writeShort2d: " + filename
+					+ " is not open for writing.");
+			throw (new Exception("Cannot write to file, not open for writing"));
+		}
+
+		try {
+			// Write the data
+			for (int i = 0; i < data.length; i++) {
+				for (int j = 0; j < data[0].length; j++) {
+					dataOutputStream.writeShort(data[i][j]);
+				}
+			}
+		} catch (Exception e) {
+			Tools.warningMessage(" DataFile::writeShort2d: error on write - "
+					+ e);
+			throw (e);
+		}
+	}
+
+	/*
 	 * writeInt2d
 	 * 
 	 * Write integer data (a 2-D array) to the file.
@@ -699,9 +726,8 @@ public class DataFile extends GeoObject {
 
 		if (length / 4 > rows * cols) {
 			Tools.warningMessage(" DataFile::readInt2D: Supplied rows and cols is greater than file size.");
-			Tools.warningMessage(" Rows * Cols = " + rows * cols);
-			throw (new Error(
-					"Error in FataFile::readInt2D: rows and cols mismatch with file"));
+			Tools.warningMessage(" Rows * Cols = " + rows * cols + "   Rows = " + rows + " Cols = " + cols);
+			throw (new Error("DataFile::readInt2D: rows and cols mismatch with file"));
 		}
 
 		if (length / 4 != rows * cols) {
@@ -752,9 +778,8 @@ public class DataFile extends GeoObject {
 
 		if (length / 2 > rows * cols) {
 			Tools.warningMessage(" DataFile::readShort2D: Supplied rows and cols is greater than file size.");
-			Tools.warningMessage(" Rows * Cols = " + rows * cols);
-			throw (new Error(
-					"Error in FataFile::readShort2D: rows and cols mismatch with file"));
+			Tools.warningMessage(" Rows * Cols = " + rows * cols + "   Rows = " + rows + " Cols = " + cols);
+			throw (new Error("DataFile::readShort2D: rows and cols mismatch with file"));
 		}
 
 		if (length / 2 != rows * cols) {
@@ -809,10 +834,9 @@ public class DataFile extends GeoObject {
 
 		if (rows * cols > length) {
 			Tools.warningMessage(" DataFile::readByte2D: Supplied rows and cols greater than file size.");
-			Tools.warningMessage(" Rows * Cols = " + rows * cols);
+			Tools.warningMessage(" Rows * Cols = " + rows * cols + "   Rows = " + rows + " Cols = " + cols);
 			Tools.warningMessage(" File length = " + length + " bytes");
-			throw (new Error(
-					"Error in FataFile::readByte2d: rows and cols mismatch with file"));
+			throw (new Error("DataFile::readByte2d: rows and cols mismatch with file"));
 		}
 
 		// Create the byte array to hold the data. Integer = 4 bytes.
@@ -862,10 +886,9 @@ public class DataFile extends GeoObject {
 
 		if (rows * cols > length) {
 			Tools.warningMessage(" DataFile::read2ByteInts2D: Supplied rows and cols greater than file size.");
-			Tools.warningMessage(" Rows * Cols = " + rows * cols);
+			Tools.warningMessage(" Rows * Cols = " + rows * cols + "   Rows = " + rows + " Cols = " + cols);
 			Tools.warningMessage(" File length = " + length + " bytes");
-			throw (new Error(
-					"Error in FataFile::read2ByteInts2D: rows and cols mismatch with file"));
+			throw (new Error("DataFile::read2ByteInts2D: rows and cols mismatch with file"));
 		}
 
 		// Create the byte array to hold the data. Integer = 4 bytes.
@@ -918,9 +941,8 @@ public class DataFile extends GeoObject {
 			Tools.warningMessage("DataFile::readFloat2d: Supplied rows and cols is greater than file size.");
 			Tools.warningMessage("DataFile::readFloat2d: file length = "
 					+ length + " bytes, Floats = " + length / 4);
-			Tools.warningMessage("Rows * Cols = " + rows * cols);
-			throw (new Error(
-					"Error in FataFile::readFloat2d: rows and cols mismatch with file"));
+			Tools.warningMessage(" Rows * Cols = " + rows * cols + "   Rows = " + rows + " Cols = " + cols);
+			throw (new Error("DataFile::readFloat2d: rows and cols mismatch with file"));
 		}
 
 		if (length / 4 != rows * cols) {

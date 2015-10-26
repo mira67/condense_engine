@@ -99,8 +99,8 @@ public class Climate extends GeoObject {
 	    procs = Runtime.getRuntime().availableProcessors(); 
 	    Tools.message("Available processors = " + procs);
 	    
-	    // Max out at 8 to avoid melt-downs?
-	    if (procs > 8) procs = 8; 
+	    // Max out at 10 to avoid melt-downs?
+	    if (procs > 10) procs = 10; 
 	    
 	    // Limit to one processor for testing
 	    if (testing) procs = 1;
@@ -128,7 +128,8 @@ public class Climate extends GeoObject {
 			
 		    switch(dataType) {
 		    	case SEA_ICE:
-		    		System.exit(1);
+		    		Tools.errorMessage("Climate", "Climate", "SEA_ICE type not enabled", 
+		    				new Exception());
 		    		break;
 		    		
 		    	case SSMI:
@@ -148,6 +149,7 @@ public class Climate extends GeoObject {
 									finalYear, finalMonth, finalDay,
 									increment,
 									dataPath, outputPath,
+									minValue, maxValue,
 									freq, pol, testing );
 						    
 						    // Start it.
@@ -163,7 +165,7 @@ public class Climate extends GeoObject {
 		    	case AVHRR:
 		    		
 		    		String[] channels = {"temp", "albd", "chn1", "chn2", "chn3", "chn4", "chn5"};
-		    		String[] channels_short = {"temp"};
+		    		String[] channels_short = {"albd"};
 		    		
 		    		// If testing, only do one channel.
 		    		if (testing) {
@@ -172,6 +174,19 @@ public class Climate extends GeoObject {
 
 					// Loop through all wavelengths
 					for ( String channel : channels) {
+						
+						// Special case: different range for albedo and visible channels
+						if (channel.equalsIgnoreCase("temp") == true ||
+							channel.equalsIgnoreCase("chn1") == true ||
+							channel.equalsIgnoreCase("chn2") == true) {
+							
+							minValue = 1;
+							maxValue = 1000;
+						}
+						else {
+							minValue = 1900;
+							maxValue = 3100;
+						}
 							
 						// Create a new thread
 					    threads[processID] = new ParallelTask(
@@ -180,6 +195,7 @@ public class Climate extends GeoObject {
 									finalYear, finalMonth, finalDay,
 									increment,
 									dataPath, outputPath,
+									minValue, maxValue, 
 									channel, suffix2, testing );
 							    
 					   // Start it.
@@ -194,12 +210,14 @@ public class Climate extends GeoObject {
 			// FINISHED WITH SENSOR-SPECIFIC PROCESSING
 			
 			// Combine the output
-		    for (int i = 0; i < procs; i++) { 
+		    for (int i = 0; i < processID; i++) { 
 		    	try { 
 		    		// Re-unites all threads; waits until each thread is done.
 		    		threads[i].join(); 
 		    	}
 		    	catch (InterruptedException e) {
+		    		// Shouldn't happen under normal operation.
+		    		Tools.message("Climate::Climate: Interrupted exception, id = " + i);
 		    	} 
 		    } 
 		}
@@ -235,6 +253,9 @@ public class Climate extends GeoObject {
 		String suff1;
 		String suff2;
 		
+		double min;
+		double max;
+		
 		boolean testing;
 		
 		// constructor
@@ -243,6 +264,7 @@ public class Climate extends GeoObject {
 				int finalYear, int finalMonth, int finalDay,
 				Timespan.Increment increment,
 				String dataPath, String outputPath,
+				double minimum, double maximum,
 				String suffix1, String suffix2, boolean test) {
 			
 			this.threadNumber = id;
@@ -261,6 +283,9 @@ public class Climate extends GeoObject {
 			this.outputP = outputPath;
 			this.suff1 = suffix1;
 			this.suff2 = suffix2;
+			
+			this.min = minimum;
+			this.max = maximum;
 			
 			this.testing = test;
 		}
@@ -289,7 +314,7 @@ public class Climate extends GeoObject {
 						startY, startM, startD,
 						finalY, finalM, finalD, inc,
 						dataP, outputP,
-						suff1, suff2, minValue, maxValue, filterBadData,
+						suff1, suff2, min, max, filterBadData,
 						addYearToInputDirectory, addDayToInputDirectory,
 						testing);			
 			}
@@ -298,7 +323,7 @@ public class Climate extends GeoObject {
 						startY, startM, startD,
 						finalY, finalM, finalD, inc,
 						dataP, outputP,
-						suff1, suff2, minValue, maxValue, filterBadData,
+						suff1, suff2, min, max, filterBadData,
 						addYearToInputDirectory, addDayToInputDirectory,
 						testing);				
 			}

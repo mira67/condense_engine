@@ -26,11 +26,16 @@ public class ViewSingleImage {
 
 		Tools.setDebug(false);
 		
-		//String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/1990-2014/";
+		//String inputPath = "C:/Users/glgr9602/Desktop/condense/data/avhrr/south/1990/001/";
+		//String searchString = "albd";
+		//DataType type = DataType.SHORT;
+
 		String inputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/";
+		String searchString = "albd1400-mean-jan";
+		DataType type = DataType.DOUBLE;
+
 		String outputPath = "C:/Users/glgr9602/Desktop/";
 		
-		String searchString = "1400-mean-jan";
 		
 		String filename = Tools.findFile(inputPath, searchString);
 		if (filename == null) {
@@ -45,8 +50,6 @@ public class ViewSingleImage {
 				filename = args[0];
 			}
 		}
-		
-		DataType type = DataType.DOUBLE;
 		
 		// Southern hemisphere AVHRR
 		int rows = 1605;

@@ -361,6 +361,28 @@ public class Tools extends GeoObject {
 	}
 
 	/*
+	 * doubleArrayToShort
+	 * 
+	 * Convert an array of doubles to an array of short integers.
+	 * Warning: no error checking.
+	 */
+	public static short[][] doubleArrayToShort(double array[][]) {
+
+		int rows = array.length;
+		int cols = array[0].length;
+
+		short[][] newArray = new short[rows][cols];
+
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				newArray[r][c] = (short) Math.round(array[r][c]);
+			}
+		}
+
+		return newArray;
+	}
+
+	/*
 	 * doubleArrayToFloat
 	 * 
 	 * Convert an array of doubles to an array of floats. Also just because.

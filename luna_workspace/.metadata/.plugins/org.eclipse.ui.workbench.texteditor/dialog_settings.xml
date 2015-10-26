@@ -9,13 +9,13 @@
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
 			<item value="fileCount"/>
-			<item value="pass"/>
-			<item value="population"/>
-			<item value="diffSquared"/>
-			<item value="accumulator"/>
-			<item value="minValue"/>
-			<item value="testing"/>
-			<item value="totalDays"/>
+			<item value="rows"/>
+			<item value="2d"/>
+			<item value="fatafile"/>
+			<item value="writeInt"/>
+			<item value="write"/>
+			<item value="convert"/>
+			<item value="exit"/>
 		</list>
 		<list key="replacehistory">
 			<item value="suffix2"/>
