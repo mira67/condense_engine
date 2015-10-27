@@ -164,8 +164,9 @@ public class Climate extends GeoObject {
 					
 		    	case AVHRR:
 		    		
-		    		String[] channels = {"temp", "albd", "chn1", "chn2", "chn3", "chn4", "chn5"};
-		    		String[] channels_short = {"albd"};
+		    		//String[] channels = {"albd", "chn1", "chn2", "chn3", "chn4", "chn5", "temp"};
+		    		String[] channels = {"albd", "chn1", "chn2", "temp"};
+		    		String[] channels_short = {"chn1"};
 		    		
 		    		// If testing, only do one channel.
 		    		if (testing) {
@@ -176,9 +177,9 @@ public class Climate extends GeoObject {
 					for ( String channel : channels) {
 						
 						// Special case: different range for albedo and visible channels
-						if (channel.equalsIgnoreCase("temp") == true ||
-							channel.equalsIgnoreCase("chn1") == true ||
-							channel.equalsIgnoreCase("chn2") == true) {
+						if (channel.equalsIgnoreCase("albd") ||
+							channel.equalsIgnoreCase("chn1") ||
+							channel.equalsIgnoreCase("chn2")) {
 							
 							minValue = 1;
 							maxValue = 1000;

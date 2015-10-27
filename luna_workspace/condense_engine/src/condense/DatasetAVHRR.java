@@ -182,7 +182,7 @@ public class DatasetAVHRR extends Dataset {
 		// Read the data.
 		try {
 			// Read the data
-			short[][] data = file.readShort2D(rows(), cols());
+			short[][] data = file.readShorts2D(rows(), cols());
 
 			// Create a place to store the data.
 			AVHRRVectors = new VectorAVHRR[rows()][cols()];

@@ -30,9 +30,9 @@ public class ViewSingleImage {
 		//String searchString = "albd";
 		//DataType type = DataType.SHORT;
 
-		String inputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/";
-		String searchString = "albd1400-mean-jan";
-		DataType type = DataType.DOUBLE;
+		String inputPath = "C:/Users/glgr9602/Desktop/condense/data/avhrr/south/1990/001";
+		String searchString = "1400_temp";
+		DataType type = DataType.SHORT;
 
 		String outputPath = "C:/Users/glgr9602/Desktop/";
 		
@@ -105,10 +105,10 @@ public class ViewSingleImage {
 					array = Tools.doubleArrayToInteger(doubleArray);
 					break;
 				case INTEGER:
-					array = file.readInt2D(rows, cols);
+					array = file.readInts2D(rows, cols);
 					break;
 				case SHORT:
-					short shortArray[][] = file.readShort2D(rows, cols);
+					short shortArray[][] = file.readShorts2D(rows, cols);
 					array = Tools.shortArrayToInteger(shortArray);
 					break;
 				default:
@@ -142,7 +142,7 @@ public class ViewSingleImage {
 		///array = Tools.discardBadData(array, 1900, 3100);
 		
 		/// DEBUG: look at a random selection of the data
-		for (int i = 0; i < rows; i = i + 40) {
+		for (int i = 0; i < rows; i = i + 60) {
 			System.out.print( array[i][i] + " ");
 		}
 		System.out.println();

@@ -125,7 +125,7 @@ public class ClimatologyAVHRR extends Climatology {
 		testing = test;
 		
 		// Southern hemisphere image size, rows and cols
-		if (outputPath.indexOf("south") > 0) {
+		if (outputPath.indexOf("_s") > 0) {
 			rows = 1605;
 			cols = 1605;
 		}
@@ -259,7 +259,7 @@ public class ClimatologyAVHRR extends Climatology {
 				file = new DataFile(filename);
 				
 				// Read the data
-				data[d] = file.readShort2D(rows, cols);
+				data[d] = file.readShorts2D(rows, cols);
 				
 				file.close();
 				
@@ -371,7 +371,7 @@ public class ClimatologyAVHRR extends Climatology {
 			DataFile file = new DataFile();
 			file.create(filename);
 			short[][] shortMean = Tools.doubleArrayToShort(mean);
-			file.writeShort2d(shortMean);
+			file.writeShorts2d(shortMean);
 			file.close();
 
 			// Standard deviation climatology file
@@ -385,7 +385,7 @@ public class ClimatologyAVHRR extends Climatology {
 			DataFile fileSD = new DataFile();
 			fileSD.create(filename);
 			short[][] shortSD = Tools.doubleArrayToShort(sd);
-			fileSD.writeShort2d(shortSD);
+			fileSD.writeShorts2d(shortSD);
 			fileSD.close();
 			
 		} catch (Exception e) {

@@ -23,7 +23,6 @@
 <fullyQualifiedTypeName name="org.jfree.chart.ChartPanel"/>
 <fullyQualifiedTypeName name="org.jfree.chart.plot.CategoryPlot"/>
 <fullyQualifiedTypeName name="java.awt.event.ActionListener"/>
-<fullyQualifiedTypeName name="java.io.File"/>
 <fullyQualifiedTypeName name="java.io.IOException"/>
 <fullyQualifiedTypeName name="org.jfree.chart.ChartUtilities"/>
 <fullyQualifiedTypeName name="helper_classes.Timestamp"/>
@@ -35,4 +34,5 @@
 <fullyQualifiedTypeName name="helper_classes.DatasetSSMI"/>
 <fullyQualifiedTypeName name="condense.Dataset.DataType"/>
 <fullyQualifiedTypeName name="condense.Timespan.Increment"/>
+<fullyQualifiedTypeName name="java.io.File"/>
 </qualifiedTypeNameHistroy>

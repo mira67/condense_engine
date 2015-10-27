@@ -2,30 +2,30 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="fileCount" key="selection"/>
+		<item value="filterBadData" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="fileCount"/>
-			<item value="rows"/>
+			<item value="filterBadData"/>
 			<item value="2d"/>
-			<item value="fatafile"/>
-			<item value="writeInt"/>
-			<item value="write"/>
-			<item value="convert"/>
-			<item value="exit"/>
+			<item value="readShort2"/>
+			<item value="Warning!"/>
+			<item value="readshort"/>
+			<item value="Tools.warningMessage(&quot;Rows * Cols = &quot; + rows * cols);"/>
+			<item value="&#x09;&#x09;&#x09;Tools.warningMessage(&quot;Rows * Cols = &quot; + rows * cols);"/>
+			<item value=" bytes, Integers = "/>
 		</list>
 		<list key="replacehistory">
+			<item value=""/>
+			<item value="Tools.warningMessage(&quot;Rows * Cols = &quot; + rows * cols + &quot;  Filename = &quot; + filename);"/>
 			<item value="suffix2"/>
 			<item value="suffix1"/>
-			<item value=""/>
 			<item value="readInt2D"/>
 			<item value="ViewSingleImage"/>
 			<item value="AVHRR"/>
 			<item value="frequency"/>
-			<item value="polarization"/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">

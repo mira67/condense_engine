@@ -526,14 +526,14 @@ public class DataFile extends GeoObject {
 	}
 
 	/*
-	 * writeDouble2d
+	 * writeDoubles2d
 	 * 
 	 * Write double array to the file.
 	 */
-	public void writeDouble2d(double[][] data) throws Exception {
+	public void writeDoubles2d(double[][] data) throws Exception {
 
 		if (!fileIsWritable) {
-			Tools.warningMessage("DataFile::writeDoubles: " + filename
+			Tools.warningMessage("DataFile::writeDoubles2d: " + filename
 					+ " is not open for writing.");
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
@@ -544,7 +544,7 @@ public class DataFile extends GeoObject {
 				writeDoubles(data[i]);
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::writeDoubles: error on write - "
+			Tools.warningMessage(" DataFile::writeDoubles2d: error on write - "
 					+ up);
 			throw (up);
 		}
@@ -576,14 +576,14 @@ public class DataFile extends GeoObject {
 	}
 
 	/*
-	 * writeFloat2d
+	 * writeFloats2d
 	 * 
 	 * Write float data (a 2-D array) to the file.
 	 */
-	public void writeFloat2d(float[][] data) throws Exception {
+	public void writeFloats2d(float[][] data) throws Exception {
 
 		if (!fileIsWritable) {
-			Tools.warningMessage("DataFile::writeFloat2d: " + filename
+			Tools.warningMessage("DataFile::writeFloats2d: " + filename
 					+ " is not open for writing.");
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
@@ -596,7 +596,7 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::writeFloat2d: error on write - "
+			Tools.warningMessage(" DataFile::writeFloats2d: error on write - "
 					+ up);
 			throw (up);
 		}
@@ -628,14 +628,14 @@ public class DataFile extends GeoObject {
 	}
 
 	/*
-	 * writeByte2d
+	 * writeBytes2d
 	 * 
 	 * Write byte data (a 2-D array) to the file.
 	 */
-	public void writeByte2d(byte[][] data) throws Exception {
+	public void writeBytes2d(byte[][] data) throws Exception {
 
 		if (!fileIsWritable) {
-			Tools.warningMessage("DataFile::writeByte2d: " + filename
+			Tools.warningMessage("DataFile::writeBytes2d: " + filename
 					+ " is not open for writing.");
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
@@ -648,21 +648,21 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::writeByte2d: error on write - "
+			Tools.warningMessage(" DataFile::writeBytes2d: error on write - "
 					+ up);
 			throw (up);
 		}
 	}
 
 	/*
-	 * writeShort2d
+	 * writeShorts2d
 	 * 
 	 * Write short integer data (a 2-D array) to the file.
 	 */
-	public void writeShort2d(short[][] data) throws Exception {
+	public void writeShorts2d(short[][] data) throws Exception {
 
 		if (!fileIsWritable) {
-			Tools.warningMessage("DataFile::writeShort2d: " + filename
+			Tools.warningMessage("DataFile::writeShorts2d: " + filename
 					+ " is not open for writing.");
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
@@ -675,21 +675,21 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception e) {
-			Tools.warningMessage(" DataFile::writeShort2d: error on write - "
+			Tools.warningMessage(" DataFile::writeShorts2d: error on write - "
 					+ e);
 			throw (e);
 		}
 	}
 
 	/*
-	 * writeInt2d
+	 * writeInts2d
 	 * 
 	 * Write integer data (a 2-D array) to the file.
 	 */
-	public void writeInt2d(int[][] data) throws Exception {
+	public void writeInts2d(int[][] data) throws Exception {
 
 		if (!fileIsWritable) {
-			Tools.warningMessage("DataFile::writeInt2d: " + filename
+			Tools.warningMessage("DataFile::writeInts2d: " + filename
 					+ " is not open for writing.");
 			throw (new Exception("Cannot write to file, not open for writing"));
 		}
@@ -702,21 +702,21 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::writeInt2d: error on write - "
+			Tools.warningMessage(" DataFile::writeInts2d: error on write - "
 					+ up);
 			throw (up);
 		}
 	}
 
 	/*
-	 * readInt2D
+	 * readInts2D
 	 * 
 	 * Read integer data (a 2-D array) from the file.
 	 */
-	public int[][] readInt2D(int rows, int cols) throws Exception {
+	public int[][] readInts2D(int rows, int cols) throws Exception {
 
 		if (!fileIsReadable) {
-			Tools.warningMessage("DataFile::readInt2D: " + filename
+			Tools.warningMessage("DataFile::readInts2D: " + filename
 					+ " is not open for reading.");
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
@@ -725,16 +725,16 @@ public class DataFile extends GeoObject {
 		long length = file.length();
 
 		if (length / 4 > rows * cols) {
-			Tools.warningMessage(" DataFile::readInt2D: Supplied rows and cols is greater than file size.");
+			Tools.warningMessage(" DataFile::readInts2D: Supplied rows and cols is greater than file size.");
 			Tools.warningMessage(" Rows * Cols = " + rows * cols + "   Rows = " + rows + " Cols = " + cols);
-			throw (new Error("DataFile::readInt2D: rows and cols mismatch with file"));
+			throw (new Error("DataFile::readInts2D: rows and cols mismatch with file"));
 		}
 
 		if (length / 4 != rows * cols) {
-			Tools.warningMessage("DataFile::readInt2D: Warning! Supplied rows and cols mismatch with file size.");
-			Tools.warningMessage("DataFile::readInt2D: file length = " + length
+			Tools.warningMessage("DataFile::readInts2D:  Supplied rows and cols mismatch with file size.");
+			Tools.warningMessage("DataFile::readInts2D: file length = " + length
 					+ " bytes, Integers = " + length / 4);
-			Tools.warningMessage("Rows * Cols = " + rows * cols);
+			Tools.warningMessage("Rows * Cols = " + rows * cols + "  Filename = " + filename);
 		}
 
 		// Create the byte array to hold the data. Integer = 4 bytes.
@@ -753,7 +753,7 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::readInt2D: error on read - " + up);
+			Tools.warningMessage(" DataFile::readInts2D: error on read - " + up);
 			throw (up);
 		}
 
@@ -761,14 +761,14 @@ public class DataFile extends GeoObject {
 	}
 
 	/*
-	 * readShort2D
+	 * readShorts2D
 	 * 
 	 * Read short integer data (a 2-D array) from the file.
 	 */
-	public short[][] readShort2D(int rows, int cols) throws Exception {
+	public short[][] readShorts2D(int rows, int cols) throws Exception {
 
 		if (!fileIsReadable) {
-			Tools.warningMessage("DataFile::readShort2D: " + filename
+			Tools.warningMessage("DataFile::readShorts2D: " + filename
 					+ " is not open for reading.");
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
@@ -777,16 +777,16 @@ public class DataFile extends GeoObject {
 		long length = file.length();
 
 		if (length / 2 > rows * cols) {
-			Tools.warningMessage(" DataFile::readShort2D: Supplied rows and cols is greater than file size.");
+			Tools.warningMessage(" DataFile::readShorts2D: Supplied rows and cols is greater than file size.");
 			Tools.warningMessage(" Rows * Cols = " + rows * cols + "   Rows = " + rows + " Cols = " + cols);
-			throw (new Error("DataFile::readShort2D: rows and cols mismatch with file"));
+			throw (new Error("DataFile::readShorts2D: rows and cols mismatch with file"));
 		}
 
 		if (length / 2 != rows * cols) {
-			Tools.warningMessage("DataFile::readShort2D: Warning! Supplied rows and cols mismatch with file size.");
-			Tools.warningMessage("DataFile::readShort2D: file length = "
-					+ length + " bytes, Integers = " + length / 2);
-			Tools.warningMessage("Rows * Cols = " + rows * cols);
+			Tools.warningMessage("DataFile::readShorts2D: Supplied rows and cols mismatch with file size.");
+			Tools.warningMessage("DataFile::readShorts2D: file length = "
+					+ length + " bytes, Shorts = " + length / 2);
+			Tools.warningMessage("Rows * Cols = " + rows * cols + "  Filename = " + filename);
 		}
 
 		// Create the byte array to hold the data. Short integer = 2 bytes.
@@ -807,7 +807,7 @@ public class DataFile extends GeoObject {
 			}
 						
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::readShort2D: error on read - " + up);
+			Tools.warningMessage(" DataFile::readShorts2D: error on read - " + up);
 			throw (up);
 		}
 
@@ -822,21 +822,21 @@ public class DataFile extends GeoObject {
 	public byte[][] readBytes2D(int rows, int cols) throws Exception {
 
 		if (!fileIsReadable) {
-			Tools.warningMessage("DataFile::readByte2D: " + filename
+			Tools.warningMessage("DataFile::readBytes2D: " + filename
 					+ " is not open for reading.");
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
 		// Get the size of the file in bytes
 		long length = file.length();
-		Tools.debugMessage("    DataFile::readByte2D: file length = " + length
+		Tools.debugMessage("    DataFile::readBytes2D: file length = " + length
 				+ " bytes");
 
 		if (rows * cols > length) {
-			Tools.warningMessage(" DataFile::readByte2D: Supplied rows and cols greater than file size.");
+			Tools.warningMessage(" DataFile::readBytes2D: Supplied rows and cols greater than file size.");
 			Tools.warningMessage(" Rows * Cols = " + rows * cols + "   Rows = " + rows + " Cols = " + cols);
 			Tools.warningMessage(" File length = " + length + " bytes");
-			throw (new Error("DataFile::readByte2d: rows and cols mismatch with file"));
+			throw (new Error("DataFile::readBytes2d: rows and cols mismatch with file"));
 		}
 
 		// Create the byte array to hold the data. Integer = 4 bytes.
@@ -860,7 +860,7 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::readByte2D: error on read - " + up);
+			Tools.warningMessage(" DataFile::readBytes2D: error on read - " + up);
 			throw (up);
 		}
 
@@ -922,14 +922,14 @@ public class DataFile extends GeoObject {
 	}
 
 	/*
-	 * readFloat2d
+	 * readFloats2d
 	 * 
 	 * Read float data (a 2-D array) from the file.
 	 */
-	public float[][] readFloat2d(int rows, int cols) throws Exception {
+	public float[][] readFloats2d(int rows, int cols) throws Exception {
 
 		if (!fileIsReadable) {
-			Tools.warningMessage("DataFile::readFloat2d: " + filename
+			Tools.warningMessage("DataFile::readFloats2d: " + filename
 					+ " is not open for reading.");
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
@@ -938,18 +938,18 @@ public class DataFile extends GeoObject {
 		long length = file.length();
 
 		if (length / 4 > rows * cols) {
-			Tools.warningMessage("DataFile::readFloat2d: Supplied rows and cols is greater than file size.");
-			Tools.warningMessage("DataFile::readFloat2d: file length = "
+			Tools.warningMessage("DataFile::readFloats2d: Supplied rows and cols is greater than file size.");
+			Tools.warningMessage("DataFile::readFloats2d: file length = "
 					+ length + " bytes, Floats = " + length / 4);
 			Tools.warningMessage(" Rows * Cols = " + rows * cols + "   Rows = " + rows + " Cols = " + cols);
-			throw (new Error("DataFile::readFloat2d: rows and cols mismatch with file"));
+			throw (new Error("DataFile::readFloats2d: rows and cols mismatch with file"));
 		}
 
 		if (length / 4 != rows * cols) {
-			Tools.warningMessage("DataFile::readFloat2d: Warning! Supplied rows and cols mismatch with file size.");
-			Tools.warningMessage("DataFile::readFloat2d: file length = "
+			Tools.warningMessage("DataFile::readFloats2d: Supplied rows and cols mismatch with file size.");
+			Tools.warningMessage("DataFile::readFloats2d: file length = "
 					+ length + " bytes, floats = " + length / 4);
-			Tools.warningMessage("Rows * Cols = " + rows * cols);
+			Tools.warningMessage("Rows * Cols = " + rows * cols + "  Filename = " + filename);
 		}
 
 		// Create the byte array to hold the data. Integer = 4 bytes.
@@ -968,7 +968,7 @@ public class DataFile extends GeoObject {
 				}
 			}
 		} catch (Exception up) {
-			Tools.warningMessage(" DataFile::readFloat2D: error on read - "
+			Tools.warningMessage(" DataFile::readFloats2D: error on read - "
 					+ up);
 			throw (up);
 		}

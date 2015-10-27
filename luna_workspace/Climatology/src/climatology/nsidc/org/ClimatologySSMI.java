@@ -479,7 +479,7 @@ public class ClimatologySSMI extends Climatology {
 
 			DataFile file = new DataFile();
 			file.create(filename);
-			file.writeDouble2d(mean);
+			file.writeDoubles2d(mean);
 			file.close();
 
 			// Standard deviation climatology file
@@ -492,7 +492,7 @@ public class ClimatologySSMI extends Climatology {
 
 			file = new DataFile();
 			file.create(filename);
-			file.writeDouble2d(sd);
+			file.writeDoubles2d(sd);
 			file.close();
 		} catch (Exception e) {
 			Tools.warningMessage("Could not open output baseline data file: "
