@@ -20,3 +20,6 @@ luna_workspace/.metadata/*
 .DS_Store
 .settings/
 .metadata/
+*.log
+luna_workspace/.metadata/.log
+*.resources

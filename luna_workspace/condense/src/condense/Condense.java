@@ -126,7 +126,7 @@ public class Condense extends GeoObject {
 	int rows = 0;
 	int cols = 0;
 
-	// Number of files successfully read, for sanity checks
+	// Number of files successfully read, for status and sanity checks
 	int fileCount = 0;
 
 	/*-------------------------------------------------------------------------
@@ -217,6 +217,10 @@ public class Condense extends GeoObject {
 			// Read the data files. Stop when we run out of dates.
 			while (date != null) {
 
+				// Processing feedback
+				fileCount++;
+				Tools.messageNoRTLF(fileCount + "  ");
+				
 				switch (dataType) {
 				case AVHRR:
 					data = DatasetAVHRR.readData(date, rows, cols,
@@ -244,11 +248,10 @@ public class Condense extends GeoObject {
 
 					// Add the data to the database
 					addDataToDatabase( database, data, locations, date.id );	
-					
-					// Increment the date.
-					date = timespan.nextDay(date);
 				}
-			}
+				
+				// Increment the date.
+				date = timespan.nextDay(date);			}
 		
 			// Store the metadata
 			Metadata metadata = new Metadata(rows, cols, timestamps, rows*cols, vectors);
@@ -261,7 +264,8 @@ public class Condense extends GeoObject {
 			database.disconnect();
 
 			// Warm fuzzy feedback.
-			Tools.statusMessage("Total data files processed = " + fileCount);
+			Tools.statusMessage("Total data files attempted = " + fileCount);
+			Tools.statusMessage("Total data files processed = " + timestamps);
 
 			// We should now have a wonderful database full of condensed pixels.
 			// Let's generate some test images of them...
