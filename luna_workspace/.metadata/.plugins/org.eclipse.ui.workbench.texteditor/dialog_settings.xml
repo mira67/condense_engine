@@ -2,30 +2,30 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="getMetadata" key="selection"/>
+		<item value="Could not find" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="getMetadata"/>
-			<item value="rows"/>
-			<item value="filterBadData"/>
-			<item value="2d"/>
-			<item value="readShort2"/>
-			<item value="Warning!"/>
-			<item value="readshort"/>
-			<item value="Tools.warningMessage(&quot;Rows * Cols = &quot; + rows * cols);"/>
+			<item value="could not find"/>
+			<item value="addDataToDatabase"/>
+			<item value="griddedve"/>
+			<item value="haveMetadata"/>
+			<item value="metadata"/>
+			<item value="surfaceVectors"/>
+			<item value="readData"/>
+			<item value="could not read stats"/>
 		</list>
 		<list key="replacehistory">
+			<item value="lonsFile"/>
+			<item value="latsFile"/>
+			<item value="climatePath"/>
 			<item value=""/>
+			<item value="SSMI"/>
 			<item value="Tools.warningMessage(&quot;Rows * Cols = &quot; + rows * cols + &quot;  Filename = &quot; + filename);"/>
 			<item value="suffix2"/>
 			<item value="suffix1"/>
-			<item value="readInt2D"/>
-			<item value="ViewSingleImage"/>
-			<item value="AVHRR"/>
-			<item value="frequency"/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
