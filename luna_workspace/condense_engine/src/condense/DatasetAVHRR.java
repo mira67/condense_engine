@@ -13,12 +13,11 @@ public class DatasetAVHRR extends Dataset {
 	 * A single file name is required to read the metadata, and a path for
 	 * the files containing the lat/lon location data.
 	 */
-	public DatasetAVHRR(String filename, String locationsPath) {
+	public DatasetAVHRR(String filename, String locationsPath, String hemisphere) {
 		metadata = new Metadata();
 		readMetadata(filename);
 
-		locs = new GriddedLocation[metadata.rows][metadata.cols];
-		//readLocations( locationsPath );
+		locs = readLocations( locationsPath, hemisphere );
 	}
 
 	/*
@@ -111,24 +110,46 @@ public class DatasetAVHRR extends Dataset {
 	/*
 	 * readLocations
 	 * 
-	 * Read the locations for this gridded dataset. LatsPath and lonsPath
+	 * Read the locations for this gridded dataset. latsFile and lonsFile
 	 * are the latitude and longitude files.
 	 */
-	protected void readLocations(String latsPath, String lonsPath) {
+	static public GriddedLocation[][] readLocations(String path, String hemisphere) {
 		
-		// If no file information was provided, bail out.
-		if (latsPath == null) return;
-		if (latsPath.length() == 0) return;
+		int rows = 0;
+		int cols = 0;
+
+		// Northern hemisphere
+		if (hemisphere.equalsIgnoreCase("north")) {
+			rows = 1805;
+			cols = 1805;			
+		}
+		else {
+			// Southern hemisphere
+			rows = 1605;
+			cols = 1605;			
+		}
+		
+		Tools.message("AVHRR Locations:");
+		Tools.message("    Hemisphere: " + hemisphere + " rows = " + rows + " cols = " + cols);
+
+		GriddedLocation[][] locs = new GriddedLocation[rows][cols];
+		GriddedLocation.initialize(locs);
+		
+		//TODO
+		String latsFile = null;
+		String lonsFile = null;
+		
+		//if (latsFile == null) return locs;
 		
 		// Read the files
 		try {
 			
 			// Open the files
-			DataFile latitudes = new DataFile( latsPath );
-			DataFile longitudes = new DataFile( lonsPath );
+			DataFile latitudes = new DataFile( latsFile );
+			DataFile longitudes = new DataFile( lonsFile );
 
-			for (int r = 0; r < metadata.rows; r++) {
-				for (int c = 0; c < metadata.cols; c++) {
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
 							
 					// Read the encoded data from the files
 							
@@ -152,8 +173,12 @@ public class DatasetAVHRR extends Dataset {
 			longitudes.close();			
 		}
 		catch(Exception e) {
-			Tools.warningMessage("Failed to open file");
-		}				
+			Tools.warningMessage("DatasetAVHRR::readLocations: Failed to open file(s) in directory: ");
+			Tools.warningMessage(path);
+			Tools.warningMessage("Filenames: " + latsFile + " and/or " + lonsFile);
+		}
+		
+		return locs;
 	}
 
 	/*
@@ -210,5 +235,46 @@ public class DatasetAVHRR extends Dataset {
 		}
 
 		return AVHRRVectors;
+	}
+
+	/*
+	 * readData
+	 * 
+	 * Read a dataset file. Since the different types of data will most likely
+	 * have different formats and file names, this method must tailor itself to
+	 * the type of data being read.
+	 * 
+	 * Doesn't care if a file is missing, assumes the data isn't available.
+	 */
+	static public short[][] readData(Timestamp date, int rows, int cols,
+			String path, boolean addYearToInputDirectory, boolean addDayToInputDirectory,
+			String channel, String time) {
+
+		String filename = "";
+		short[][] data = new short[rows][cols];
+		
+		// Read in the data file
+		try {
+			data = null;
+
+			filename = DatasetAVHRR.getFileName(path, date.year(), date.dayOfYear(),
+					addYearToInputDirectory, addDayToInputDirectory, channel, time);
+
+			DataFile file = new DataFile( filename );
+			data = file.readShorts2D(rows, cols);
+			
+			file.close();
+		}
+		catch (Exception e) {
+			// Didn't find the file, or it's bad. Return nothing.
+			Tools.statusMessage(date.yearString() + "." + date.monthString() + "."
+					+ date.dayOfMonthString() + "  No file");
+			return null;
+		}
+		
+		Tools.statusMessage(date.yearString() + "." + date.monthString() + "."
+					+ date.dayOfMonthString() + "  File name: " + filename);
+		
+		return data;
 	}
 }

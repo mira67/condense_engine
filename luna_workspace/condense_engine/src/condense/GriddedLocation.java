@@ -74,4 +74,20 @@ public class GriddedLocation extends Location {
 	public void print(){
 		System.out.print("(" + row() + "," + col() + ")  " + lat() + " / " + lon());
   	}
+	
+	/*
+	 * initialize
+	 * 
+	 * Initialize an array of gridded locations.
+	 */
+	static public GriddedLocation[][] initialize( GriddedLocation[][] locs ) {
+		
+		for (int r = 0; r < locs.length; r++) {
+			for (int c = 0; c < locs[0].length; c++) {
+				locs[r][c] = new GriddedLocation(r,c,0,0);
+			}
+		}
+		
+		return locs;
+	}
 }

@@ -99,7 +99,7 @@ public class DatabaseRamSchema extends Database {
 	
 	protected void updateMetadata() {
 		metadata.vectors = vectors.size();
-		metadata.timestamps = timestamps.size();
+		metadata.timestamps = (short) timestamps.size();
 		metadata.locations = locations.size();				
 	}
 	
@@ -227,7 +227,7 @@ public class DatabaseRamSchema extends Database {
 		Tools.statusMessage("Cols              = " + metadata.cols);
 	}
 	
-	public int storeTimestamp(Timestamp t) {
+	public short storeTimestamp(Timestamp t) {
 		metadata.timestamps++;		
 		return metadata.timestamps;
 	}
@@ -240,6 +240,12 @@ public class DatabaseRamSchema extends Database {
 
 	@Override
 	public void storeVector(GriddedVector v) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void storeVector(short i, int locationID, short timestampID) {
 		// TODO Auto-generated method stub
 		
 	}

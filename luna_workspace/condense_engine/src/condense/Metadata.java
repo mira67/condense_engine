@@ -11,14 +11,14 @@ public class Metadata {
 	
 	protected int rows = 0;
 	protected int cols = 0;
-	protected int timestamps = 0;
+	protected short timestamps = 0;
 	protected int locations = 0;
 	protected int vectors = 0;
 	
 	// Constructors
 	public Metadata() {}
 	
-	public Metadata( int r, int c, int t, int l, int v) {
+	public Metadata( int r, int c, short t, int l, int v) {
 		rows = r;
 		cols = c;
 		timestamps = t;

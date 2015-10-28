@@ -16,12 +16,11 @@ public class DatasetSSMI extends Dataset {
 	 * A single file name is required to read the metadata, and a path for
 	 * the files containing the lat/lon location data.
 	 */
-	public DatasetSSMI(String filename, String locationsPath) {
+	public DatasetSSMI(String filename, String locationsPath, String hemisphere, String frequency) {
 		metadata = new Metadata();
 		readMetadata(filename);
 
-		locs = new GriddedLocation[metadata.rows][metadata.cols];
-		readLocations( locationsPath );
+		locs = readLocations( locationsPath, hemisphere, frequency );
 	}
 
 	/*
@@ -157,29 +156,68 @@ public class DatasetSSMI extends Dataset {
 	 * 
 	 * Read the locations for this gridded dataset.
 	 */
-	protected void readLocations(String locationsPath) {
+	static public GriddedLocation[][] readLocations(String path, String hemisphere, String frequency) {
 
+		int rows = 0;
+		int cols = 0;
+		
+		// Determine the size of the image files...
+		// Southern hemisphere
+		if (hemisphere.equalsIgnoreCase("south")) {
+			if (frequency.equalsIgnoreCase("85") ||
+				frequency.equalsIgnoreCase("91")) {
+				
+				// 85 and 91 GHz
+					rows = 664;
+				cols = 632;				
+			}
+			else {
+		 		// Southern hemisphere,	everything else (19, 22, 37 GHz)
+				rows = 332;
+				cols = 316;				
+			}
+		}
+		
+		// Northern hemisphere
+		else {
+			if (frequency.equalsIgnoreCase("85") ||
+				frequency.equalsIgnoreCase("91")) {
+				
+					// 85 and 91 GHz
+					rows = 896;
+					cols = 608;
+			}
+			else {
+		 		// Northern hemisphere,	everything else (19, 22, 37 GHz)
+				rows = 448;
+				cols = 304;	
+			}
+		}
+		
+		GriddedLocation[][] locs = new GriddedLocation[rows][cols];
+		locs = GriddedLocation.initialize(locs);
+		
 		// Temporary file name hard-code until we have time for something better. :-(
 		
 		// 25km resolution grid cells
-		String latsFileName = locationsPath + "pss25lats_v3.dat";
-		String lonsFileName = locationsPath + "pss25lons_v3.dat";
+		String latsFile = path + "pss25lats_v3.dat";
+		String lonsFile = path + "pss25lons_v3.dat";
 		
 		// 12.5km resolution grid cells
-		if (metadata.rows > 332 ) {
-			latsFileName = locationsPath + "pss12lats_v3.dat";
-			lonsFileName = locationsPath + "pss12lons_v3.dat";
+		if (rows > 332 ) {
+			latsFile = path + "pss12lats_v3.dat";
+			lonsFile = path + "pss12lons_v3.dat";
 		}
 		
 		// Read the files
 		try {
 			
 			// Open the files
-			DataFile latitudes = new DataFile( latsFileName );
-			DataFile longitudes = new DataFile( lonsFileName );
+			DataFile latitudes = new DataFile( latsFile );
+			DataFile longitudes = new DataFile( lonsFile );
 
-			for (int r = 0; r < metadata.rows; r++) {
-				for (int c = 0; c < metadata.cols; c++) {
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
 							
 					// Read the encoded data from the files
 							
@@ -203,8 +241,12 @@ public class DatasetSSMI extends Dataset {
 			longitudes.close();			
 		}
 		catch(Exception e) {
-			Tools.warningMessage("Failed to open file");
+			Tools.warningMessage("DatasetSSMI::readLocations: Failed to open file(s) in directory: ");
+			Tools.warningMessage(path);
+			Tools.warningMessage("Filenames: " + latsFile + " and/or " + lonsFile);
 		}				
+		
+		return locs;
 	}
 
 	/*
@@ -265,5 +307,49 @@ public class DatasetSSMI extends Dataset {
 		}
 
 		return ssmiVectors;
+	}
+	
+	/*
+	 * readData
+	 * 
+	 * Read a dataset file. Since the different types of data will most likely
+	 * have different formats and file names, this method must tailor itself to
+	 * the type of data being read.
+	 * 
+	 * Doesn't care if a file is missing. Assumes the data isn't available.
+	 */
+	static protected short[][] readData(Timestamp date, int rows, int cols,
+			String path, boolean addYearToInputDirectory, boolean addDayToInputDirectory,
+			String frequency, String polarization) {
+
+		String filename = "";
+		short[][] data = new short[rows][cols];
+		
+		try {
+			data = null;
+			filename = DatasetSSMI.getFileName(path, date.year(),
+					date.month(), date.dayOfMonth(),
+					addYearToInputDirectory, frequency, polarization);
+
+			if (filename == null) return data;
+		
+			// Read the data
+
+			DataFile file = new DataFile( filename );
+			data = file.readShorts2D(rows, cols);
+			
+			file.close();
+		}
+		catch (Exception e) {
+				// Didn't find the file, or it's bad. Return nothing.
+				Tools.statusMessage(date.yearString() + "." + date.monthString() + "."
+						+ date.dayOfMonthString() + "  No file");
+				return null;
+			}
+			
+			Tools.statusMessage(date.yearString() + "." + date.monthString() + "."
+						+ date.dayOfMonthString() + "  File name: " + filename);
+			
+			return data;
 	}
 }

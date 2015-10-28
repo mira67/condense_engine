@@ -32,7 +32,7 @@ public class Timestamp {
 	private int minute;
 	private int dayOfYear;
 
-	protected int id = -1;	// Database table unique primary key. -1 means not in the database.
+	protected short id = -1;	// Database table unique primary key. -1 means not in the database.
 	
 	protected static String dateSeparator = ".";
 
@@ -62,7 +62,7 @@ public class Timestamp {
 	 * Constructor using days since January 1, 1970 as the epoch date,
 	 * and a database index ID number
 	 */
-	public Timestamp(int indexID, double daysInput) {
+	public Timestamp(short indexID, double daysInput) {
 
 		days = daysInput;
 

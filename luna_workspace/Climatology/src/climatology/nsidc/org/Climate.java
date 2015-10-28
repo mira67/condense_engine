@@ -93,8 +93,6 @@ public class Climate extends GeoObject {
 			Tools.errorMessage("Climate", "main", "", new Exception());
 		}
 		
-		// Where does the data come from? Set the path. Platform dependent.
-		
 		// How many processors do we have available?
 	    procs = Runtime.getRuntime().availableProcessors(); 
 	    Tools.message("Available processors = " + procs);

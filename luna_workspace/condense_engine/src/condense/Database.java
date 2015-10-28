@@ -58,9 +58,10 @@ public abstract class Database extends GeoObject {
 	// STORAGE METHODS
 
 	public abstract void storeMetadata(Metadata m);
-	public abstract int storeTimestamp(Timestamp t);
+	public abstract short storeTimestamp(Timestamp t);
 	public abstract int storeLocation(GriddedLocation loc);
 	public abstract void storeVector(GriddedVector v);
+	public abstract void storeVector(short i, int locationID, short timestampID);
 
 	// RETRIEVAL METHODS
 
@@ -122,33 +123,4 @@ public abstract class Database extends GeoObject {
 	 * Print out the status and metadata of the database.
 	 */
 	public abstract void status();
-
-	/*
-	 * createArrayFromSensorVectorList
-	 * 
-	 * Take a list of sensor vectors and create a 2D array of vectors from
-	 * what's in the list, based on their row/col locations. Undefined vectors
-	 * will be zeros.
-	 */
-	/*public static GriddedVector[][] createArrayFromSensorVectorList(
-			ArrayList<GriddedVector> list, Metadata m) {
-
-		GriddedVector[][] vectors = new GriddedVector[m.rows][m.cols];
-
-		// Initialize the array
-		for (int r = 0; r < m.rows; r++) {
-			for (int c = 0; c < m.cols; c++) {
-				vectors[r][c] = new GriddedVector(r, c);
-			}
-		}
-
-		// Load each vector in the list onto the image array.
-		Iterator<GriddedVector> iterator = list.iterator();
-		while (iterator.hasNext()) {
-			GriddedVector v = iterator.next();
-			vectors[v.row()][v.col()] = v;
-		}
-
-		return vectors;
-	}*/
 }

@@ -14,16 +14,16 @@ public class ViewMultipleImages {
 	//static String[] channels = {"temp", "albd", "chn1", "chn2", "chn3", "chn4", "chn5"};
 	static String[] channels = {"temp", "albd", "chn1", "chn2"};
 
-	static String inputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/north/";
-	static String outputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/northimages/";
+	static String inputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/south/";
+	static String outputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/";
 
 	// Southern hemisphere AVHRR
-	//static int rows = 1605;
-	//static int cols = 1605;			
+	static int rows = 1605;
+	static int cols = 1605;			
 
 	// Northern hemisphere AVHRR
-	static int rows = 1805;
-	static int cols = 1805;
+	//static int rows = 1805;
+	//static int cols = 1805;
 	
 	
 	public static void main(String[] args) {
@@ -49,7 +49,7 @@ public class ViewMultipleImages {
 			// Loop through all wavelengths
 			for ( String channel : channels) {
 				
-				String searchString = channel+"1400-mean-" + increment.name().toLowerCase();
+				String searchString = channel+"1400-sd-" + increment.name().toLowerCase();
 
 				String filename = Tools.findFile(inputPath, searchString);
 

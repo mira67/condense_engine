@@ -204,7 +204,7 @@ public class DatabaseFileSchema extends Database {
 	/*
 	 * store a Timestamp
 	 */
-	public int storeTimestamp(Timestamp t) {
+	public short storeTimestamp(Timestamp t) {
 
 		try {
 			timestampsFile.writeDouble(t.days());
@@ -281,7 +281,7 @@ public class DatabaseFileSchema extends Database {
 			// Write the metadata
 			metadata.rows = metadataFile.readInt();
 			metadata.cols = metadataFile.readInt();
-			metadata.timestamps = metadataFile.readInt();
+			metadata.timestamps = metadataFile.readShort();
 			metadata.locations = metadataFile.readInt();
 			metadata.vectors = metadataFile.readInt();
 		} catch (Exception e) {
@@ -428,5 +428,11 @@ public class DatabaseFileSchema extends Database {
 		Tools.statusMessage("Timestamp entries = " + metadata.timestamps);
 		Tools.statusMessage("Location entries  = " + metadata.locations);
 		Tools.statusMessage("Vector entries    = " + metadata.vectors);
+	}
+
+	@Override
+	public void storeVector(short i, int locationID, short timestampID) {
+		// TODO Auto-generated method stub
+		
 	}
 }

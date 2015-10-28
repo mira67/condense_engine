@@ -18,8 +18,6 @@ public class ClimatologyAVHRR extends Climatology {
 	Timespan.Increment increment;
 
 	// Start and end dates for the processing.
-	// A data file for the start date *must* exist because that will be used
-	// to generate the metadata.
 	int startYear;
 	int startMonth;
 	int startDay;
@@ -59,10 +57,7 @@ public class ClimatologyAVHRR extends Climatology {
 	double diffSquared[][] = null;
 	int population[][] = null;
 
-	// The mean provides a reference for deciding whether to condense the
-	// newest pixels; i.e., are the pixels varying greater than n*sd from
-	// the mean? If so, keep the newest ones and update the reference image
-	// with the new pixel values.
+	// The statistics we're generating: mean and standard deviation.
 	double[][] mean = null; // Mean: [row][col]
 	double[][] sd = null; // Standard deviation: [row][col]
 
@@ -125,7 +120,7 @@ public class ClimatologyAVHRR extends Climatology {
 		testing = test;
 		
 		// Southern hemisphere image size, rows and cols
-		if (outputPath.indexOf("_s") > 0) {
+		if (dataPath.indexOf("south") > 0) {
 			rows = 1605;
 			cols = 1605;
 		}
@@ -280,9 +275,16 @@ public class ClimatologyAVHRR extends Climatology {
 				}
 			}
 
-			Tools.message("    " + date.yearString() + "." + date.monthString()
-					+ "." + date.dayOfMonthString() + "  File name: "
-					+ filename);
+			if (filename == null) {
+				Tools.message("    " + date.yearString() + "." + date.monthString()
+						+ "." + date.dayOfMonthString() + "  File name: "
+						+ filename + "    (" + suffix1 + ")");
+			}
+			else {
+				Tools.message("    " + date.yearString() + "." + date.monthString()
+						+ "." + date.dayOfMonthString() + "  File name: "
+						+ filename);				
+			}
 
 			// Next day.
 			date = timespan.nextDay(date);

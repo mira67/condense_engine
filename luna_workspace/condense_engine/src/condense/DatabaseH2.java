@@ -72,6 +72,8 @@ public class DatabaseH2 extends Database {
 
 		createIfDoesNotExist = true;
 
+		metadata = new Metadata();
+		
 		// Open the database. On connecting, create a custom schema name so
 		// it doesn't default to "PUBLIC". Using the default schema creates
 		// ID conflicts when working with multiple open databases.
@@ -80,7 +82,8 @@ public class DatabaseH2 extends Database {
 			conn = DriverManager.getConnection(dbPath + dbName +
 					";INIT=CREATE SCHEMA IF NOT EXISTS " + dbName + "\\;" + 
 	                "SET SCHEMA " + dbName, null, null);
-
+			sqlCreate = conn.createStatement();
+			
 			conn.setAutoCommit(true);
 
 		} catch (Exception e) {
@@ -90,6 +93,8 @@ public class DatabaseH2 extends Database {
 		}
 
 		status = Status.CONNECTED;
+
+		createTables();
 
 		return true;
 	}
@@ -118,7 +123,7 @@ public class DatabaseH2 extends Database {
 
 		Tools.statusMessage("Connected to database, read-only: " + dbPath + dbName);
 		status = Status.CONNECTED_READ_ONLY;
-
+		
 		return true;
 	}
 
@@ -148,6 +153,34 @@ public class DatabaseH2 extends Database {
 	}
 
 	/*
+	 * createTables
+	 * 
+	 * Create the tables in the database.
+	 */
+	protected void createTables() {
+
+		try {
+			sqlCreate = conn.createStatement();
+
+			sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + Table.METADATA.name()
+					+ Table.METADATA.columnNames());
+
+	        sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + Table.LOCATIONS.name()
+					+ Table.LOCATIONS.columnNames());
+
+	        sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + Table.TIMESTAMPS.name()
+					+ Table.TIMESTAMPS.columnNames());
+
+			sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + Table.VECTORS.name()
+					+ Table.VECTORS.columnNames());					
+		}
+		catch(Exception e) {
+			Tools.errorMessage("DatabaseH2", "createTables", "when creating tables", e);
+		}
+	}
+	
+	
+	/*
 	 * clean
 	 * 
 	 * Reset the database, clean out all existing data and tables. Empty tables
@@ -169,6 +202,8 @@ public class DatabaseH2 extends Database {
 				// Might want to re-visit this assumption at a later time.
 			}
 		}
+
+		createTables();
 	}
 
     //
@@ -197,9 +232,6 @@ public class DatabaseH2 extends Database {
 		
 		// Now store it in the database.
 		try {
-			if (createIfDoesNotExist) sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + Table.METADATA.name()
-					+ Table.METADATA.columnNames());
-
 			sqlCreate.execute("INSERT INTO " + Table.METADATA.name() + " VALUES(" +
 					"1," +		// Primary key index is always 1.
 					metadata.rows + "," +
@@ -263,9 +295,6 @@ public class DatabaseH2 extends Database {
 			// Increment the number of locations stored.
 	        metadata.locations++;
 	        
-	        if (createIfDoesNotExist) sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + Table.LOCATIONS.name()
-					+ Table.LOCATIONS.columnNames());
-
 			sqlCreate.execute("INSERT INTO " + Table.LOCATIONS.name() + " VALUES(" +
 					+ metadata.locations + "," +
 					+ loc.row() + "," +
@@ -288,7 +317,7 @@ public class DatabaseH2 extends Database {
 	 *  Store a single timestamp. The returned id is a unique table identifier
 	 *  for this time.
 	 */
-	public int storeTimestamp(Timestamp t) {
+	public short storeTimestamp(Timestamp t) {
 
 		if (t == null) return 0;
 		
@@ -296,10 +325,7 @@ public class DatabaseH2 extends Database {
 		metadata.timestamps++;
 
         try {
-			if (createIfDoesNotExist) sqlCreate.execute("CREATE TABLE IF NOT EXISTS " + Table.TIMESTAMPS.name()
-					+ Table.TIMESTAMPS.columnNames());
-
-			sqlCreate.execute("INSERT INTO " + Table.TIMESTAMPS.name() + " VALUES(" +
+						sqlCreate.execute("INSERT INTO " + Table.TIMESTAMPS.name() + " VALUES(" +
 					+ metadata.timestamps + "," +
 					+ t.days() + ")");
 
@@ -343,6 +369,33 @@ public class DatabaseH2 extends Database {
 		return;
 	}
 
+	
+	/*
+	 * storeVector
+	 * 
+	 * Stores a single value of sensor data to the database.
+	 */
+	public void storeVector(short v, int locationID, short timestampID) {
+
+		// Increment the number of vectors stored, and use that as the ID.
+		metadata.vectors++;
+		
+		try {
+			sqlCreate.execute("INSERT INTO " + Table.VECTORS.name() + " VALUES(" +
+					metadata.vectors + "," +
+					v + "," +
+					locationID + "," +
+					timestampID + ")");
+
+		} catch (Exception e) {
+			Tools.errorMessage("DatabaseH2",
+					"storeShort",
+					"When storing short in " + dbPath + dbName, e);
+		}
+	
+		return;
+	}
+
 
 	//
 	// RETRIEVAL METHODS
@@ -366,7 +419,7 @@ public class DatabaseH2 extends Database {
 				metadata = new Metadata(
 					rs.getInt("ROWS"),
 					rs.getInt("COLS"),
-					rs.getInt("TIMESTAMPS"),
+					rs.getShort("TIMESTAMPS"),
 					rs.getInt("LOCATIONS"),
 					rs.getInt("VECTORS"));
 			}
@@ -394,7 +447,7 @@ public class DatabaseH2 extends Database {
 		    
 			if (rs.next()) {
 				t = new Timestamp(
-					rs.getInt("ID"),
+					rs.getShort("ID"),
 					rs.getFloat("TIMESTAMP"));
 			}
 			rs.close();
@@ -455,7 +508,7 @@ public class DatabaseH2 extends Database {
 			ResultSet rs = statement.executeQuery(query);
 		    
 			while (rs.next()) {
-				Timestamp t = new Timestamp(rs.getInt("ID"), rs.getFloat("TIMESTAMP"));
+				Timestamp t = new Timestamp(rs.getShort("ID"), rs.getFloat("TIMESTAMP"));
 				timestamps.add(t);
 			}
 			rs.close();

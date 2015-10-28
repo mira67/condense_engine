@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="filterBadData" key="selection"/>
+		<item value="getMetadata" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="getMetadata"/>
+			<item value="rows"/>
 			<item value="filterBadData"/>
 			<item value="2d"/>
 			<item value="readShort2"/>
 			<item value="Warning!"/>
 			<item value="readshort"/>
 			<item value="Tools.warningMessage(&quot;Rows * Cols = &quot; + rows * cols);"/>
-			<item value="&#x09;&#x09;&#x09;Tools.warningMessage(&quot;Rows * Cols = &quot; + rows * cols);"/>
-			<item value=" bytes, Integers = "/>
 		</list>
 		<list key="replacehistory">
 			<item value=""/>
