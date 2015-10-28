@@ -256,6 +256,14 @@ public class ClimatologyAVHRR extends Climatology {
 				// Read the data
 				data[d] = file.readShorts2D(rows, cols);
 				
+				/*
+				Tools.message("  " + data[d][ Tools.randomInt(rows)][Tools.randomInt(cols)] +
+						"  " + data[d][ Tools.randomInt(rows)][Tools.randomInt(cols)] +
+						"  " + data[d][ Tools.randomInt(rows)][Tools.randomInt(cols)] +
+						"  " + data[d][ Tools.randomInt(rows)][Tools.randomInt(cols)] +
+						"  " + data[d][ Tools.randomInt(rows)][Tools.randomInt(cols)] );
+				*/
+				
 				file.close();
 				
 			}

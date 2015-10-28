@@ -145,6 +145,12 @@ public class DatasetAVHRR extends Dataset {
 			filename = DatasetAVHRR.getFileName(path, date.year(), date.dayOfYear(),
 					addYearToInputDirectory, addDayToInputDirectory, channel, time);
 
+			if (filename == null) {
+				Tools.message(date.yearString() + "." + date.monthString() + "."
+						+ date.dayOfMonthString() + "  No file");
+				return data;
+			}
+
 			DataFile file = new DataFile( filename );
 			data = file.readShorts2D(rows, cols);
 			
@@ -152,12 +158,11 @@ public class DatasetAVHRR extends Dataset {
 		}
 		catch (Exception e) {
 			// Didn't find the file, or it's bad. Return nothing.
-			Tools.statusMessage(date.yearString() + "." + date.monthString() + "."
-					+ date.dayOfMonthString() + "  No file");
-			return null;
+			Tools.message(date.yearString() + "." + date.monthString() + "."
+					+ date.dayOfMonthString() + "  DatasetAVHRR::readData: Exception on file read: " + e);
 		}
 		
-		Tools.statusMessage(date.yearString() + "." + date.monthString() + "."
+		Tools.message(date.yearString() + "." + date.monthString() + "."
 					+ date.dayOfMonthString() + "  File name: " + filename);
 		
 		return data;

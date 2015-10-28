@@ -2,14 +2,14 @@
 
 import condense.*;
 
-/* ViewMultipleImage
+/* ViewMultipleClimatology
  * 
  * Show or store image files as png images.
  * 
  * This is intended to be a viewer to QA the data files.
  */
 
-public class ViewMultipleImages {
+public class ViewMultipleClimatology {
 
 	//static String[] channels = {"temp", "albd", "chn1", "chn2", "chn3", "chn4", "chn5"};
 	static String[] channels = {"temp", "albd", "chn1", "chn2"};
@@ -67,7 +67,7 @@ public class ViewMultipleImages {
 					// Display the image
 					//Tools.message("Creating image...");
 					String imageFilename = outputPath + searchString;
-					DisplayImage(imageFilename, data);
+					createImage(imageFilename, data);
 					
 					file.close();
 				}
@@ -83,7 +83,7 @@ public class ViewMultipleImages {
 		Tools.statusMessage("End program");
 	}
 	
-	static public void DisplayImage( String filename, int[][] array ) {
+	static public void createImage( String filename, int[][] array ) {
 		
 		int rows = array.length;
 		int cols = array[0].length;

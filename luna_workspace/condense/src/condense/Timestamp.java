@@ -142,6 +142,25 @@ public class Timestamp {
 	}
 
 	/*
+	 * Timestamp constructor
+	 * 
+	 * Constructor using year, and day of year (0-366)
+	 */
+	public Timestamp(int yearInput, int dayOfYear) {
+
+		cal = Calendar.getInstance();
+		cal.set(Calendar.YEAR, yearInput);
+		cal.set(Calendar.DAY_OF_YEAR, dayOfYear);
+
+		// Make sure we're using UTC time zone.
+		TimeZone utcTimeZone = SimpleTimeZone.getTimeZone("UTC_TIME");
+		cal.setTimeZone(utcTimeZone);
+
+		// Update the local stuff to match.
+		updateLocalVariables();
+	}
+
+	/*
 	 * clone a Timestamp
 	 * 
 	 */

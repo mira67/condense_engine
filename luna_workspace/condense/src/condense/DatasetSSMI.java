@@ -185,7 +185,11 @@ public class DatasetSSMI extends Dataset {
 					date.month(), date.dayOfMonth(),
 					addYearToInputDirectory, frequency, polarization);
 
-			if (filename == null) return data;
+			if (filename == null) {
+				Tools.message(date.yearString() + "." + date.monthString() + "."
+						+ date.dayOfMonthString() + "  No file");
+				return data;
+			}
 		
 			// Read the data
 
@@ -196,14 +200,13 @@ public class DatasetSSMI extends Dataset {
 		}
 		catch (Exception e) {
 				// Didn't find the file, or it's bad. Return nothing.
-				Tools.statusMessage(date.yearString() + "." + date.monthString() + "."
-						+ date.dayOfMonthString() + "  No file");
-				return null;
-			}
+				Tools.message(date.yearString() + "." + date.monthString() + "."
+						+ date.dayOfMonthString() + "  DatasetSSMI::readData: Exception on file read: " + e);
+		}
 			
-			Tools.statusMessage(date.yearString() + "." + date.monthString() + "."
-						+ date.dayOfMonthString() + "  File name: " + filename);
+		Tools.message(date.yearString() + "." + date.monthString() + "."
+					+ date.dayOfMonthString() + "  File name: " + filename);
 			
-			return data;
+		return data;
 	}
 }

@@ -219,7 +219,7 @@ public class Condense extends GeoObject {
 
 				// Processing feedback
 				fileCount++;
-				Tools.messageNoRTLF(fileCount + "  ");
+				Tools.messageNoRTLF(fileCount + "/" + timespan.days() + "  ");
 				
 				switch (dataType) {
 				case AVHRR:

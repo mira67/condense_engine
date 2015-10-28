@@ -255,16 +255,49 @@ public class Tools extends GeoObject {
 			}
 		}
 
-		// /System.out.println("scaleIntArray2D: min = " + minData + "   max = "
-		// + maxData + "  rows,cols = " + rows + "," + cols);
+		float dataRange = maxData - minData;
+
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				array[r][c] = (int) (min + range
+						* ((float) array[r][c] - minData) / dataRange);
+			}
+		}
+
+		return array;
+	}
+
+	/*
+	 * scaleShortArray2D
+	 * 
+	 * Scale a 2D array of short integer data.
+	 */
+	public static short[][] scaleShortArray2D(short[][] array, int min, int max) {
+
+		int rows = array.length;
+		int cols = array[0].length;
+
+		float range = (float) max - (float) min;
+
+		float minData = 999999;
+		float maxData = -999999;
+
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				if (array[r][c] == NODATA)
+					continue;
+				if (array[r][c] < minData)
+					minData = array[r][c];
+				if (array[r][c] > maxData)
+					maxData = array[r][c];
+			}
+		}
 
 		float dataRange = maxData - minData;
 
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
-				// /float pct = ((float) array[r][c] - minData)/dataRange;
-
-				array[r][c] = (int) (min + range
+				array[r][c] = (short) (min + range
 						* ((float) array[r][c] - minData) / dataRange);
 			}
 		}
