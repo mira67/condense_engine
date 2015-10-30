@@ -86,7 +86,7 @@ public class ClimatologySSMI extends Climatology {
 	public ClimatologySSMI(Dataset.DataType type, int startY, int startM,
 			int startD, int finalY, int finalM, int finalD,
 			Timespan.Increment inc, String dataP, String outputP, String suff1,
-			String suff2, double min, double max, boolean filter,
+			String suff2, boolean filter,
 			boolean addYear, boolean addDay, boolean test) {
 
 		dataType = type;
@@ -109,8 +109,9 @@ public class ClimatologySSMI extends Climatology {
 		suffix1 = suff1;
 		suffix2 = suff2;
 
-		minValue = (int) Math.round(min);
-		maxValue = (int) Math.round(max);
+		// Valid data range for SSMI
+		minValue = 500;
+		maxValue = 3500;
 
 		filterBadData = filter;
 		
@@ -124,6 +125,10 @@ public class ClimatologySSMI extends Climatology {
 			rows = 1605;
 			cols = 1605;
 		}
+
+		Tools.statusMessage("  Run: " + dataPath + "\n" + 
+			"     suffix1 = " + suff1 + "  suffix2 = " + suff2 + "  increment = " + inc.toString() + "\n" +
+			"     min = " + minValue + "  max = " + maxValue + "  rows = " + rows + "  cols = " + cols);
 	}
 	
 	/*

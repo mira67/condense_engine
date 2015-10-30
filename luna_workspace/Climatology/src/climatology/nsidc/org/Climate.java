@@ -24,10 +24,6 @@ public class Climate extends GeoObject {
     // Parallel processes.
     static int procs;
     
-    // Min and max allowable data values
-    static double minValue = -9999999;
-    static double maxValue = 9999999;
-    
     // When reading the source data, do we have to modify the path?
     static boolean addYearToInputDirectory = true;
     static boolean addDayToInputDirectory = true;   // Day-of-year, not day of month
@@ -108,7 +104,8 @@ public class Climate extends GeoObject {
 	    // Create an array to hold parallel threads.
 	    ParallelTask[] threads = new ParallelTask[procs]; 
 
-		// Loop through all possible increment types.
+		// Loop through all possible increment types. Create a new process
+	    // for each increment.
 		for (Timespan.Increment increment : Timespan.Increment.values()) {
 
 			// Skip over unwanted increments, i.e., only process in the
@@ -121,6 +118,11 @@ public class Climate extends GeoObject {
 				name.compareTo("week") == 0
 			) continue;
 
+			// For testing, only do January
+			if (testing) {
+				if (name.compareTo("jan") != 0) continue;
+			}
+			
 			// This keeps track of how many parallel processes we create.
 			int processID = 0;
 			
@@ -147,7 +149,6 @@ public class Climate extends GeoObject {
 									finalYear, finalMonth, finalDay,
 									increment,
 									dataPath, outputPath,
-									minValue, maxValue,
 									freq, pol, testing );
 						    
 						    // Start it.
@@ -162,8 +163,8 @@ public class Climate extends GeoObject {
 					
 		    	case AVHRR:
 		    		
-		    		//String[] channels = {"albd", "chn1", "chn2", "chn3", "chn4", "chn5", "temp"};
-		    		String[] channels = {"albd", "chn1", "chn2", "temp"};
+		    		String[] channels = {"albd", "chn1", "chn2", "chn3", "chn4", "chn5", "temp"};
+		    		//String[] channels = {"temp", "albd", "chn1", "chn2"};
 		    		String[] channels_short = {"chn1"};
 		    		
 		    		// If testing, only do one channel.
@@ -174,19 +175,6 @@ public class Climate extends GeoObject {
 					// Loop through all wavelengths
 					for ( String channel : channels) {
 						
-						// Special case: different range for albedo and visible channels
-						if (channel.equalsIgnoreCase("albd") ||
-							channel.equalsIgnoreCase("chn1") ||
-							channel.equalsIgnoreCase("chn2")) {
-							
-							minValue = 1;
-							maxValue = 1000;
-						}
-						else {
-							minValue = 1900;
-							maxValue = 3100;
-						}
-							
 						// Create a new thread
 					    threads[processID] = new ParallelTask(
 						    		processID, dataType,
@@ -194,7 +182,6 @@ public class Climate extends GeoObject {
 									finalYear, finalMonth, finalDay,
 									increment,
 									dataPath, outputPath,
-									minValue, maxValue, 
 									channel, suffix2, testing );
 							    
 					   // Start it.
@@ -263,7 +250,6 @@ public class Climate extends GeoObject {
 				int finalYear, int finalMonth, int finalDay,
 				Timespan.Increment increment,
 				String dataPath, String outputPath,
-				double minimum, double maximum,
 				String suffix1, String suffix2, boolean test) {
 			
 			this.threadNumber = id;
@@ -282,9 +268,6 @@ public class Climate extends GeoObject {
 			this.outputP = outputPath;
 			this.suff1 = suffix1;
 			this.suff2 = suffix2;
-			
-			this.min = minimum;
-			this.max = maximum;
 			
 			this.testing = test;
 		}
@@ -313,7 +296,7 @@ public class Climate extends GeoObject {
 						startY, startM, startD,
 						finalY, finalM, finalD, inc,
 						dataP, outputP,
-						suff1, suff2, min, max, filterBadData,
+						suff1, suff2, filterBadData,
 						addYearToInputDirectory, addDayToInputDirectory,
 						testing);			
 			}
@@ -322,7 +305,7 @@ public class Climate extends GeoObject {
 						startY, startM, startD,
 						finalY, finalM, finalD, inc,
 						dataP, outputP,
-						suff1, suff2, min, max, filterBadData,
+						suff1, suff2, filterBadData,
 						addYearToInputDirectory, addDayToInputDirectory,
 						testing);				
 			}
@@ -421,14 +404,6 @@ public class Climate extends GeoObject {
 					if (value.equals("avhrr"))
 						dataType = DataType.AVHRR;
 					Tools.statusMessage("Data Type = " + dataType);
-					break;
-				case "minvalue":
-					minValue = Double.valueOf(value);
-					Tools.statusMessage("Low threshold = " + minValue);
-					break;
-				case "maxvalue":
-					maxValue = Double.valueOf(value);
-					Tools.statusMessage("High threshold = " + maxValue);
 					break;
 				case "testing":
 					testing = Boolean.valueOf(value);

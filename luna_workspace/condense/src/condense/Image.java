@@ -24,18 +24,19 @@ import javax.imageio.*;
 public class Image extends GeoObject {
 
 	protected ArrayList<RasterLayer> layers;
+	protected ArrayList<Annotation> annotations;
 
 	public Image() {
 
 		layers = new ArrayList<RasterLayer>();
+		annotations = null;
 	}
 
 	// Construct an image with a user-supplied layer
 	public Image(RasterLayer layer) {
-
 		layers = new ArrayList<RasterLayer>();
-
 		layers.add(layer);
+		annotations = null;
 	}
 
 	/*
@@ -157,6 +158,45 @@ public class Image extends GeoObject {
 		}
 	}
 
+	/*
+	 * addAnnotation
+	 * 
+	 * Add annotation to the image.
+	 */
+	public void addAnnotation(String comment, int row, int col) {
+		if (annotations == null) {
+			annotations = new ArrayList<Annotation>();
+		}
+
+		annotations.add(new Annotation(comment, row, col));
+	}
+
+	/*
+	 * addAnnotation
+	 * 
+	 * Add annotation to the image, using a pre-defined annotation object.
+	 */
+	public void addAnnotation(Annotation a) {
+		if (annotations == null) {
+			annotations = new ArrayList<Annotation>();
+		}
+
+		annotations.add(a);
+	}
+
+	/*
+	 * cleanAnnotation
+	 */
+	public void clearAnnotation() {
+		annotations.clear();
+		annotations = null;
+	}
+	
+	/*
+	 * createBufferedImage
+	 * 
+	 * Using the layers and annotations, create the image.
+	 */
 	protected BufferedImage createBufferedImage(int type, int rows, int cols) {
 
 		// Create the image objects
@@ -164,9 +204,13 @@ public class Image extends GeoObject {
 		Graphics2D graphics = bufferedImage.createGraphics();
 		Color color;
 
+		// Add each of the layers in sequence.
 		for (int i = 0; i < layers.size(); i++) {
+
+			// Get an iterator for the pixels in this layer.
 			Iterator<PixelDisplayable> iter = layers.get(i).pixelIterator();
 
+			// Set the layer's opacity. Untested?
 			float layerOpacity = layers.get(i).opacity();
 
 			Tools.debugMessage("Image::createBufferedImage: layer = "
@@ -174,17 +218,41 @@ public class Image extends GeoObject {
 			Tools.debugMessage("       Size = " + layers.get(i).pixels().size());
 			Tools.debugMessage("       Opacity = " + layers.get(i).opacity());
 
+			// Iterate through all the pixels in the layer, adding them to the
+			// image.
 			while (iter.hasNext()) {
 				PixelDisplayable pixel = iter.next();
 
 				// Set the opacity: the pixel opacity * the layer opacity.
 				int alpha = new DN((int) layerOpacity * DN.MAXIMUM).asInt();
 
+				// Draw the pixel using the chosen color
 				color = new Color(pixel.red(), pixel.green(), pixel.blue(),
 						alpha);
 				graphics.setColor(color);
 				graphics.draw(new Ellipse2D.Float(pixel.col(), pixel.row(), 0,
 						0));
+			}
+		}
+
+		// Add annotations. Note that they are always on top of the layers.
+		if (annotations != null) {
+			if (annotations.size() > 0) {
+				Iterator<Annotation> iter = annotations.iterator();
+
+				while (iter.hasNext()) {
+					Annotation a = iter.next();
+
+					// Use default font and color unless the user has set it.
+					// Note: once set, it applies to all subsequent annotation
+					// unless changed again.
+					if (a.font() != null)
+						graphics.setFont(a.font());
+					if (a.color() != null)
+						graphics.setColor(a.color());
+
+					graphics.drawString(a.getString(), a.row(), a.col());
+				}
 			}
 		}
 

@@ -35,4 +35,5 @@
 <fullyQualifiedTypeName name="condense.Dataset.DataType"/>
 <fullyQualifiedTypeName name="condense.Timespan.Increment"/>
 <fullyQualifiedTypeName name="java.io.File"/>
+<fullyQualifiedTypeName name="condense.Tools"/>
 </qualifiedTypeNameHistroy>

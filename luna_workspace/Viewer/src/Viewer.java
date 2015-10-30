@@ -1,5 +1,7 @@
 
 import condense.*;
+import java.awt.Color;
+import java.awt.Font;
 
 /* Viewer
  * 
@@ -13,6 +15,7 @@ public class Viewer {
 
 	public enum DataType {
 		DOUBLE,
+		SHORT,
 		FLOAT,
 		INTEGER,
 		BYTE,
@@ -22,11 +25,11 @@ public class Viewer {
 	public static void main(String[] args) {
 
 		//String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/1990-2014/";
-		String path = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/1990-2014/";
-		String filenameRoot = "climate-ssmi";
-		String filenameTail = "-1990-2014.bin";
+		String path = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/";
+		String filenameRoot = "sd-temp";
+		String filenameTail = "";
 		
-		DataType type = DataType.DOUBLE;
+		DataType type = DataType.SHORT;
 		
 		String[] months = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
 		String[] frequency = {"19", "22", "37", "85"};
@@ -39,17 +42,18 @@ public class Viewer {
 		int rows = 0;
 		int cols = 0;
 		
-		for (int m = 0; m < 12; m++) {
-			for (int f = 0; f <= 3; f++) {
-				for (int p = 0; p < 2; p++) {
-					for (int s = 0; s < 2; s++) {
-
-						filename = path + filenameRoot + frequency[f] + polarization[p] + "-" + stat[s] + "-" + months[m] + filenameTail;
+		
+						//filename = path + filenameRoot + frequency[f] + polarization[p] + "-" + stat[s] + "-" + months[m] + filenameTail;
+						filename = Tools.findFile(path, filenameRoot);
+						//filename = path + filenameRoot + frequency[f] + polarization[p] + "-" + stat[s] + "-" + months[m] + filenameTail;
 						
 						Tools.message(filename);
 
 						// Determine rows and columns in the file...
 
+						rows = 1605;
+						cols = 1605;
+						/*
 						// Everything less than 85 GHz.
 						rows = 332;
 						cols = 316;
@@ -59,19 +63,15 @@ public class Viewer {
 							rows = 664;
 							cols = 632;							
 						}
-
+						*/
+						
 						// Read the file
 						double[][] array = readFile( filename, rows, cols, type);
 						
-						int numericalMonth = m + 1;
+						//int numericalMonth = m + 1;
 						
 						// Display the image
-						imageFilename = path + filenameRoot + frequency[f] + polarization[p] + stat[s] + numericalMonth;
-						DisplayImage(imageFilename, array, rows, cols);
-					}
-				}
-			}
-		}
+						DisplayImage(filename, array, rows, cols);
 			
 		Tools.message("End program");
 	}
@@ -131,6 +131,13 @@ public class Viewer {
 		// Create a raster layer for the image, with the data
 		RasterLayer layer = new RasterLayer( ct, intArray );
 		image.addLayer(layer);
+		
+		// Add some verbage
+		Annotation a = new Annotation("First annotation", 1000, 1000);
+		a.setColor(new Color(0, 0, 255));
+		a.setFont(new Font("PLAIN", 0, 15));
+		image.addAnnotation(a);
+		image.addAnnotation("My annotation", 500, 500);
 		
 		// Display the image
 		image.display(filename, rows, cols);

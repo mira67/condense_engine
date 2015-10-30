@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="Type" key="selection"/>
+		<item value="minValue" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="minValue"/>
+			<item value="intarra"/>
+			<item value="meanNobaddata2d"/>
+			<item value="accumulateData"/>
+			<item value="annota"/>
 			<item value="type"/>
 			<item value="setSt"/>
 			<item value="shortArray"/>
-			<item value="shortTo"/>
-			<item value="scaleInt"/>
-			<item value="date"/>
-			<item value="file name:"/>
-			<item value="file name"/>
 		</list>
 		<list key="replacehistory">
 			<item value="lonsFile"/>

@@ -6,7 +6,6 @@ package condense;
  * 
  */
 
-
 public class Algorithms extends GeoObject {
 
 	// The first time the algorithm is used, print out
@@ -22,31 +21,27 @@ public class Algorithms extends GeoObject {
 	 * sdThreshold is the number of standard deviations to use for selecting
 	 * anomalous pixels.
 	 * 
-	 * minValue and maxValue are the minimum and maximum "reasonable" values
-	 * for the data we're condensing. For instance, if the data set is
-	 * temperature data (K), values below, say, 50K or above 400K are clearly
-	 * errors-- ignore that data. This will also take care of missing data that
-	 * slips through the other filters, such as a pole hole.  
-	 *
-	 * minAnomalies is the number of adjacent anomalies required to declare
-	 * any one pixel anomalous.
+	 * minValue and maxValue are the minimum and maximum "reasonable" values for
+	 * the data we're condensing. For instance, if the data set is temperature
+	 * data (K), values below, say, 50K or above 400K are clearly errors--
+	 * ignore that data. This will also take care of missing data that slips
+	 * through the other filters, such as a pole hole.
+	 * 
+	 * minAnomalies is the number of adjacent anomalies required to declare any
+	 * one pixel anomalous.
 	 */
 
-	public static short[][] algorithm1(
-			short[][] data,
-			double[][] mean,
-			double[][] sd,
-			double sdThreshold,
-			short minAnomalies,
-			short minValue,
-			short maxValue ) {
+	public static short[][] algorithm1(short[][] data, double[][] mean,
+			double[][] sd, double sdThreshold, short minAnomalies,
+			short minValue, short maxValue) {
 
 		// Find anomalies outside of the standard deviation threshold.
-		short[][] anomalies = findAnomaliesBasedOnStats(data, minValue, maxValue,
-				sdThreshold, mean, sd);			
-		
+		short[][] anomalies = findAnomaliesBasedOnStats(data, minValue,
+				maxValue, sdThreshold, mean, sd);
+
 		// Filter the anomalies based on adjacency
-		anomalies = findAnomaliesBasedOnAdjacency(anomalies, minAnomalies);
+		if (minAnomalies > 0)
+			anomalies = findAnomaliesBasedOnAdjacency(anomalies, minAnomalies);
 
 		// The first time through, print the criteria.
 		if (printCriteria) {
@@ -55,32 +50,33 @@ public class Algorithms extends GeoObject {
 			Tools.message("    Max value allowable: " + maxValue);
 			Tools.message("    Standard deviations: " + sdThreshold);
 			Tools.message("    Adjacent anomalies required: " + minAnomalies);
-			
+
 			// Turn off the printing.
 			printCriteria = false;
 		}
-		
+
 		return anomalies;
 	}
 
 	/*
 	 * findAnomaliesBasedOnStats
 	 * 
-	 * Look in a data array for anomalies. An anomaly is identified
-	 * when it is 1) in the valid range (minvalue - maxvalue), and
-	 * 2) outside of (deviations * standard deviations) from the mean.
+	 * Look in a data array for anomalies. An anomaly is identified when it is
+	 * 1) in the valid range (minvalue - maxvalue), and 2) outside of
+	 * (deviations * standard deviations) from the mean.
 	 */
-	public static short[][] findAnomaliesBasedOnStats(short[][] data, short minValue, short maxValue,
-			double deviations, double[][] mean, double[][] sd) {
+	public static short[][] findAnomaliesBasedOnStats(short[][] data,
+			short minValue, short maxValue, double deviations, double[][] mean,
+			double[][] sd) {
 
 		int rows = data.length;
 		int cols = data[0].length;
-		
+
 		double high;
 		double low;
-		
+
 		short[][] anomalies = new short[rows][cols];
-		
+
 		// Iterate through the pixels, keeping only the data that
 		// exceeds the threshold value (# of standard deviations)
 		for (int r = 0; r < rows; r++) {
@@ -93,12 +89,14 @@ public class Algorithms extends GeoObject {
 				if (data[r][c] < minValue || data[r][c] > maxValue) {
 					continue;
 				}
-				
-				// Calculate a low and high threshold using the mean and standard deviation
+
+				// Calculate a low and high threshold using the mean and
+				// standard deviation
 				low = mean[r][c] - deviations * sd[r][c];
 				high = mean[r][c] + deviations * sd[r][c];
-				
-				// If the pixel value exceeds either threshold, keep it. It's an anomaly.
+
+				// If the pixel value exceeds either threshold, keep it. It's an
+				// anomaly.
 				// TODO: should we offer different high and low thresholds?
 				if (data[r][c] < low || data[r][c] > high) {
 					anomalies[r][c] = data[r][c];
@@ -109,23 +107,23 @@ public class Algorithms extends GeoObject {
 		return anomalies;
 	}
 
-
 	/*
 	 * findAnomaliesBasedOnAdjacency
 	 * 
 	 * Given an array of anomaly data, filter it: only keep an anomaly if it has
 	 * 'minAnomalies' adjacent to it. minanomalies = 0 would keep everything.
 	 */
-	public static short[][] findAnomaliesBasedOnAdjacency(short data[][], int minAnomalies) {
+	public static short[][] findAnomaliesBasedOnAdjacency(short data[][],
+			int minAnomalies) {
 
 		int rows = data.length;
 		int cols = data[0].length;
-		
+
 		// Filter: If a pixel doesn't have enough adjacent anomalous pixels, it
 		// might be noise -- ignore it.
-		
+
 		// A new place to put the newly filtered pixels
-		short[][] anomalies = new short[ rows ][ cols ];
+		short[][] anomalies = new short[rows][cols];
 
 		// Go through every pixel location
 		for (int r = 0; r < rows; r++) {
@@ -133,38 +131,42 @@ public class Algorithms extends GeoObject {
 
 				// Default to "not an anomaly"
 				anomalies[r][c] = NODATA;
-				
+
 				// Is there an anomalous pixel here? If not, don't bother.
-				if (data[r][c] == NODATA) continue;
+				if (data[r][c] == NODATA)
+					continue;
 
 				// How many anomalous pixels are adjacent to this pixel?
 				int adjacentAnomalies = 0;
-				
+
 				// Look at adjacent pixels, counting the anomalies
-				for (int r1 = r-1; r1 < r+2; r1++) {
-					for (int c1 = c-1; c1 < c+2; c1++) {
-						
+				for (int r1 = r - 1; r1 < r + 2; r1++) {
+					for (int c1 = c - 1; c1 < c + 2; c1++) {
+
 						// Don't compare the pixel with itself
-						if (r1 == r && c1 == c) continue;
-					
+						if (r1 == r && c1 == c)
+							continue;
+
 						// Don't exceed the array bounds.
-						if (r1 < 0 || c1 < 0 || r1 > rows-1 || c1 > cols-1) continue;
-						
+						if (r1 < 0 || c1 < 0 || r1 > rows - 1 || c1 > cols - 1)
+							continue;
+
 						// Found an adjacent anomaly? Count it.
-						if (data[r1][c1] != NODATA) adjacentAnomalies++;
+						if (data[r1][c1] != NODATA)
+							adjacentAnomalies++;
 					}
 
 					// Did we find enough adjacent anomalous pixels?
 					if (adjacentAnomalies >= minAnomalies) {
 						// Yup.
 						anomalies[r][c] = data[r][c];
-						
+
 						break;
 					}
 				}
-			}		
+			}
 		}
-		
+
 		return anomalies;
 	}
 }

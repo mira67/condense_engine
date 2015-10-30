@@ -39,8 +39,8 @@ public class ClimatologyAVHRR extends Climatology {
 
 	static boolean filterBadData; // Filter out bad data points
 
-	static int minValue; // Minimum acceptable data value
-	static int maxValue; // Maximum acceptable data value
+	int minValue; // Minimum acceptable data value
+	int maxValue; // Maximum acceptable data value
 
 	static final String climatologyPrefix = "climate-";
 
@@ -86,7 +86,7 @@ public class ClimatologyAVHRR extends Climatology {
 	public ClimatologyAVHRR(Dataset.DataType type, int startY, int startM,
 			int startD, int finalY, int finalM, int finalD,
 			Timespan.Increment inc, String dataP, String outputP, String suff1,
-			String suff2, double min, double max, boolean filter,
+			String suff2, boolean filter,
 			boolean addYear, boolean addDay, boolean test) {
 
 		dataType = type;
@@ -109,8 +109,19 @@ public class ClimatologyAVHRR extends Climatology {
 		suffix1 = suff1;
 		suffix2 = suff2;
 
-		minValue = (int) Math.round(min);
-		maxValue = (int) Math.round(max);
+		// Data range for AVHRR --
+		// Special case: different range for albedo and visible channels
+		if (suffix1.equalsIgnoreCase("albd") ||
+			suffix1.equalsIgnoreCase("chn1") ||
+			suffix1.equalsIgnoreCase("chn2")) {
+			
+			minValue = 1;
+			maxValue = 1000;
+		}
+		else {
+			minValue = 1900;
+			maxValue = 3100;
+		}
 
 		filterBadData = filter;
 		
@@ -124,6 +135,10 @@ public class ClimatologyAVHRR extends Climatology {
 			rows = 1605;
 			cols = 1605;
 		}
+		
+		Tools.statusMessage("  Run: " + dataPath + "\n" + 
+			"     suffix1 = " + suff1 + "  suffix2 = " + suff2 + "  increment = " + inc.toString() + "\n" +
+			"     min = " + minValue + "  max = " + maxValue + "  rows = " + rows + "  cols = " + cols);
 	}
 	
 	/*
@@ -188,18 +203,17 @@ public class ClimatologyAVHRR extends Climatology {
 				// Advance the date to next year.
 				date = new Timestamp(timespan.startTimestamp().year() + 1, 1, 1);
 			}
+			Tools.message("  CALCULATING STATS");
 
 			// Calculated the statistics. First time through, the mean; second
 			// time through, standard deviation.
-			Tools.message("  CALCULATING STATS");
-
 			if (pass == 1) {
 				mean = Stats.meanNoBadData2d(sums, population, NODATA);
 			}
-
-			if (pass == 2)
+			if (pass == 2) {
 				sd = Stats.standardDeviationNoBadData2d(diffSquared,
-						population, (double) NODATA, 1.0);
+						population, (double) NODATA, 1.0);				
+			}
 		}
 
 		// Write out the stats to files
@@ -255,14 +269,6 @@ public class ClimatologyAVHRR extends Climatology {
 				
 				// Read the data
 				data[d] = file.readShorts2D(rows, cols);
-				
-				/*
-				Tools.message("  " + data[d][ Tools.randomInt(rows)][Tools.randomInt(cols)] +
-						"  " + data[d][ Tools.randomInt(rows)][Tools.randomInt(cols)] +
-						"  " + data[d][ Tools.randomInt(rows)][Tools.randomInt(cols)] +
-						"  " + data[d][ Tools.randomInt(rows)][Tools.randomInt(cols)] +
-						"  " + data[d][ Tools.randomInt(rows)][Tools.randomInt(cols)] );
-				*/
 				
 				file.close();
 				
@@ -406,4 +412,33 @@ public class ClimatologyAVHRR extends Climatology {
 		Timestamp.dateSeparator(".");
 
 	}
+	
+static public void DisplayImage( String filename, double[][] array) {
+
+	int rows = array.length;
+	int cols = array[0].length;
+	
+// Create an image obect
+Image image = new Image();
+
+// Create the color table
+ColorTable ct = new ColorTable();
+ct.grayScale();
+
+// Convert the data to integers and scale it for display
+int[][] intArray = Tools.doubleArrayToInteger(array);
+intArray = Tools.scaleIntArray2D(intArray, 0, 255);
+
+// Create a raster layer for the image, with the data
+RasterLayer layer = new RasterLayer( ct, intArray );
+image.addLayer(layer);
+
+// Display the image
+image.display(filename, rows, cols);
+
+// Save a png version
+image.savePNG(filename, rows, cols);
+}
+
+
 }
