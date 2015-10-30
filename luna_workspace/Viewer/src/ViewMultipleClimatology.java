@@ -11,11 +11,11 @@ import condense.*;
 
 public class ViewMultipleClimatology {
 
-	//static String[] channels = {"temp", "albd", "chn1", "chn2", "chn3", "chn4", "chn5"};
-	static String[] channels = {"temp", "albd", "chn1", "chn2"};
+	static String[] channels = {"temp", "albd", "chn1", "chn2", "chn3", "chn4", "chn5"};
+	//static String[] channels = {"temp", "albd", "chn1", "chn2"};
 
 	static String inputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/south/";
-	static String outputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/";
+	static String outputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/southimages/";
 
 	// Southern hemisphere AVHRR
 	static int rows = 1605;
@@ -49,7 +49,7 @@ public class ViewMultipleClimatology {
 			// Loop through all wavelengths
 			for ( String channel : channels) {
 				
-				String searchString = channel+"1400-sd-" + increment.name().toLowerCase();
+				String searchString = channel+"1400-mean-" + increment.name().toLowerCase();
 
 				String filename = Tools.findFile(inputPath, searchString);
 

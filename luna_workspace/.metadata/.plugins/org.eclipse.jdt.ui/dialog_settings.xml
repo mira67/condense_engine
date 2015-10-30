@@ -61,16 +61,16 @@
 	</section>
 	<section name="FatJarPackageWizard">
 		<item value="\Users\mira67\Google Drive\IceBerg_Project\Condense_Engine\luna_workspace.xml" key="FatJarPackageWizardPage.ANTSCRIPT_LOCATION"/>
-		<item value="Condense - condense" key="FatJarPackageWizardPage.LAUNCH_CONFIGURATION_SELECTION_NAME"/>
-		<item value="C:\Users\glgr9602\Desktop\condense\bin\condense.jar" key="FatJarPackageWizardPage.DESTINATION_PATH_SELECTION"/>
+		<item value="ViewMultipleClimatology - Viewer" key="FatJarPackageWizardPage.LAUNCH_CONFIGURATION_SELECTION_NAME"/>
+		<item value="C:\Users\glgr9602\Desktop\condense\bin\viewMultipleClimatology.jar" key="FatJarPackageWizardPage.DESTINATION_PATH_SELECTION"/>
 		<item value="false" key="FatJarPackageWizardPage.ANTSCRIPT_SAVE"/>
 		<item value="1" key="FatJarPackageWizardPage.LIBRARY_HANDLING"/>
 		<list key="FatJarPackageWizardPage.DESTINATION_NAMES_ID">
+			<item value="C:\Users\glgr9602\Desktop\condense\bin\viewMultipleClimatology.jar"/>
 			<item value="C:\Users\glgr9602\Desktop\condense\bin\condense.jar"/>
 			<item value="C:\Users\glgr9602\Desktop\condense\bin\ViewMultipleImages.jar"/>
 			<item value="/Users/mira67/Google Drive/IceBerg_Project/Condense_Engine/condense_test_raw.jar"/>
 			<item value="/Users/mira67/Google Drive/IceBerg_Project/Condense_Engine/condense_test.jar"/>
-			<item value="condense_engine/condense_test.jar"/>
 		</list>
 		<list key="FatJarPackageWizardPage.ANTSCRIPT_LOCATION_HISTORY">
 			<item value="\Users\mira67\Google Drive\IceBerg_Project\Condense_Engine\luna_workspace.xml"/>

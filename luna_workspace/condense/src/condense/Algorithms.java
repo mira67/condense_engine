@@ -31,8 +31,8 @@ public class Algorithms extends GeoObject {
 	 * one pixel anomalous.
 	 */
 
-	public static short[][] algorithm1(short[][] data, double[][] mean,
-			double[][] sd, double sdThreshold, short minAnomalies,
+	public static short[][] algorithm1(short[][] data, short[][] mean,
+			short[][] sd, double sdThreshold, short minAnomalies,
 			short minValue, short maxValue) {
 
 		// Find anomalies outside of the standard deviation threshold.
@@ -66,8 +66,8 @@ public class Algorithms extends GeoObject {
 	 * (deviations * standard deviations) from the mean.
 	 */
 	public static short[][] findAnomaliesBasedOnStats(short[][] data,
-			short minValue, short maxValue, double deviations, double[][] mean,
-			double[][] sd) {
+			short minValue, short maxValue, double deviations, short[][] mean,
+			short[][] sd) {
 
 		int rows = data.length;
 		int cols = data[0].length;
@@ -137,10 +137,11 @@ public class Algorithms extends GeoObject {
 					continue;
 
 				// How many anomalous pixels are adjacent to this pixel?
-				int adjacentAnomalies = 0;
+				short adjacentAnomalies = 0;
 
-				// Look at adjacent pixels, counting the anomalies
-				for (int r1 = r - 1; r1 < r + 2; r1++) {
+				// Search the adjacent pixels, counting the anomalies
+
+				search: for (int r1 = r - 1; r1 < r + 2; r1++) {
 					for (int c1 = c - 1; c1 < c + 2; c1++) {
 
 						// Don't compare the pixel with itself
@@ -148,25 +149,27 @@ public class Algorithms extends GeoObject {
 							continue;
 
 						// Don't exceed the array bounds.
-						if (r1 < 0 || c1 < 0 || r1 > rows - 1 || c1 > cols - 1)
+						if (r1 < 0 || c1 < 0 || r1 >= rows || c1 >= cols)
 							continue;
 
 						// Found an adjacent anomaly? Count it.
-						if (data[r1][c1] != NODATA)
+						if (data[r1][c1] != NODATA) {
 							adjacentAnomalies++;
-					}
 
-					// Did we find enough adjacent anomalous pixels?
-					if (adjacentAnomalies >= minAnomalies) {
-						// Yup.
-						anomalies[r][c] = data[r][c];
+							// Did we find enough adjacent anomalous pixels?
+							if (adjacentAnomalies >= minAnomalies) {
+								// Yup.
+								anomalies[r][c] = data[r][c];
 
-						break;
+								break search;
+							}
+						}
 					}
-				}
+				} // End search
 			}
 		}
 
 		return anomalies;
 	}
+
 }

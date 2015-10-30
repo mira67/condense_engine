@@ -83,8 +83,8 @@ public class Condense extends GeoObject {
 	static String databasePath = "jdbc:h2:tcp://localhost/~/";
 
 	// Stats for algorithmic processing
-	static double[][] mean = null;	// Mean: [row][col]
-	static double[][] sd = null; 	// Standard deviation: [row][col]
+	static short[][] mean = null;	// Mean: [row][col]
+	static short[][] sd = null; 	// Standard deviation: [row][col]
 	static String meanFilename = "none";
 	static String sdFilename = "none";
 	
@@ -392,16 +392,18 @@ public class Condense extends GeoObject {
 				meanFilename = newMeanFilename;
 				sdFilename = newSdFilename;
 
-				Tools.message("  Reading climatology files: \n    " + meanFilename +
-						"\n    " + sdFilename);
+				Tools.message("  Reading climatology files:  (" + 
+						suffix1 + suffix2 + ", " + increment + ")" );
+				Tools.message("    " + meanFilename);
+				Tools.message("    " + sdFilename);
 				
 				try {
 					DataFile file = new DataFile(meanFilename);
-					mean = file.readDoubles2D( rows, cols);
+					mean = file.readShorts2D( rows, cols);
 					file.close();
 					
 					file = new DataFile(sdFilename);
-					sd = file.readDoubles2D( rows, cols);
+					sd = file.readShorts2D( rows, cols);
 					file.close();						
 				}
 				catch(Exception e) {
@@ -732,12 +734,12 @@ public class Condense extends GeoObject {
 					Tools.statusMessage("Hemisphere = " + hemisphere);
 					break;
 				case "channel":		// AVHRR channel: chn1, chn2, etc. The file name suffix.
-					suffix2 = value;
-					Tools.statusMessage("Channel = " + suffix2);
+					suffix1 = value;
+					Tools.statusMessage("Channel = " + suffix1);
 					break;
 				case "time":			// AVHRR time: 0200 or 1400, also a file name suffix.
-					suffix1 = value;
-					Tools.statusMessage("Time = " + suffix1);
+					suffix2 = value;
+					Tools.statusMessage("Time = " + suffix2);
 					break;
 				case "seasonal":
 					seasonalFlag = Boolean.valueOf(value);
