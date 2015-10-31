@@ -49,7 +49,7 @@ public class ViewMultipleClimatology {
 			// Loop through all wavelengths
 			for ( String channel : channels) {
 				
-				String searchString = channel+"1400-mean-" + increment.name().toLowerCase();
+				String searchString = channel+"1400-sd-" + increment.name().toLowerCase();
 
 				String filename = Tools.findFile(inputPath, searchString);
 

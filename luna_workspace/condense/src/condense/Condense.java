@@ -507,9 +507,9 @@ public class Condense extends GeoObject {
 				metadata.rows, metadata.cols);
 
 		// Diagnostics
-		int total = rows * cols;
-		int allPixels = database.metadata.timestamps * total;
-		int storedPixels = database.numberOfVectors();
+		long total = rows * cols;
+		long allPixels = database.metadata.timestamps * total;
+		long storedPixels = database.numberOfVectors();
 
 		Tools.statusMessage("");
 		Tools.statusMessage("--------------------------------------------------------------");

@@ -1,3 +1,6 @@
+import java.io.File;
+import java.io.FilenameFilter;
+
 import condense.*;
 
 /* a sandbox for code experimentation.
@@ -8,50 +11,68 @@ public class Scratch2 {
 	
 	public static void main(String[] args) {
 
-		String inputPath = "C:/Users/glgr9602/Desktop/condense/climatology/avhrr/";
+		String inputPath = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/doubles/";
+		String outputPath = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/shorts/";
 		
-		String searchString = "1400-mean-jan";
+		String searchString = "bin";
 		
-		String filename = Tools.findFile(inputPath, searchString);
-		if (filename == null) {
-			Tools.message("Could not find file with string: " + searchString);
-			Tools.message("in path: " + inputPath);
-			System.exit(1);
-		}
+		File[] files = findFiles(inputPath, searchString);
 		
-		filename = "junk.bin";
-		
-		try {
-			int rows = 1605;
-			int cols = 1605;
-			
-			int r = 52;
-			int c = 50;
-			
-			
-			double[][] a = new double[rows][cols];
-			a[r][c] = 2345.6789;
-			
-			DataFile file1 = new DataFile();
-			file1.create("junk.bin");
-			
-			file1.writeDouble2d(a);
-			file1.close();
-			
-			Tools.message("File written");
-			
-			
-			DataFile file = new DataFile(filename);
-			file.open();
-			
-			double[][] b = file.readDoubles2D(rows, cols);
-			file.close();
-			
-			Tools.message("b[" + r + "][" + c + "] = " + b[r][c]);
-			Tools.message("End");
-		}
-		catch(Exception e) {
-			Tools.warningMessage("Failed to open file");
+		for (int i = 0; i < files.length; i++) {
+			try {
+				String name = files[i].getName();
+
+				DataFile inputFile = new DataFile(inputPath + name);
+
+				Tools.message("input file = " + name);
+				
+				// Southern hemisphere,	everything except 85.5 and 91.7 GHz,
+				// file size = 209824 Bytes
+				int rows = 332;
+				int cols = 316;
+				
+				// Southern hemisphere,	85.5 and 91.7 GHz, 839296 Bytes
+				if (inputFile.length() > 900000) {
+					rows = 664;
+					cols = 632;
+				}
+				Tools.message("    rows, cols = " + rows + "," + cols);
+				
+				double[][] data = new double[rows][cols];
+				data = inputFile.readDoubles2D(rows, cols);
+				short[][] shortData = Tools.doubleArrayToShort(data);
+				inputFile.close();
+				
+				String outputName = outputPath + name;
+				DataFile outputFile = new DataFile();
+				outputFile.create(outputName);
+				outputFile.writeShorts2d(shortData);
+				outputFile.close();
+				
+			}
+			catch(Exception e) {
+				Tools.errorMessage("", "", "Caught execption", e);
+			}
 		}
 	}
+	
+	
+	/*
+	 * findFiles
+	 * 
+	 * Return all the files in one directory that match a search string.
+	 */
+	public static File[] findFiles( String path, String searchString ) {
+
+		File dir = new File(path);
+
+		File[] matches = dir.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.contains(searchString);
+			}
+		});
+
+		return matches;
+	}
+	
 }

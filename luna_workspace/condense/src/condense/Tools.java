@@ -386,7 +386,7 @@ public class Tools extends GeoObject {
 
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
-				newArray[r][c] = (int) array[r][c];
+				newArray[r][c] = (int) Math.round(array[r][c]);
 			}
 		}
 
@@ -646,6 +646,24 @@ public class Tools extends GeoObject {
 		}
 
 		return null;
+	}
+	
+	/*
+	 * findFiles
+	 * 
+	 * Return all the files in one directory that match a search string.
+	 */
+	public static File[] findFiles( String path, String searchString ) {
+
+		File dir = new File(path);
+
+		File[] matches = dir.listFiles(new FilenameFilter() {
+			public boolean accept(File dir, String name) {
+				return name.contains(searchString);
+			}
+		});
+
+		return matches;
 	}
 	
 	/*
