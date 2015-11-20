@@ -20,7 +20,7 @@ public class RasterColorBar extends RasterGraphic {
 	
 	Orientation orientation = Orientation.LEFTRIGHT;
 	
-	RasterColorBar(int r, int c, int width, int height, ColorTable colors) {
+	public RasterColorBar(int r, int c, int width, int height, ColorTable colors) {
 		
 		bar = new RasterRectangle(r, c, width, height);
 		
@@ -75,8 +75,8 @@ public class RasterColorBar extends RasterGraphic {
 						colorIndex = (int) (size * ((rSize - r) - 1) / (rSize - 1));
 				}
 
-				int row = r + outlineWidth ;
-				int col = c + outlineWidth;
+				int row = bar.row() + r + outlineWidth ;
+				int col = bar.col() + c + outlineWidth;
 				
 				pixels.add( new PixelIndexedColor( colorTable, colorIndex, row, col ) );
 			}
@@ -86,14 +86,14 @@ public class RasterColorBar extends RasterGraphic {
 		if (outlineWidth > 0) {
 			for (int r = 0; r < bar.height(); r++) {
 				for (int w = 0; w < outlineWidth; w++) {
-					pixels.add( new PixelRGBA(outlineColor, r, 0+w) );
-					pixels.add( new PixelRGBA(outlineColor, r, (bar.width()-1)-w) );					
+					pixels.add( new PixelRGBA(outlineColor, r + bar.row(), bar.col() + w) );
+					pixels.add( new PixelRGBA(outlineColor, r + bar.row(), bar.col() + (bar.width()-1)-w) );					
 				}
 			}
 			for (int c = 0; c < bar.width(); c++) {
 				for (int w = 0; w < outlineWidth; w++) {
-					pixels.add( new PixelRGBA(outlineColor, 0+w, c) );
-					pixels.add( new PixelRGBA(outlineColor, (bar.height()-1)-w, c) );					
+					pixels.add( new PixelRGBA(outlineColor, bar.row() + w, bar.col() + c) );
+					pixels.add( new PixelRGBA(outlineColor, bar.row() + (bar.height()-1)-w, bar.col() + c) );					
 				}
 			}
 		}

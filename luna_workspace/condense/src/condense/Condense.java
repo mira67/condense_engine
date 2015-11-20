@@ -223,7 +223,7 @@ public class Condense extends GeoObject {
 				
 				switch (dataType) {
 				case AVHRR:
-					data = DatasetAVHRR.readData(date, rows, cols,
+					data = DatasetAVHRR.readData(date, hemisphere,
 							dataPath, addYearToInputDirectory, addDayToInputDirectory,
 							suffix1, suffix2);
 					break;
@@ -464,11 +464,11 @@ public class Condense extends GeoObject {
 		Tools.statusMessage("Pixels: " + pixList.size());
 
 		// Make an integer array out of the pixel data
-		int[][] sensorData = GriddedVector.createArrayFromVectorList(metadata.rows,
+		short[][] sensorData = GriddedVector.createArrayFromVectorList(metadata.rows,
 				metadata.cols, pixList);
 
 		// Scale the data so that it goes from 0 - 255
-		sensorData = Tools.scaleIntArray2D(sensorData, 0, 255);
+		sensorData = Tools.scaleShortArray2D(sensorData, 0, 255);
 		
 		// Make a color table.
 		ColorTable colors = new ColorTable();

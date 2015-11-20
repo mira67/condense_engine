@@ -42,38 +42,20 @@ public class DatasetSurface extends Dataset {
 	/*
 	 * readData
 	 * 
-	 * Read a surface mask file, add it to the database. - surfaceFile contains
-	 * the surface data - surfaceLats is a file containing the latitudes -
-	 * surfaceLons is a file containing the longitudes
+	 * Read a surface mask file. Return just the surface information.
+	 * (No lats or lons.)
 	 */
-	public static short[][] readData(String surfaceFile, GriddedLocation[][] locs,
-			String surfaceLats,	String surfaceLons) {
+	public static short[][] readData(String surfaceFile, int rows, int cols ) {
 
-		Tools.debugMessage("Reading surface mask files");
-
-		int rows = locs.length;
-		int cols = locs[1].length;
+		Tools.debugMessage("Reading surface mask file");
 		
 		short[][] data = new short[rows][cols];
 
-		// Read all the surface data, add it to the database.
+		// Read the surface data
 		try {
 
 			DataFile file = new DataFile(surfaceFile);
-			//surfaceBytes = file.readBytes2D(rows, cols);
 			data = file.readShorts2D(rows, cols);
-
-			/*
-			for (int r = 0; r < rows; r++) {
-				for (int c = 0; c < cols; c++) {
-					data[r][c] = Tools.unsignedByteToInt(surfaceBytes[r][c]);
-					
-					// Create the surface vector. 0 is used for the timestampID
-					// because all surface vectors will have the same time.
-					data[r][c] = face(value, locs[r][c], 0);
-				}
-			}
-			*/
 			file.close();
 		} catch (Exception e) {
 			Tools.errorMessage("DatasetSurface", "readData",
@@ -83,61 +65,140 @@ public class DatasetSurface extends Dataset {
 
 		return data;
 	}
+		
+	/*
+	 * makeSurface
+	 * 
+	 * Return the surface array for this data type.
+	 */
+	public static GriddedVector[][] makeSurface( DataType type,
+			String path, String hemisphere, String frequency) {
+
+		Tools.statusMessage("Making the surface data");
+
+		GriddedLocation[][] locs = getLocations( type, path, hemisphere, frequency);
+		
+		int rows = locs.length;
+		int cols = locs[0].length;
+		String filename = "";
+		
+		switch(type) {
+		case AVHRR:
+			break;
+		case SSMI:
+			break;
+		case EASE_GRID_SURFACE:
+			if (hemisphere.equalsIgnoreCase("south"))
+				filename = path + "Sh_loci_land50_landcoast12.5km.1441x1441.bin";
+			if (hemisphere.equalsIgnoreCase("north"))
+				filename = path + "Nh_loci_land50_landcoast12.5km.1441x1441.bin";
+			break;
+		case SEA_ICE:
+			Tools.errorMessage("DatasetSurface", "makeSurface", "SEA_ICE type not implemented",
+					new Exception(""));
+		}
+
+		short data[][] = readData( filename, rows, cols);
+		
+		GriddedVector[][] vecs = new GriddedVector[rows][cols];
+		
+		// Make the surface array
+		try {
+			for (int r = 0; r < rows; r++) {
+				for (int c = 0; c < cols; c++) {
+					vecs[r][c] = new GriddedVector( data[r][c],
+							locs[r][c], 0);
+				}
+			}
+		} catch (Exception e) {
+			Tools.errorMessage("DatasetSurface", "makeSurface",
+					"Failed to make the locations array. Error:", e);
+		}
+		
+		return vecs;
+	}
 
 	/*
 	 * getLocations
 	 * 
-	 * Return the list of locations.
+	 * Retrieve the locations for the surface data.
 	 */
-	public static GriddedLocation[][] getLocations(String path) {
+	public static GriddedLocation[][] getLocations( DataType type, String path,
+				String hemisphere, String frequency) {
+				
+		double lats[][] = null; 
+		double lons[][] = null;
 
-		// TODO: hardcoded dimensions, for now.
-		// Size of the 12.5 km resolution files
-		int rows = 1441;
-		int cols = 1441;
-
-		GriddedLocation[][] locs = new GriddedLocation[rows][cols];
+		GriddedLocation[][] locs = null;
 		
-		// TODO
-		String surfaceLats = path + "";
-		String surfaceLons = path + "";
-		
-		// Read all the surface data, add it to the database.
+		// TODO: not all lat/lon files will have the same data format.
+		// Read the surface data lat/lons
 		try {
-			// Read the locations.
-			// Start with the latitudes
-			DataFile file = new DataFile(surfaceLats);
-			int[][] lats = file.readInts2D(rows, cols);
-			file.close();
 
-			// Read the longitudes
-			file = new DataFile(surfaceLons);
-			int[][] lons = file.readInts2D(rows, cols);
-			file.close();
+			switch(type) {
+			
+			case AVHRR:
+				return DatasetAVHRR.getLocations(path, hemisphere);
+			
+			case SSMI:
+				return DatasetSSMI.getLocations(path, hemisphere, frequency);
+			
+			case EASE_GRID_SURFACE:
 
-			// Locations of the vectors
-			locs = new GriddedLocation[rows][cols];
-
-			// Create the array of locations.
-			// Divide by 100000 to decode integer lat/lon into decimal degrees
-			// (doubles).
-			for (int r = 0; r < rows; r++) {
-				for (int c = 0; c < cols; c++) {
-					locs[r][c] = new GriddedLocation(r, c,
-							((double) lats[r][c]) / 100000.,
-							((double) lons[r][c]) / 100000.);
+				// Standard LOCI surface, unrelated to other data types.
+				int rows = 1441;
+				int cols = 1441;
+				String latsPath = "NO FILE";
+				String lonsPath = "NO FILE";
+				
+				if (hemisphere.equalsIgnoreCase("south")) {
+					latsPath = path + "SHLATLSB";
+					lonsPath = path + "SHLONLSB";
 				}
-			}
+				
+				// Northern hemisphere
+				else {
+					latsPath = path + "NHLATLSB";
+					lonsPath = path + "NHLONLSB";					
+				}
 
-					} catch (Exception e) {
+				DataFile latsFile = new DataFile(latsPath);
+				DataFile lonsFile = new DataFile(lonsPath);
+				
+				lats = latsFile.readDoubles2D(rows, cols);
+				lons = lonsFile.readDoubles2D(rows, cols);
+
+				latsFile.close();
+				lonsFile.close();
+				
+				// Make the locations array
+				locs = new GriddedLocation[rows][cols];
+				
+				for (int r = 0; r < rows; r++) {
+					for (int c = 0; c < cols; c++) {
+						locs[r][c] = new GriddedLocation( r, c, lats[r][c], lons[r][c]);
+					}
+				}
+
+				break;
+				
+			case SEA_ICE:
+			default:
+				Tools.errorMessage("DatasetSurface", "getLocations",
+						"Data type not implemented: " + type, new Exception("Exiting"));
+			}
+				
+			
+		} catch (Exception e) {
+			Tools.message("Could not read lats and/or lons files:");
+			Tools.message("   " + path);
 			Tools.errorMessage("DatasetSurface", "getLocations",
 					"error on file read", e);
-			return null;
 		}
-
+		
 		return locs;
 	}
-
+	
 	/*
 	 * getTime
 	 * 

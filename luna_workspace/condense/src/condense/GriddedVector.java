@@ -12,7 +12,7 @@ public class GriddedVector extends GeoObject {
 
 	// Data is a 4-byte integer
 	// - byte [3]: classification (256 possibilities, 0 - 255)
-	protected int data = NODATA;
+	protected short data = NODATA;
 	
 	protected int timestampID;
 	protected GriddedLocation location;
@@ -24,7 +24,7 @@ public class GriddedVector extends GeoObject {
 		location = loc;
 	}
 
-	public GriddedVector(int value, GriddedLocation loc, int timeID) {
+	public GriddedVector(short value, GriddedLocation loc, int timeID) {
 		data(value);
 		location = loc;
 		timestampID = timeID;
@@ -38,31 +38,8 @@ public class GriddedVector extends GeoObject {
 	public boolean hasLatLon() {return location.hasLatLon;}
 	public GriddedLocation location() {return location;}
 	public int locationID() {return location.id;}
+	public int timestampID() {return timestampID;}
 	
-	/*
-	 * classification
-	 * 
-	 * Set the classification. The input value must be between 0-255.
-	 */
-	public void classification(int i) {
-
-		byte[] dataBytes = Tools.intToByteArray(data);
-		dataBytes[3] = Tools.intToUnsignedByte(i);
-		data = Tools.byteArrayToInt(dataBytes);
-	}
-
-	/*
-	 * classification
-	 * 
-	 * Set the classification using an unsigned byte.
-	 */
-	public void classification(byte b) {
-
-		byte[] dataBytes = Tools.intToByteArray(data);
-		dataBytes[3] = b;
-		data = Tools.byteArrayToInt(dataBytes);
-	}
-
 	/*
 	 * classification
 	 * 
@@ -89,12 +66,11 @@ public class GriddedVector extends GeoObject {
 				" timestampID = " + timestampID );
 	}
 
-	// /public int byteData(int byte) { return data[byte]; }
-	public int data() {
+	public short data() {
 		return data;
 	}
 
-	public void data(int d) {
+	public void data(short d) {
 		data = d;
 	}
 
@@ -105,7 +81,7 @@ public class GriddedVector extends GeoObject {
 	 * thresholds with a 'no data' value.
 	 */
 	public static GriddedVector[][] filterBadData(GriddedVector array[][],
-			int min, int max, int noData) {
+			int min, int max, short noData) {
 
 		for (int r = 0; r < array.length; r++) {
 			for (int c = 0; c < array[0].length; c++) {
@@ -128,9 +104,16 @@ public class GriddedVector extends GeoObject {
 	 * Given an array-list of vectors, create an integer array containing only
 	 * the vectors' scalar data values at each row/col location.
 	 */
-	public static int[][] createArrayFromVectorList(int rows, int cols,
+	public static short[][] createArrayFromVectorList(int rows, int cols,
 			ArrayList<GriddedVector> list) {
-		int[][] array = new int[rows][cols];
+		short[][] array = new short[rows][cols];
+		
+		// Initialize the array with NODATA
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				array[r][c] = NODATA;
+			}
+		}
 
 		Iterator<GriddedVector> i = list.iterator();
 		while (i.hasNext()) {

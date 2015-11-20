@@ -364,9 +364,9 @@ public class DatabaseFileSchema extends Database {
 
 		try {
 			for (int i = 0; i < metadata.vectors; i++) {
-				int value = vectorsFile.readInt();
+				short value = vectorsFile.readShort();
 				int locID =  vectorsFile.readInt();
-				int timeID =  vectorsFile.readInt();
+				short timeID =  vectorsFile.readShort();
 				
 				GriddedLocation loc = getLocation( locID );
 				
@@ -397,9 +397,9 @@ public class DatabaseFileSchema extends Database {
 
 		try {
 			for (int i = 0; i < metadata.vectors; i++) {
-				int value = vectorsFile.readInt();
+				short value = vectorsFile.readShort();
 				int locID =  vectorsFile.readInt();
-				int timeID =  vectorsFile.readInt();
+				short timeID =  vectorsFile.readShort();
 				
 				GriddedLocation loc = getLocation( locID );
 				

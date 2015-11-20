@@ -115,12 +115,16 @@ public class ClimatologyAVHRR extends Climatology {
 			suffix1.equalsIgnoreCase("chn1") ||
 			suffix1.equalsIgnoreCase("chn2")) {
 			
+			// Normally 0-1000. I reduced it by one to
+			// eliminate saturated noise.
 			minValue = 1;
-			maxValue = 1000;
+			maxValue = 999;
 		}
 		else {
-			minValue = 1900;
-			maxValue = 3100;
+			// Nominally "1900 - 3100", which turns out not to be
+			// anywhere near wide enough.
+			minValue = 1000;
+			maxValue = 3500;
 		}
 
 		filterBadData = filter;

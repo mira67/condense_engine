@@ -23,9 +23,9 @@ public class DatabaseH2 extends Database {
 	 */
 	public enum Table {
 		
-		METADATA("METADATA","(ID TINYINT PRIMARY KEY, ROWS SMALLINT, COLS SMALLINT, TIMESTAMPS INT, LOCATIONS INT, VECTORS BIGINT)"),
+		METADATA("METADATA","(ID TINYINT PRIMARY KEY, ROWS SMALLINT, COLS SMALLINT, TIMESTAMPS SMALLINT, LOCATIONS INT, VECTORS BIGINT)"),
 		LOCATIONS("LOCATIONS","(ID INT PRIMARY KEY, ROW SMALLINT, COL SMALLINT, LAT DOUBLE, LON DOUBLE)"),
-		TIMESTAMPS("TIMESTAMPS","(ID SMALLINT PRIMARY KEY, TIMESTAMP FLOAT)"),
+		TIMESTAMPS("TIMESTAMPS","(ID SMALLINT PRIMARY KEY, TIMESTAMP FLOAT, YEAR SMALLINT, MONTH SMALLINT, DAY SMALLINT, DOY SMALLINT )"),
 		VECTORS("VECTORS","(ID INT PRIMARY KEY, VALUE SMALLINT, LOCATIONID INT, TIMESTAMPID SMALLINT)");
 			
 		protected final String name;
@@ -325,9 +325,13 @@ public class DatabaseH2 extends Database {
 		metadata.timestamps++;
 
         try {
-						sqlCreate.execute("INSERT INTO " + Table.TIMESTAMPS.name() + " VALUES(" +
+			sqlCreate.execute("INSERT INTO " + Table.TIMESTAMPS.name() + " VALUES(" +
 					+ metadata.timestamps + "," +
-					+ t.days() + ")");
+					t.days() + "," + 
+					t.year() + "," + 
+					t.month() + "," + 
+					t.dayOfMonth() + "," + 
+					t.dayOfYear() +	")");
 
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2",
@@ -585,7 +589,7 @@ public class DatabaseH2 extends Database {
 				loc = getLocation(rs.getInt("LOCATIONID"));
 				
 				// Create the vector from the value, location and timestamp.
-				vec = new GriddedVector(rs.getInt("VALUE"),	loc, timeID );
+				vec = new GriddedVector(rs.getShort("VALUE"),	loc, timeID );
 				
 				// Add it to the arraylist.
 				vectors.add(vec);
@@ -615,6 +619,56 @@ public class DatabaseH2 extends Database {
 		return vectors;
 	}	
 
+
+	/* query
+	 * 
+	 * Implements any SQL query.
+	 */
+	 public	ResultSet query( String query ) { 
+
+		try {
+			Statement statement = conn.createStatement();
+			statement.close();
+			return statement.executeQuery(query);
+		} catch(SQLException e) {
+			Tools.errorMessage("DatabaseH2", "query", dbPath + dbName + " query failed", e);
+		}
+				
+		return null;
+	 }
+
+	/* queryVectors
+	 * 
+	 * Implements a SQL query for vectors. If you query on something other than
+	 * vectors, the results will be unpredictable.
+	 */
+	 public	ArrayList<GriddedVector> queryVectors( String query, ArrayList<GriddedLocation> locs ) { 
+
+		ArrayList<GriddedVector> vecs = new ArrayList<GriddedVector>();
+		
+		try {
+			Statement statement = conn.createStatement();
+			ResultSet rs = statement.executeQuery(query);
+			    
+			while (rs.next()) {
+							
+				GriddedVector vec = new GriddedVector(
+						rs.getShort("VALUE"),
+						locs.get(rs.getInt("LOCATIONID")),
+						rs.getShort("TIMESTAMPID") );
+					
+				vecs.add(vec);
+			}
+
+			rs.close();
+			statement.close();
+		} catch(SQLException e) {
+			Tools.errorMessage("DatabaseH2", "queryVectors", dbPath + dbName + " query failed", e);
+		}
+					
+		return vecs;
+	}
+	
 	public int numberOfTimestamps() { return metadata.timestamps; }	
 	public int numberOfLocations() { return metadata.locations; }	
 	public int numberOfVectors() { return metadata.vectors; }

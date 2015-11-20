@@ -7,7 +7,6 @@ package condense;
 
 public class DatasetAVHRR extends Dataset {
 
-
 	/*
 	 * getFileName
 	 * 
@@ -48,7 +47,30 @@ public class DatasetAVHRR extends Dataset {
 		return filename;
 	}
 
+	/* 
+	 * rows
+	 * 
+	 * Return the number of rows for this hemisphere's imagery.
+	 */
+	public static int rows( String hemisphere ) {
+		if (hemisphere.equalsIgnoreCase("south"))
+			return 1605;
+		else return 1805;
+
+	}
+
+	/* 
+	 * cols
+	 * 
+	 * Return the number of cols for this hemisphere's imagery.
+	 */
+	public static int cols( String hemisphere ) {
+		if (hemisphere.equalsIgnoreCase("south")) return 1605;
+		else return 1805;
+	}
+	
 	/*
+	 * 
 	 * getLocations
 	 * 
 	 * Read the locations for this gridded dataset. latsFile and lonsFile
@@ -56,67 +78,61 @@ public class DatasetAVHRR extends Dataset {
 	 */
 	static public GriddedLocation[][] getLocations(String path, String hemisphere) {
 		
-		int rows = 0;
-		int cols = 0;
+		int rows = rows(hemisphere);
+		int cols = cols(hemisphere);
+		
+		// Don't hard-code? Temporary
+		String latsFilename = path + "app_s001_lat2";	// Southern hemisphere, 5km (1605x1605)
+		String lonsFilename = path + "app_s001_lon2";	// Southern hemisphere, 5km (1605x1605)
 
 		// Northern hemisphere
 		if (hemisphere.equalsIgnoreCase("north")) {
-			rows = 1805;
-			cols = 1805;			
-		}
-		else {
-			// Southern hemisphere
-			rows = 1605;
-			cols = 1605;			
+			latsFilename = path + "app_n001_lat2";	// Northern hemisphere, 5km (1805x1805)
+			lonsFilename = path + "app_n001_lon2";
 		}
 		
 		Tools.message("AVHRR Locations:");
 		Tools.message("    Hemisphere: " + hemisphere + ", rows = " + rows + ", cols = " + cols);
 
 		GriddedLocation[][] locs = new GriddedLocation[rows][cols];
-		GriddedLocation.initialize(locs);
-		
-		//TODO
-		String latsFile = null;
-		String lonsFile = null;
-		
-		//if (latsFile == null) return locs;
 		
 		// Read the files
 		try {
 			
 			// Open the files
-			DataFile latitudes = new DataFile( latsFile );
-			DataFile longitudes = new DataFile( lonsFile );
+			DataFile latitudes = new DataFile( latsFilename );
+			DataFile longitudes = new DataFile( lonsFilename );
 
+			// Create the locations array
 			for (int r = 0; r < rows; r++) {
 				for (int c = 0; c < cols; c++) {
-							
-					// Read the encoded data from the files
-							
-					int lat = latitudes.readInt();
-					int lon = longitudes.readInt();
-		
-					// Reverse the byte order (for Windows).
-					lat = Tools.reverseByteOrder(lat);
-					lon = Tools.reverseByteOrder(lon);
+	
+					// The files are 4x the resolution. We only need every 4th location.
+					short lat = latitudes.readShort();
+					latitudes.readShort();
+					latitudes.readShort();
+					latitudes.readShort();
 
-					// Decode the data, convert to doubles.
-					double latD = ((double) lat) / 100000.0;
-					double lonD = ((double) lon) / 100000.0;
-							
+					short lon = longitudes.readShort();
+					longitudes.readShort();
+					longitudes.readShort();
+					longitudes.readShort();
+					
+					double latD = ((double) lat) / 100.;
+					double lonD = ((double) lon) / 100.;
+					
 					// Create the surface object at this location
-					locs[r][c] = new GriddedLocation(r,c,latD,lonD);
+					locs[r][c] = new GriddedLocation(r, c, latD, lonD);
 				}
 			}
 
 			latitudes.close();			
-			longitudes.close();			
+			longitudes.close();
 		}
 		catch(Exception e) {
 			Tools.warningMessage("DatasetAVHRR::readLocations: Failed to open file(s) in directory: ");
 			Tools.warningMessage(path);
-			Tools.warningMessage("Filenames: " + latsFile + " and/or " + lonsFile);
+			Tools.warningMessage("Filenames: " + latsFilename + " and/or " + lonsFilename);
 		}
 		
 		return locs;
@@ -125,16 +141,17 @@ public class DatasetAVHRR extends Dataset {
 	/*
 	 * readData
 	 * 
-	 * Read a dataset file. Since the different types of data will most likely
-	 * have different formats and file names, this method must tailor itself to
-	 * the type of data being read.
+	 * Read an AVHRR dataset file.
 	 * 
 	 * Doesn't care if a file is missing, assumes the data isn't available.
 	 */
-	static public short[][] readData(Timestamp date, int rows, int cols,
+	static public short[][] readData(Timestamp date, String hemisphere,
 			String path, boolean addYearToInputDirectory, boolean addDayToInputDirectory,
 			String channel, String time) {
 
+		int rows = rows(hemisphere);
+		int cols = cols(hemisphere);
+		
 		String filename = "";
 		short[][] data = new short[rows][cols];
 		

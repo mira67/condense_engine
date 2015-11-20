@@ -31,6 +31,7 @@ public class Climate extends GeoObject {
 	// Where to get the source data, and store the output
     static String dataPath = "";
     static String outputPath = "";
+    static String hemisphere;
     
     // What to do about bad data in the files?
     static boolean filterBadData = true;
@@ -54,7 +55,6 @@ public class Climate extends GeoObject {
 	static boolean debugMessages = false; // Receive debug messages?
 
 	// File suffixes, for data selection
-	static String suffix1 = ""; // Frequency of SSMI data or AVHRR time
 	static String suffix2 = ""; // SSMI polarization, h or v, or AVHRR channel
 
 	/*-------------------------------------------------------------------------
@@ -96,8 +96,8 @@ public class Climate extends GeoObject {
 	    // Max out at 10 to avoid melt-downs?
 	    if (procs > 10) procs = 10; 
 	    
-	    // Limit to one processor for testing
-	    if (testing) procs = 1;
+	    // Limit processors for testing
+	    if (testing) procs = 2;
 
 	    Tools.message("Using: " + procs + " processors.");
 	    
@@ -120,7 +120,7 @@ public class Climate extends GeoObject {
 
 			// For testing, only do January
 			if (testing) {
-				if (name.compareTo("jan") != 0) continue;
+				if (name.compareTo("sep") != 0) continue;
 			}
 			
 			// This keeps track of how many parallel processes we create.
@@ -134,13 +134,21 @@ public class Climate extends GeoObject {
 		    		
 		    	case SSMI:
 					String[] frequencies = {"19", "22", "37", "85"};
+					String[] frequencies_short = {"19"};
 					String[] polarizations = {"h", "v"};
+					
+					if (testing) {
+						frequencies = frequencies_short;
+					}
 					
 					// Loop through all frequencies
 					for ( String freq : frequencies) {
 						
 						// Loop through all polarizations
 						for ( String pol : polarizations) {
+							
+							// No 22GHz Horizontal data. Skip it.
+							if (pol.equalsIgnoreCase("h") && freq.equalsIgnoreCase("22")) continue;
 							
 							// Create a new thread
 						    threads[processID] = new ParallelTask(
@@ -149,7 +157,7 @@ public class Climate extends GeoObject {
 									finalYear, finalMonth, finalDay,
 									increment,
 									dataPath, outputPath,
-									freq, pol, testing );
+									freq, pol, hemisphere, testing );
 						    
 						    // Start it.
 						    threads[processID].start();
@@ -182,7 +190,8 @@ public class Climate extends GeoObject {
 									finalYear, finalMonth, finalDay,
 									increment,
 									dataPath, outputPath,
-									channel, suffix2, testing );
+									channel, suffix2, hemisphere,
+									testing );
 							    
 					   // Start it.
 					   threads[processID].start();
@@ -191,6 +200,10 @@ public class Climate extends GeoObject {
 					   processID++;
 					}
 					break;
+		    	case EASE_GRID_SURFACE:
+		    	default:
+		    		Tools.errorMessage("Climate", "Climate", "Datatype not implemented: " + dataType,
+		    				new Exception("exiting"));
 		    }
 		    
 			// FINISHED WITH SENSOR-SPECIFIC PROCESSING
@@ -238,6 +251,7 @@ public class Climate extends GeoObject {
 		String outputP;
 		String suff1;
 		String suff2;
+		String hemisphere;
 		
 		double min;
 		double max;
@@ -250,7 +264,8 @@ public class Climate extends GeoObject {
 				int finalYear, int finalMonth, int finalDay,
 				Timespan.Increment increment,
 				String dataPath, String outputPath,
-				String suffix1, String suffix2, boolean test) {
+				String suffix1, String suffix2,
+				String hemi, boolean test) {
 			
 			this.threadNumber = id;
 			this.dataT = datatype;
@@ -268,6 +283,8 @@ public class Climate extends GeoObject {
 			this.outputP = outputPath;
 			this.suff1 = suffix1;
 			this.suff2 = suffix2;
+			
+			this.hemisphere = hemi;
 			
 			this.testing = test;
 		}
@@ -305,7 +322,7 @@ public class Climate extends GeoObject {
 						startY, startM, startD,
 						finalY, finalM, finalD, inc,
 						dataP, outputP,
-						suff1, suff2, filterBadData,
+						suff1, suff2, filterBadData, hemisphere,
 						addYearToInputDirectory, addDayToInputDirectory,
 						testing);				
 			}
@@ -437,13 +454,9 @@ public class Climate extends GeoObject {
 					outputPath = textValue;
 					Tools.statusMessage("Output Path = " + outputPath);
 					break;
-				case "polarization":
-					suffix2 = value;
-					Tools.statusMessage("Polarization = " + suffix2);
-					break;
-				case "frequency":
-					suffix1 = value;
-					Tools.statusMessage("Frequency = " + suffix1);
+				case "hemisphere":
+					hemisphere = textValue;
+					Tools.statusMessage("Hemisphere = " + hemisphere);
 					break;
 				case "time":			// AVHRR time: 0200 or 1400, also a file name suffix.
 					suffix2 = value;

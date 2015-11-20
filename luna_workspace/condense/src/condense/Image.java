@@ -25,7 +25,8 @@ public class Image extends GeoObject {
 
 	protected ArrayList<RasterLayer> layers;
 	protected ArrayList<Annotation> annotations;
-
+	protected Color bgColor = null;
+	
 	public Image() {
 
 		layers = new ArrayList<RasterLayer>();
@@ -159,6 +160,15 @@ public class Image extends GeoObject {
 	}
 
 	/*
+	 * setBackground
+	 * 
+	 * Establish a default background color.
+	 */
+	public void setBackground(Color c) {
+		bgColor = c;
+	}
+	
+	/*
 	 * addAnnotation
 	 * 
 	 * Add annotation to the image.
@@ -204,11 +214,20 @@ public class Image extends GeoObject {
 		Graphics2D graphics = bufferedImage.createGraphics();
 		Color color;
 
+		// Fill the background, if requested
+		if (bgColor != null) {
+			graphics.setColor(bgColor);
+			graphics.fillRect(0,0, cols, rows);
+		}
+		
 		// Add each of the layers in sequence.
 		for (int i = 0; i < layers.size(); i++) {
 
+			// Get the layers in sequence
+			RasterLayer layer = layers.get(i);
+			
 			// Get an iterator for the pixels in this layer.
-			Iterator<PixelDisplayable> iter = layers.get(i).pixelIterator();
+			Iterator<PixelDisplayable> iter = layer.pixelIterator();
 
 			// Set the layer's opacity. Untested?
 			float layerOpacity = layers.get(i).opacity();
@@ -323,8 +342,6 @@ public class Image extends GeoObject {
 		// Create the image using the pixel objects
 		BufferedImage image = createBufferedImage(BufferedImage.TYPE_INT_ARGB,
 				rows, cols);
-		// /BufferedImage image =
-		// createBufferedImage(BufferedImage.TYPE_INT_RGB, rows, cols);
 
 		try {
 			new Display(image, title);

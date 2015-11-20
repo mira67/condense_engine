@@ -2,37 +2,37 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="3100" key="selection"/>
+		<item value="min" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
-			<item value="3100"/>
-			<item value="3500"/>
-			<item value="1900"/>
-			<item value="condenseData"/>
-			<item value="minValue"/>
-			<item value="intarra"/>
-			<item value="meanNobaddata2d"/>
-			<item value="accumulateData"/>
+			<item value="min"/>
+			<item value="algorithm1"/>
+			<item value="readData"/>
+			<item value="85"/>
+			<item value="locationsPath"/>
+			<item value="getloc"/>
+			<item value="hemisphere"/>
+			<item value="scale"/>
 		</list>
 		<list key="replacehistory">
+			<item value="surfaceLonsFilePath"/>
+			<item value="surfaceLatsFilePath"/>
+			<item value="bar"/>
 			<item value="lonsFile"/>
 			<item value="latsFile"/>
 			<item value="climatePath"/>
 			<item value=""/>
 			<item value="SSMI"/>
-			<item value="Tools.warningMessage(&quot;Rows * Cols = &quot; + rows * cols + &quot;  Filename = &quot; + filename);"/>
-			<item value="suffix2"/>
-			<item value="suffix1"/>
 		</list>
 	</section>
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog_dialogBounds">
 		<item value="237" key="DIALOG_WIDTH"/>
 		<item value="1|Tahoma|8.25|0|WINDOWS|1|-11|0|0|0|400|0|0|0|1|0|0|0|0|Tahoma" key="DIALOG_FONT_NAME"/>
 		<item value="357" key="DIALOG_HEIGHT"/>
-		<item value="974" key="DIALOG_X_ORIGIN"/>
-		<item value="387" key="DIALOG_Y_ORIGIN"/>
+		<item value="1126" key="DIALOG_X_ORIGIN"/>
+		<item value="366" key="DIALOG_Y_ORIGIN"/>
 	</section>
 </section>

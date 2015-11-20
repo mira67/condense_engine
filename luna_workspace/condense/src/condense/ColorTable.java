@@ -38,8 +38,9 @@ public class ColorTable extends GeoObject {
     	}
     }
     
+    public void temperature() { temperature(256); }
     public void prism() { prism(256); }
-    
+
     /* prism
      * 
      * Create a chromatic color table with 'number' of colors, 
@@ -67,5 +68,28 @@ public class ColorTable extends GeoObject {
     	// First and last colors on the the table will be black and white.
     	set(low, BLACK);
     	set(high, WHITE);
+    }
+
+    /* temperature
+     * 
+     * Create a chromatic color table with 'number' of colors,
+     * representing temperatures, cold to hot. 
+     */
+    public void temperature(int number) {
+       	clear();
+    	
+       	double high = 255;
+       	
+    	for (double i = 0; i < number; i++) {
+    		double percent = i/number;
+    		
+    		int red = (int) Math.round(percent * high);
+    		int blue = (int) Math.round((1.0 - percent) * high);
+
+    		// Low green, to add brightness
+    		add(new Color(red, 50, blue));
+    	}
+    	
+    	//set(0, BLACK);
     }
 }

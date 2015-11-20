@@ -57,6 +57,8 @@ public class ClimatologySSMI extends Climatology {
 	double diffSquared[][] = null;
 	int population[][] = null;
 
+	String hemisphere;
+	
 	// The statistics we're generating: mean and standard deviation.
 	double[][] mean = null; // Mean: [row][col]
 	double[][] sd = null; // Standard deviation: [row][col]
@@ -86,7 +88,7 @@ public class ClimatologySSMI extends Climatology {
 	public ClimatologySSMI(Dataset.DataType type, int startY, int startM,
 			int startD, int finalY, int finalM, int finalD,
 			Timespan.Increment inc, String dataP, String outputP, String suff1,
-			String suff2, boolean filter,
+			String suff2, boolean filter, String hemi,
 			boolean addYear, boolean addDay, boolean test) {
 
 		dataType = type;
@@ -106,8 +108,8 @@ public class ClimatologySSMI extends Climatology {
 		dataPath = dataP;
 		outputPath = outputP;
 
-		suffix1 = suff1;
-		suffix2 = suff2;
+		suffix1 = suff1;	// Frequency
+		suffix2 = suff2;	// Polarization
 
 		// Valid data range for SSMI
 		minValue = 500;
@@ -120,12 +122,12 @@ public class ClimatologySSMI extends Climatology {
 		
 		testing = test;
 		
-		// Southern hemisphere image size, rows and cols
-		if (dataPath.indexOf("south") > 0) {
-			rows = 1605;
-			cols = 1605;
-		}
-
+		hemisphere = hemi;
+		
+		// Get rows and columns
+		rows = rows(hemisphere, suffix1);
+		cols = cols(hemisphere, suffix1);
+			
 		Tools.statusMessage("  Run: " + dataPath + "\n" + 
 			"     suffix1 = " + suff1 + "  suffix2 = " + suff2 + "  increment = " + inc.toString() + "\n" +
 			"     min = " + minValue + "  max = " + maxValue + "  rows = " + rows + "  cols = " + cols);
@@ -257,35 +259,10 @@ public class ClimatologySSMI extends Climatology {
 						date.dayOfMonth(), addYearToInputDirectory, suffix1, suffix2);
 
 				file = new DataFile(filename);
-
-				// Determine the size of the image based on the file size.
-				long length = file.length();
-
-				// Southern hemisphere,	everything except 85.5 and 91.7 GHz,
-				// file size = 209824 Bytes
-				rows = 332;
-				cols = 316;
-				
-				// Southern hemisphere,	85.5 and 91.7 GHz, 839296 Bytes
-				if (length == 839296) {
-					rows = 664;
-					cols = 632;
-				}
-				
-				// Northern hemisphere,	85.5 and 91.7 GHz, 1089536 Bytes
-				if (length == 1089536) {
-					rows = 896;
-					cols = 608;
-				}
-
-				// Northern hemisphere,	everything else, 272384 Bytes
-				if (length == 272384) {
-					rows = 448;
-					cols = 304;
-				}
 				
 				// Read the data
-				data[d] = file.readShorts2D(rows, cols);
+				//data[d] = file.readShorts2D(rows, cols);
+				data[d] = file.read2ByteInts2D(rows, cols);
 				
 				file.close();
 			}
@@ -420,4 +397,70 @@ public class ClimatologySSMI extends Climatology {
 
 		Timestamp.dateSeparator(".");
 	}
+
+	/*
+	 * rows
+	 * 
+	 * Return the number of rows for the SSMI data.
+	 */
+	public static int rows(String hemisphere, String frequency) {
+		if (hemisphere == null) {
+			Tools.errorMessage("ClimatologySSMI", "rows", "Hemisphere configuration not set.", new Exception("exiting"));			
+		}
+		
+		if (hemisphere.equalsIgnoreCase("south")) {
+			// 85 and 91 GHz
+			if (frequency.equalsIgnoreCase("85") ||
+				frequency.equalsIgnoreCase("91")) return 664;
+			
+	 		// Southern hemisphere,	everything else (19, 22, 37 GHz)
+			return 332;
+		}
+		// Northern hemisphere
+		if (hemisphere.equalsIgnoreCase("north")) {
+			// 85 and 91 GHz
+			if (frequency.equalsIgnoreCase("85") ||
+					frequency.equalsIgnoreCase("91")) return 896;
+			// Northern hemisphere, all other frequencies
+			return 448;
+		}
+		
+		else {
+			Tools.errorMessage("ClimatologySSMI", "rows", "Unknown hemisphere", new Exception("exiting"));
+		}
+		
+		return 0;
+	}
+
+	/*
+	 * cols
+	 * 
+	 * Return the number of columns for the SSMI data.
+	 */
+	public static int cols(String hemisphere, String frequency) {
+		if (hemisphere.equalsIgnoreCase("south")) {
+			// 85 and 91 GHz
+			if (frequency.equalsIgnoreCase("85") ||
+				frequency.equalsIgnoreCase("91")) return 632;
+	 		
+			// Southern hemisphere,	everything else (19, 22, 37 GHz)
+			else return 316;				
+
+		}
+		// Northern hemisphere
+		if (hemisphere.equalsIgnoreCase("north")) {
+			// 85 and 91 GHz
+			if (frequency.equalsIgnoreCase("85") ||
+					frequency.equalsIgnoreCase("91")) return 608;
+
+			// Northern hemisphere, all other frequencies
+			return 304;
+		}
+		else {
+			Tools.errorMessage("ClimatologySSMI", "cols", "Unknown hemisphere", new Exception("exiting"));
+		}
+		
+		return 0;
+	}
+	
 }

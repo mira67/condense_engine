@@ -32,8 +32,11 @@
 <fullyQualifiedTypeName name="net.sf.saxon.exslt.Date"/>
 <fullyQualifiedTypeName name="org.joda.time.Months"/>
 <fullyQualifiedTypeName name="helper_classes.DatasetSSMI"/>
-<fullyQualifiedTypeName name="condense.Dataset.DataType"/>
 <fullyQualifiedTypeName name="condense.Timespan.Increment"/>
 <fullyQualifiedTypeName name="java.io.File"/>
 <fullyQualifiedTypeName name="condense.Tools"/>
+<fullyQualifiedTypeName name="java.awt.geom.Rectangle2D.Float"/>
+<fullyQualifiedTypeName name="java.nio.ByteOrder"/>
+<fullyQualifiedTypeName name="condense.Dataset.DataType"/>
+<fullyQualifiedTypeName name="climatology.nsidc.org.ClimatologySSMI"/>
 </qualifiedTypeNameHistroy>

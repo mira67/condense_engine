@@ -122,8 +122,6 @@ public class DataFile extends GeoObject {
 			throw wutever;
 		}
 
-		Tools.debugMessage("    DataFile::readStrings: reading file "
-				+ filename);
 		BufferedReader br = new BufferedReader(new FileReader(filename));
 
 		String line;
@@ -134,9 +132,6 @@ public class DataFile extends GeoObject {
 		br.close();
 
 		open();
-
-		Tools.debugMessage("DataFile::readStrings: lines read = "
-				+ strings.size());
 
 		return strings;
 	}
@@ -180,12 +175,8 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
-		Tools.debugMessage("    DataFile::readBytes: reading file " + filename);
-
 		// Get the size of the file
 		long length = file.length();
-		Tools.debugMessage("    DataFile::readBytes: file length = " + length
-				+ " bytes");
 
 		// Create the byte array to hold the data
 		byte[] bytes = new byte[(int) length];
@@ -216,13 +207,6 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
-		Tools.debugMessage("    DataFile::readShort: reading file " + filename);
-
-		// Get the size of the file in bytes
-		long length = file.length();
-		Tools.debugMessage("    DataFile::readShort: file length = " + length
-				+ " bytes, shorts = " + length / 2);
-
 		// Create the byte array to hold the data. Short integer = 2 bytes.
 		short data = 0;
 
@@ -250,12 +234,8 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
-		Tools.debugMessage("    DataFile::readShorts: reading file " + filename);
-
 		// Get the size of the file in bytes
 		long length = file.length();
-		Tools.debugMessage("    DataFile::readShorts: file length = " + length
-				+ " bytes, shorts = " + length / 2);
 
 		// Create the byte array to hold the data. Short integer = 2 bytes.
 		short[] shorts = new short[(int) length / 2];
@@ -286,12 +266,8 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
-		Tools.debugMessage("    DataFile::readLongs: reading file " + filename);
-
 		// Get the size of the file in bytes
 		long length = file.length();
-		Tools.debugMessage("    DataFile::readLongs: file length = " + length
-				+ " bytes, longs = " + length / 8);
 
 		// Create the byte array to hold the data. Long integer = 8 bytes.
 		long[] longs = new long[(int) length / 8];
@@ -335,6 +311,56 @@ public class DataFile extends GeoObject {
 	}
 
 	/*
+	 * readLong
+	 * 
+	 * Read a single long integer from the file.
+	 */
+	public long readLong() throws Exception {
+
+		if (!fileIsReadable) {
+			Tools.warningMessage("DataFile::readLong: " + filename
+					+ " is not open for reading.");
+			throw (new Exception("Cannot read file, not open for reading"));
+		}
+
+		long i;
+
+		try {
+			i = dataInputStream.readLong();
+		} catch (Exception e) {
+			Tools.warningMessage("DataFile::readLong: could not read long integer");
+			throw (e);
+		}
+
+		return i;
+	}
+
+	/*
+	 * readFloat
+	 * 
+	 * Read a single float number from the file.
+	 */
+	public float readFloat() throws Exception {
+
+		if (!fileIsReadable) {
+			Tools.warningMessage("DataFile::readFloat: " + filename
+					+ " is not open for reading.");
+			throw (new Exception("Cannot read file, not open for reading"));
+		}
+
+		float x;
+
+		try {
+			x = dataInputStream.readFloat();
+		} catch (Exception e) {
+			Tools.warningMessage("DataFile::readFloat: could not read long integer");
+			throw (e);
+		}
+
+		return x;
+	}
+
+	/*
 	 * readDouble
 	 * 
 	 * Read a double floating point number from the file.
@@ -372,17 +398,11 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
-		Tools.debugMessage("    DataFile::readInts: reading file " + filename);
-
 		// Get the size of the file in bytes
 		long length = file.length();
-		Tools.debugMessage("    DataFile::readInts: file length = " + length
-				+ " bytes, Integers = " + length / 4);
 
 		// Create the byte array to hold the data. Integer = 4 bytes.
 		int[] ints = new int[(int) length / 4];
-		Tools.debugMessage("    DataFile::readInts: integer array length = "
-				+ ints.length);
 
 		try {
 			// Read in the data
@@ -475,17 +495,11 @@ public class DataFile extends GeoObject {
 			throw (new Exception("Cannot read file, not open for reading"));
 		}
 
-		Tools.debugMessage("    DataFile::readFloats: reading file " + filename);
-
 		// Get the size of the file in bytes
 		long length = file.length();
-		Tools.debugMessage("    DataFile::readFloats: file length = " + length
-				+ " bytes, Floats = " + length / 4);
 
 		// Create the array to hold the data. Float = 4 bytes.
 		float[] floats = new float[(int) length / 4];
-		Tools.debugMessage("    DataFile::readFloats: float array length = "
-				+ floats.length);
 
 		try {
 			// Read in the data
@@ -829,8 +843,6 @@ public class DataFile extends GeoObject {
 
 		// Get the size of the file in bytes
 		long length = file.length();
-		Tools.debugMessage("    DataFile::readBytes2D: file length = " + length
-				+ " bytes");
 
 		if (rows * cols > length) {
 			Tools.warningMessage(" DataFile::readBytes2D: Supplied rows and cols greater than file size.");
@@ -847,9 +859,7 @@ public class DataFile extends GeoObject {
 		try {
 			// Slightly faster to read as a 1-D array and then convert it.
 			byte[] bytes1D = new byte[rows * cols];
-			int num = dataInputStream.read(bytes1D);
-
-			Tools.debugMessage("Datafile::readBytes2D: bytes read = " + num);
+			dataInputStream.read(bytes1D);
 
 			for (int i = 0; i < length; i++) {
 				bytes[r][c] = bytes1D[r * cols + c];
@@ -873,7 +883,7 @@ public class DataFile extends GeoObject {
 	 * Read integer data (a 2-D array) from the file, where the integers are
 	 * 2-byte little-Endian format.
 	 */
-	public int[][] read2ByteInts2D(int rows, int cols) throws Exception {
+	public short[][] read2ByteInts2D(int rows, int cols) throws Exception {
 
 		if (!fileIsReadable) {
 			Tools.warningMessage("DataFile::read2ByteInts2D: " + filename
@@ -888,7 +898,7 @@ public class DataFile extends GeoObject {
 			Tools.warningMessage(" DataFile::read2ByteInts2D: Supplied rows and cols greater than file size.");
 			Tools.warningMessage(" Rows * Cols = " + rows * cols + "   Rows = " + rows + " Cols = " + cols);
 			Tools.warningMessage(" File length = " + length + " bytes");
-			throw (new Error("DataFile::read2ByteInts2D: rows and cols mismatch with file"));
+			throw (new Exception("DataFile::read2ByteInts2D: rows and cols mismatch with file"));
 		}
 
 		// Create the byte array to hold the data. Integer = 4 bytes.
@@ -897,7 +907,7 @@ public class DataFile extends GeoObject {
 		int c = 0;
 
 		// And where the final integers will go...
-		int[][] ints = new int[rows][cols];
+		short[][] shorts = new short[rows][cols];
 
 		try {
 			// Read in the data
@@ -905,7 +915,7 @@ public class DataFile extends GeoObject {
 				// Little-endian byte order
 				bytes[r][c][0] = dataInputStream.readByte();
 				bytes[r][c][1] = dataInputStream.readByte();
-				ints[r][c] = Tools.byteArrayToInt(bytes[r][c]);
+				shorts[r][c] = Tools.byteArrayToShort(bytes[r][c]);
 				c++;
 				if (c == cols) {
 					r++;
@@ -918,7 +928,7 @@ public class DataFile extends GeoObject {
 			throw (e);
 		}
 
-		return ints;
+		return shorts;
 	}
 
 	/*

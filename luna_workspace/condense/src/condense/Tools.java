@@ -84,6 +84,57 @@ public class Tools extends GeoObject {
 	}
 
 	/*
+	 * reverse
+	 * 
+	 * Bit-reverse an integer.
+	 */
+	public static int reverse(int i) {
+		   return Integer.reverse(i);
+	}
+
+	/*
+	 * swap
+	 * 
+	 * Byte-swap a double.
+	 */
+	public static double swap(double value) {
+		   long longValue = Double.doubleToLongBits (value);
+		    longValue = swap (longValue);
+		    return Double.longBitsToDouble (longValue);
+	}
+
+	/*
+	 * swap
+	 * 
+	 * Byte-swap a float.
+	 */
+	public static float swap(float value) {
+		int intValue = Float.floatToRawIntBits (value);
+	    intValue = swap (intValue);
+	    return Float.intBitsToFloat (intValue);
+	}
+	
+	/*
+	 * Byte swap a single long value.
+	 * 
+	 */
+	public static long swap(long value) {
+	    long b1 = (value >>  0) & 0xff;
+	    long b2 = (value >>  8) & 0xff;
+	    long b3 = (value >> 16) & 0xff;
+	    long b4 = (value >> 24) & 0xff;
+	    long b5 = (value >> 32) & 0xff;
+	    long b6 = (value >> 40) & 0xff;
+	    long b7 = (value >> 48) & 0xff;
+	    long b8 = (value >> 56) & 0xff;
+
+	    return b1 << 56 | b2 << 48 | b3 << 40 | b4 << 32 |
+	           b5 << 24 | b6 << 16 | b7 <<  8 | b8 <<  0;
+	}
+	  
+
+	  
+	/*
 	 * intArrayToByteArray
 	 * 
 	 * Converts an integer array into a byte array. No error checking. May
@@ -98,6 +149,7 @@ public class Tools extends GeoObject {
 	 * byteArrayToInt
 	 * 
 	 * Converts a byte array into an integer
+	 * Little-endian byte order
 	 */
 	public static int byteArrayToInt(byte[] bytes) {
 		int answer = 0;
@@ -107,6 +159,26 @@ public class Tools extends GeoObject {
 
 		for (int i = 0; i < bytes.length; i++) {
 			answer = answer | ((bytes[i] & 0xff) << i * 8);
+		}
+
+		return answer;
+
+	}
+
+	/*
+	 * byteArrayToShort
+	 * 
+	 * Converts a byte array into a short integer. No error checking.
+	 * Little-endian byte order
+	 */
+	public static short byteArrayToShort(byte[] bytes) {
+		short answer = 0;
+
+		if (bytes == null)
+			return answer;
+
+		for (short i = 0; i < bytes.length; i++) {
+			answer = (short) (answer | ((bytes[i] & 0xff) << i * 8));
 		}
 
 		return answer;
@@ -173,11 +245,12 @@ public class Tools extends GeoObject {
 	}
 
 	/*
-	 * reverseByteOrder
+	 * swap
 	 * 
-	 * Converts an little-endian integer (LSB) to big-endian (MSB), and vice-versa.
+	 * Swaps the byte order of an integer: little-endian integer (LSB)
+	 * to big-endian (MSB), and vice-versa.
 	 */
-	public static int reverseByteOrder(int i) {
+	public static int swap(int i) {
 		byte[] b = Tools.intToByteArray( i );
 		
 		byte[] b2 = new byte[4];
@@ -187,6 +260,40 @@ public class Tools extends GeoObject {
 		b2[0] = b[3];
 		
 		return Tools.byteArrayToInt(b2);
+	}
+
+	/*
+	 * reverse
+	 * 
+	 * Reverses the bit order of a double.
+	 */
+	public static double reverse(double x) {
+		
+		long y = Long.reverse(Double.doubleToLongBits(x));
+		
+		return Double.longBitsToDouble(y);
+	}
+
+	/*
+	 * reverse
+	 * 
+	 * Reverses the bit order of a float.
+	 */
+	public static float reverse(float x) {
+		
+		int y = Integer.reverse(Float.floatToIntBits(x));
+		
+		return Float.intBitsToFloat(y);
+	}
+
+	/*
+	 * reverse
+	 * 
+	 * Reverses the bit order of a long integer.
+	 */
+	public static long reverse(long x) {
+		
+		return Long.reverse(Double.doubleToLongBits(x));
 	}
 
 	/*
@@ -268,6 +375,44 @@ public class Tools extends GeoObject {
 	}
 
 	/*
+	 * scaleIntArray2D
+	 * 
+	 * Scale a 2D integer array of data.
+	 */
+	public static int[][] scaleIntArray2DExcludeBad(int[][] array, int min, int max, int lowBad, int highBad) {
+
+		int rows = array.length;
+		int cols = array[0].length;
+
+		float range = (float) max - (float) min;
+
+		float minData = 999999;
+		float maxData = -999999;
+
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				if (array[r][c] == NODATA || array[r][c] < lowBad || array[r][c] > highBad)
+					continue;
+				if (array[r][c] < minData)
+					minData = array[r][c];
+				if (array[r][c] > maxData)
+					maxData = array[r][c];
+			}
+		}
+
+		float dataRange = maxData - minData;
+
+		for (int r = 0; r < rows; r++) {
+			for (int c = 0; c < cols; c++) {
+				array[r][c] = (int) (min + range
+						* ((float) array[r][c] - minData) / dataRange);
+			}
+		}
+
+		return array;
+	}
+
+	/*
 	 * scaleShortArray2D
 	 * 
 	 * Scale a 2D array of short integer data.
@@ -279,8 +424,8 @@ public class Tools extends GeoObject {
 
 		float range = (float) max - (float) min;
 
-		float minData = 999999;
-		float maxData = -999999;
+		short minData = 32767;
+		short maxData = -32767;
 
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
@@ -297,7 +442,7 @@ public class Tools extends GeoObject {
 
 		for (int r = 0; r < rows; r++) {
 			for (int c = 0; c < cols; c++) {
-				array[r][c] = (short) (min + range
+				if (array[r][c] != NODATA) array[r][c] = (short) (min + range
 						* ((float) array[r][c] - minData) / dataRange);
 			}
 		}
@@ -509,7 +654,7 @@ public class Tools extends GeoObject {
 		System.out.flush();
 
 	}
-	
+
 	/* messageNoRTLF
 	 * 
 	 * Just print a message. No return-linefeed, and no way to turn it off.

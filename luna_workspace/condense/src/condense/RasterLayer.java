@@ -36,10 +36,10 @@ public class RasterLayer extends GeoObject {
 		addPixels(c, data);
 	}
 
-	/*// Constructor with sensor pixel data
-	public RasterLayer(ColorTable c, GriddedVector sensorPix[][]) {
-		addPixels(c, sensorPix);
-	}*/
+	// Constructor with integer pixel data. Create monochrome pixels.
+	public RasterLayer(ColorTable c, short data[][]) {
+		addPixels(c, data);
+	}
 
 	// Constructor with displayable pixel data.
 	public RasterLayer(ArrayList<PixelDisplayable> pix) {
@@ -118,30 +118,29 @@ public class RasterLayer extends GeoObject {
 	/*
 	 * addPixels
 	 * 
-	 * Add integer data as indexed color pixels. Skip any 'nodata' values.
-	 
-	public void addPixels(ColorTable ct, int[][] data) {
-		for (int row = 0; row < data.length; row++) {
-			for (int col = 0; col < data[0].length; col++) {
-				if (data[row][col] == NODATA)
-					continue;
-				pixels.add(new PixelIndexedColor(ct, data[row][col], row, col));
-			}
-		}
-	}*/
-
-	/*
-	 * addPixels
-	 * 
 	 * Add pixels to the layer. Skip any 'nodata' values.
 	 */
 	public void addPixels(ColorTable ct, int pixArray[][]) {
 
 		for (int r = 0; r < pixArray.length; r++) {
 			for (int c = 0; c < pixArray[0].length; c++) {
-				if (pixArray[r][c] == NODATA)
-					continue;
-				pixels.add(new PixelIndexedColor(ct,
+				if (pixArray[r][c] != NODATA)
+					pixels.add(new PixelIndexedColor(ct, pixArray[r][c], r, c));
+			}
+		}
+	}
+
+	/*
+	 * addPixels
+	 * 
+	 * Add short pixels to the layer. Skip any 'nodata' values.
+	 */
+	public void addPixels(ColorTable ct, short pixArray[][]) {
+
+		for (int r = 0; r < pixArray.length; r++) {
+			for (int c = 0; c < pixArray[0].length; c++) {
+				if (pixArray[r][c] != NODATA)
+					pixels.add(new PixelIndexedColor(ct,
 						pixArray[r][c], r, c));
 			}
 		}

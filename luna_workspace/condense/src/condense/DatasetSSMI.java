@@ -66,58 +66,39 @@ public class DatasetSSMI extends Dataset {
 	 */
 	static public GriddedLocation[][] getLocations(String path, String hemisphere, String frequency) {
 
-		int rows = 0;
-		int cols = 0;
-		
-		// Determine the size of the image files...
-		// Southern hemisphere
-		if (hemisphere.equalsIgnoreCase("south")) {
-			if (frequency.equalsIgnoreCase("85") ||
-				frequency.equalsIgnoreCase("91")) {
-				
-				// 85 and 91 GHz
-				rows = 664;
-				cols = 632;				
-			}
-			else {
-		 		// Southern hemisphere,	everything else (19, 22, 37 GHz)
-				rows = 332;
-				cols = 316;				
-			}
-		}
-		
-		// Northern hemisphere
-		else {
-			if (frequency.equalsIgnoreCase("85") ||
-				frequency.equalsIgnoreCase("91")) {
-				
-					// 85 and 91 GHz
-					rows = 896;
-					cols = 608;
-			}
-			else {
-		 		// Northern hemisphere,	everything else (19, 22, 37 GHz)
-				rows = 448;
-				cols = 304;	
-			}
-		}
+		// Size of the image files.
+		int rows = rows( hemisphere, frequency );
+		int cols = cols( hemisphere, frequency );
 		
 		Tools.message("SSMI Locations:");
 		Tools.message("    Hemisphere: " + hemisphere + ", Frequency: " + frequency + ", rows = " + rows + ", cols = " + cols);
 		
 		GriddedLocation[][] locs = new GriddedLocation[rows][cols];
 		locs = GriddedLocation.initialize(locs);
-		
-		// Temporary file name hard-code until we have time for something better. :-(
-		
-		// 25km resolution grid cells
+
+		// 25km resolution grid cells, southern hemisphere.
 		String latsFile = path + "pss25lats_v3.dat";
 		String lonsFile = path + "pss25lons_v3.dat";
-		
-		// 12.5km resolution grid cells
-		if (rows > 332 ) {
+
+		// Read data files
+		// Temporary file name hard-code until we have time for something better. :-(
+		if (hemisphere.equalsIgnoreCase("south") && rows > 332 ) {
+			// 12.5km resolution grid cells
 			latsFile = path + "pss12lats_v3.dat";
 			lonsFile = path + "pss12lons_v3.dat";
+		}
+		
+		// Northern hemisphere
+		else {
+			// 25km resolution grid cells
+			latsFile = path + "psn25lats_v3.dat";
+			lonsFile = path + "psn25lons_v3.dat";
+						
+			// 12.5km resolution grid cells
+			if (rows > 448 ) {
+				latsFile = path + "psn12lats_v3.dat";
+				lonsFile = path + "psn12lons_v3.dat";
+			}
 		}
 		
 		// Read the files
@@ -135,9 +116,9 @@ public class DatasetSSMI extends Dataset {
 					int lat = latitudes.readInt();
 					int lon = longitudes.readInt();
 		
-					// Reverse the byte order (for Windows).
-					lat = Tools.reverseByteOrder(lat);
-					lon = Tools.reverseByteOrder(lon);
+					// Swap the byte order (for Windows).
+					lat = Tools.swap(lat);
+					lon = Tools.swap(lon);
 
 					// Decode the data, convert to doubles.
 					double latD = ((double) lat) / 100000.0;
@@ -160,6 +141,55 @@ public class DatasetSSMI extends Dataset {
 		return locs;
 	}
 
+	/*
+	 * rows
+	 * 
+	 * Return the number of rows for the SSMI data.
+	 */
+	public static int rows(String hemisphere, String frequency) {
+		if (hemisphere.equalsIgnoreCase("south")) {
+			// 85 and 91 GHz
+			if (frequency.equalsIgnoreCase("85") ||
+				frequency.equalsIgnoreCase("91")) return 664;
+			
+	 		// Southern hemisphere,	everything else (19, 22, 37 GHz)
+			return 332;
+		}
+		// Northern hemisphere
+		else {
+			// 85 and 91 GHz
+			if (frequency.equalsIgnoreCase("85") ||
+					frequency.equalsIgnoreCase("91")) return 896;
+		}
+		
+		// Northern hemisphere, all other frequencies
+		return 448;
+	}
+
+	/*
+	 * cols
+	 * 
+	 * Return the number of columns for the SSMI data.
+	 */
+	public static int cols(String hemisphere, String frequency) {
+		if (hemisphere.equalsIgnoreCase("south")) {
+			// 85 and 91 GHz
+			if (frequency.equalsIgnoreCase("85") ||
+				frequency.equalsIgnoreCase("91")) return 632;
+	 		// Southern hemisphere,	everything else (19, 22, 37 GHz)
+			else return 316;				
+
+		}
+		// Northern hemisphere
+		else {
+			// 85 and 91 GHz
+			if (frequency.equalsIgnoreCase("85") ||
+					frequency.equalsIgnoreCase("91")) return 608;
+		}
+		
+		// Northern hemisphere, all other frequencies
+		return 304;
+	}
 	
 	/*
 	 * readData
@@ -194,7 +224,7 @@ public class DatasetSSMI extends Dataset {
 			// Read the data
 
 			DataFile file = new DataFile( filename );
-			data = file.readShorts2D(rows, cols);
+			data = file.read2ByteInts2D(rows, cols);
 			
 			file.close();
 		}

@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 
 import condense.*;
+import condense.Dataset.DataType;
 
 /* a sandbox for code experimentation.
  * 
@@ -11,7 +12,16 @@ public class Scratch2 {
 	
 	public static void main(String[] args) {
 
-		String inputPath = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/doubles/";
+		String inputPath = "C:/Users/glgr9602/Desktop/condense/data/surface/";
+		//String outputPath = "C:/Users/glgr9602/Desktop/condense/data/surface/avhrr/south/";
+		
+		GriddedLocation[][] locs = DatasetSurface.getLocations(DataType.EASE_GRID_SURFACE, inputPath, "south", "");
+		//GriddedLocation[][] locs = DatasetAVHRR.getLocations(inputPath, "south");
+		
+		Tools.message(" Rows = " + locs.length);
+		Tools.message(" Cols = " + locs[0].length);
+		
+		/*
 		String outputPath = "C:/Users/glgr9602/Desktop/condense/climatology/ssmi/shorts/";
 		
 		String searchString = "bin";
@@ -54,6 +64,9 @@ public class Scratch2 {
 				Tools.errorMessage("", "", "Caught execption", e);
 			}
 		}
+		*/
+		
+		Tools.message("End program.");
 	}
 	
 	

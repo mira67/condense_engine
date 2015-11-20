@@ -20,6 +20,8 @@ public class ViewMultipleAVHRR {
 	// Southern hemisphere AVHRR
 	static int rows = 1605;
 	static int cols = 1605;
+	
+	static String hemisphere = "south";
 
 	// Northern hemisphere AVHRR
 	//static int rows = 1805;
@@ -51,7 +53,7 @@ public class ViewMultipleAVHRR {
 
 					date = new Timestamp(year, day);
 					
-					data = DatasetAVHRR.readData(date, rows, cols, inputPath, true, true, channel, "1400");
+					data = DatasetAVHRR.readData(date, hemisphere, inputPath, true, true, channel, "1400");
 					
 					if (data != null) {
 						String imageFilename = outputPath + date.dateString() + "." + channel;
