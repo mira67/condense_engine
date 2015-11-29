@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="min" key="selection"/>
+		<item value="byteArray" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="byteArray"/>
+			<item value="byteArr"/>
 			<item value="min"/>
-			<item value="algorithm1"/>
-			<item value="readData"/>
 			<item value="85"/>
-			<item value="locationsPath"/>
-			<item value="getloc"/>
-			<item value="hemisphere"/>
-			<item value="scale"/>
+			<item value=" SET"/>
+			<item value=" set"/>
+			<item value="set"/>
+			<item value="rows"/>
 		</list>
 		<list key="replacehistory">
 			<item value="surfaceLonsFilePath"/>

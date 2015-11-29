@@ -292,9 +292,6 @@ public class DatabaseH2 extends Database {
 		if (loc == null) return 0;
 		
 		try {
-			// Increment the number of locations stored.
-	        metadata.locations++;
-	        
 			sqlCreate.execute("INSERT INTO " + Table.LOCATIONS.name() + " VALUES(" +
 					+ metadata.locations + "," +
 					+ loc.row() + "," +
@@ -302,6 +299,9 @@ public class DatabaseH2 extends Database {
 					+ loc.lat() + "," +
 					+ loc.lon() + ")");
 
+			// Increment the number of locations stored.
+	        metadata.locations++;
+	        
 		} catch (Exception e) {
 			Tools.errorMessage("DatabaseH2",
 					"storeLocation",

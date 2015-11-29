@@ -119,9 +119,9 @@ public class Climate extends GeoObject {
 			) continue;
 
 			// For testing, only do January
-			if (testing) {
+			/*if (testing) {
 				if (name.compareTo("sep") != 0) continue;
-			}
+			}*/
 			
 			// This keeps track of how many parallel processes we create.
 			int processID = 0;
@@ -133,8 +133,8 @@ public class Climate extends GeoObject {
 		    		break;
 		    		
 		    	case SSMI:
-					String[] frequencies = {"19", "22", "37", "85"};
-					String[] frequencies_short = {"19"};
+					String[] frequencies = {"19", "22", "37", "85", "91"};
+					String[] frequencies_short = {"91"};
 					String[] polarizations = {"h", "v"};
 					
 					if (testing) {

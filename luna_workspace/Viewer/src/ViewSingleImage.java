@@ -30,9 +30,9 @@ public class ViewSingleImage {
 		//String searchString = "albd";
 		//DataType type = DataType.SHORT;
 
-		String inputPath = "C:/Users/glgr9602/Desktop/condense/data/avhrr/south/1990/001";
-		String searchString = "1400_temp";
-		DataType type = DataType.SHORT;
+		String inputPath = "C:/Users/glgr9602/Desktop/condense/data/surface/";
+		String searchString = "Nh_loci_land50_coast0km.1441x1441.bin";
+		DataType type = DataType.BYTE;
 
 		String outputPath = "C:/Users/glgr9602/Desktop/";
 		
@@ -50,10 +50,14 @@ public class ViewSingleImage {
 				filename = args[0];
 			}
 		}
-		
+
+		// Surface data
+		int rows = 1441;
+		int cols = 1441;			
+
 		// Southern hemisphere AVHRR
-		int rows = 1605;
-		int cols = 1605;			
+		//int rows = 1605;
+		//int cols = 1605;			
 
 		// Northern hemisphere AVHRR
 		if (filename.indexOf("_n") > 0) {
@@ -74,7 +78,7 @@ public class ViewSingleImage {
 		
 		// Display the image
 		Tools.message("Creating image...");
-		String imageFilename = outputPath + searchString;
+		String imageFilename = outputPath + searchString + "_coast";
 		DisplayImage(imageFilename, data);
 
 		Tools.statusMessage("End program");
@@ -110,6 +114,25 @@ public class ViewSingleImage {
 				case SHORT:
 					short shortArray[][] = file.readShorts2D(rows, cols);
 					array = Tools.shortArrayToInteger(shortArray);
+					break;
+				case BYTE:
+					byte byteArray[][] = file.readBytes2D(rows, cols);
+					
+					int newInts[][] = new int[rows][cols];
+					for (int r = 0; r < rows; r++) {
+						for (int c = 0; c < cols; c++) {
+							newInts[r][c] = Tools.unsignedByteToInt(byteArray[r][c]);
+						}
+					}
+					
+					for (int r = 1; r < rows-1; r++) {
+						for (int c = 1; c < cols-1; c++) {
+							if (newInts[r][c] == 255 && newInts[r-1][c] != 255) array[r][c] = 252;
+							if (newInts[r][c] == 255 && newInts[r+1][c] != 255) array[r][c] = 252;
+							if (newInts[r][c] == 255 && newInts[r][c-1] != 255) array[r][c] = 252;
+							if (newInts[r][c] == 255 && newInts[r][c+1] != 255) array[r][c] = 252;
+						}
+					}
 					break;
 				default:
 					break;

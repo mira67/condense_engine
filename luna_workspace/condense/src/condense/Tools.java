@@ -371,6 +371,8 @@ public class Tools extends GeoObject {
 			}
 		}
 
+		Tools.message("  Tools::scaleIntArray2D: Min/Max/Range = " + minData + " / " + maxData + " / " + dataRange);
+		
 		return array;
 	}
 
@@ -409,6 +411,8 @@ public class Tools extends GeoObject {
 			}
 		}
 
+		Tools.message("  Tools::scaleIntArray2DExcludeBad: Min/Max/Range = " + minData + " / " + maxData + " / " + dataRange);
+		
 		return array;
 	}
 
@@ -447,6 +451,8 @@ public class Tools extends GeoObject {
 			}
 		}
 
+		Tools.message("  Tools::scaleShortArray2D: Min/Max/Range = " + minData + " / " + maxData + " / " + dataRange);
+		
 		return array;
 	}
 
